@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import Button from './Button';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { getCartItemsCount } = useCart();
+  const { isLoggedIn, user, logout } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   
   const cartItemsCount = getCartItemsCount();
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   
   useEffect(() => {
     const handleScroll = () => {
@@ -76,11 +84,22 @@ const Navbar = () => {
             
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-4">
-              <Link to="/login">
-                <Button variant="ghost" size="small">
-                  Login
-                </Button>
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <span className="text-sm text-gray-600">
+                    Welcome, {user?.email}
+                  </span>
+                  <Button variant="ghost" size="small" onClick={handleLogout}>
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <Link to="/login">
+                  <Button variant="ghost" size="small">
+                    Login
+                  </Button>
+                </Link>
+              )}
               
               <Link to="/cart" className="relative">
                 <Button variant="outline" size="small" className="flex items-center gap-2">
@@ -164,11 +183,22 @@ const Navbar = () => {
                 </nav>
                 
                 <div className="mt-8 space-y-4">
-                  <Link to="/login">
-                    <Button variant="outline" className="w-full">
-                      Login
-                    </Button>
-                  </Link>
+                  {isLoggedIn ? (
+                    <>
+                      <div className="px-4 py-2 text-sm text-gray-600">
+                        Welcome, {user?.email}
+                      </div>
+                      <Button variant="outline" className="w-full" onClick={handleLogout}>
+                        Logout
+                      </Button>
+                    </>
+                  ) : (
+                    <Link to="/login">
+                      <Button variant="outline" className="w-full">
+                        Login
+                      </Button>
+                    </Link>
+                  )}
                   
                   <Link to="/cart" className="relative">
                     <Button variant="primary" className="w-full flex items-center justify-center gap-2">

@@ -11,7 +11,7 @@ const CategoryCard = ({ category }) => {
       whileHover={{ scale: 1.05 }}
       className="relative overflow-hidden rounded-custom shadow-soft hover:shadow-medium transition-all duration-300 group cursor-pointer"
     >
-      <Link to={`/shop?category=${category.slug}`} className="block">
+      <Link to={`/category/${category.slug}`} className="block">
         <div className="relative h-64">
           <img
             src={category.image}
@@ -22,14 +22,20 @@ const CategoryCard = ({ category }) => {
           
           <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
             <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
-            <p className="text-sm opacity-90">{category.description}</p>
+            <p className="text-sm opacity-90 mb-3">{category.description}</p>
+            
+            {category.subcategories && (
+              <div className="text-xs opacity-75 mb-3">
+                {category.subcategories.length} subcategories available
+              </div>
+            )}
             
             <motion.div
-              className="mt-4 inline-flex items-center text-sm font-medium"
+              className="inline-flex items-center text-sm font-medium"
               whileHover={{ x: 5 }}
               transition={{ duration: 0.2 }}
             >
-              Shop Now
+              Explore Subcategories
               <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>

@@ -2,14 +2,19 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
+import CategoryPage from './pages/CategoryPage';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import About from './pages/About';
+import OrderConfirmation from './pages/OrderConfirmation';
+import Checkout from './pages/Checkout';
 import NotFound from './pages/NotFound';
 
 // Scroll to top component
@@ -69,32 +74,57 @@ const PageTransition = ({ children }) => (
   </motion.div>
 );
 
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isLoggedIn } = useAuth();
+  
+  if (!isLoggedIn) {
+    // Store the attempted URL for redirect after login
+    sessionStorage.setItem('redirectTo', window.location.pathname);
+    window.location.href = '/login';
+    return null;
+  }
+  
+  return children;
+};
+
 function App() {
   return (
-    <CartProvider>
-      <Router>
-        <div className="min-h-screen bg-cream">
-          <Navbar />
-          
-          <main className="pt-16">
-            <AnimatePresence mode="wait">
-              <Routes>
-                <Route path="/" element={<PageTransition><Home /></PageTransition>} />
-                <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
-                <Route path="/product/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
-                <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
-                <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-                <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
-                <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
-              </Routes>
-            </AnimatePresence>
-          </main>
-          
-          <Footer />
-          <ScrollToTop />
-        </div>
-      </Router>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <div className="min-h-screen bg-cream">
+            <Navbar />
+            
+            <main className="pt-16">
+              <AnimatePresence mode="wait">
+                <Routes>
+                  <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+                  <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
+                  <Route path="/category/:categorySlug" element={<PageTransition><CategoryPage /></PageTransition>} />
+                  <Route path="/category/:categorySlug/:subcategorySlug" element={<PageTransition><CategoryPage /></PageTransition>} />
+                  <Route path="/product/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
+                  <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+                  <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+                  <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+                  <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+                  <Route path="/checkout" element={
+                    <ProtectedRoute>
+                      <PageTransition><Checkout /></PageTransition>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/order-confirmation" element={<PageTransition><OrderConfirmation /></PageTransition>} />
+                  <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+                </Routes>
+              </AnimatePresence>
+            </main>
+            
+            <Footer />
+            <ScrollToTop />
+          </div>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

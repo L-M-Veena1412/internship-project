@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { login } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -26,16 +27,18 @@ const Login = () => {
     setError('');
     
     try {
-      const response = await login(formData);
+      const result = login(formData.email, formData.password);
       
-      // Store token in localStorage (in real app)
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      
-      // Redirect to home or previous page
-      navigate('/');
+      if (result.success) {
+        // Redirect to checkout if they came from there, otherwise home
+        const redirectTo = sessionStorage.getItem('redirectTo') || '/';
+        sessionStorage.removeItem('redirectTo');
+        navigate(redirectTo);
+      } else {
+        setError(result.message);
+      }
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

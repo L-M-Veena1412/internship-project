@@ -24,9 +24,20 @@ const Shop = () => {
       try {
         setLoading(true);
         
+        // Parse category filter to extract category and subcategory
+        let categoryFilter = filters.category;
+        let subcategoryFilter = undefined;
+        
+        if (filters.category && filters.category.includes('/')) {
+          const [category, subcategory] = filters.category.split('/');
+          categoryFilter = category;
+          subcategoryFilter = subcategory;
+        }
+        
         const [productsRes, categoriesRes] = await Promise.all([
           getProducts({
-            category: filters.category || undefined,
+            category: categoryFilter || undefined,
+            subcategory: subcategoryFilter,
             search: searchTerm || undefined,
             featured: searchParams.get('featured') === 'true'
           }),
@@ -184,17 +195,36 @@ const Shop = () => {
                     <span className="text-sm">All Categories</span>
                   </label>
                   {categories.map((category) => (
-                    <label key={category.id} className="flex items-center">
-                      <input
-                        type="radio"
-                        name="category"
-                        value={category.slug}
-                        checked={filters.category === category.slug}
-                        onChange={(e) => handleFilterChange('category', e.target.value)}
-                        className="mr-2 text-olive-green focus:ring-olive-green"
-                      />
-                      <span className="text-sm">{category.name}</span>
-                    </label>
+                    <div key={category.id} className="ml-4">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="category"
+                          value={category.slug}
+                          checked={filters.category === category.slug}
+                          onChange={(e) => handleFilterChange('category', e.target.value)}
+                          className="mr-2 text-olive-green focus:ring-olive-green"
+                        />
+                        <span className="text-sm font-medium">{category.name}</span>
+                      </label>
+                      {category.subcategories && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {category.subcategories.map((sub) => (
+                            <label key={sub.id} className="flex items-center text-xs text-gray-600">
+                              <input
+                                type="radio"
+                                name="category"
+                                value={`${category.slug}/${sub.slug}`}
+                                checked={filters.category === `${category.slug}/${sub.slug}`}
+                                onChange={(e) => handleFilterChange('category', e.target.value)}
+                                className="mr-2 text-olive-green focus:ring-olive-green"
+                              />
+                              <span>{sub.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>

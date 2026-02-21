@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { register } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { signup } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -35,20 +36,16 @@ const Register = () => {
     }
     
     try {
-      const response = await register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
-      });
+      const result = signup(formData.email, formData.password);
       
-      // Store token in localStorage (in real app)
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      
-      // Redirect to home
-      navigate('/');
+      if (result.success) {
+        // Redirect to login after successful registration
+        navigate('/login');
+      } else {
+        setError(result.message);
+      }
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
+      setError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
