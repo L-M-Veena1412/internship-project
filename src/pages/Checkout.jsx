@@ -13,6 +13,11 @@ const Checkout = () => {
   const shipping = cartTotal > 50 ? 0 : 5.99;
   const finalTotal = cartTotal + shipping;
   
+  const handleImageError = (e) => {
+    // Fallback to a placeholder image if the original fails to load
+    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop'; // Fresh produce fallback
+  };
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -326,6 +331,7 @@ const Checkout = () => {
                       src={item.image}
                       alt={item.name}
                       className="w-16 h-16 object-cover rounded-lg"
+                      onError={handleImageError}
                     />
                     <div className="flex-1">
                       <h3 className="text-sm font-medium text-gray-900">{item.name}</h3>

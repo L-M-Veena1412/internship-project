@@ -10,6 +10,7 @@ import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
 
 // Scroll to top component
@@ -85,6 +86,7 @@ function App() {
                 <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
                 <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
                 <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+                <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
                 <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
               </Routes>
             </AnimatePresence>

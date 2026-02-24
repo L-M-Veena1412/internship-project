@@ -3,6 +3,11 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const CategoryCard = ({ category }) => {
+  const handleImageError = (e) => {
+    // Fallback to a placeholder image if the original fails to load
+    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=300&fit=crop'; // Fresh vegetables fallback
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -17,6 +22,7 @@ const CategoryCard = ({ category }) => {
             src={category.image}
             alt={category.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            onError={handleImageError}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           

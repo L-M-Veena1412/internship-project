@@ -12,6 +12,11 @@ const ProductCard = ({ product }) => {
     e.stopPropagation();
     addToCart(product, 1);
   };
+
+  const handleImageError = (e) => {
+    // Fallback to a placeholder image if the original fails to load
+    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop'; // Fresh produce fallback
+  };
   
   return (
     <motion.div
@@ -27,6 +32,7 @@ const ProductCard = ({ product }) => {
             src={product.image}
             alt={product.name}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={handleImageError}
           />
           {product.featured && (
             <span className="absolute top-2 left-2 bg-olive-green text-white px-2 py-1 text-xs font-medium rounded">

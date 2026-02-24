@@ -88,6 +88,11 @@ const ProductDetails = () => {
     'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=600&fit=crop',
     'https://images.unsplash.com/photo-1445282768811-6a790c3c3529?w=600&h=600&fit=crop'
   ];
+
+  const handleImageError = (e) => {
+    // Fallback to a placeholder image if the original fails to load
+    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=600&fit=crop'; // Fresh produce fallback
+  };
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,6 +131,7 @@ const ProductDetails = () => {
                 src={productImages[selectedImage]}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                onError={handleImageError}
               />
             </div>
             
@@ -145,6 +151,7 @@ const ProductDetails = () => {
                     src={image}
                     alt={`${product.name} ${index + 1}`}
                     className="w-full h-full object-cover"
+                    onError={handleImageError}
                   />
                 </button>
               ))}

@@ -14,19 +14,25 @@ const OrderConfirmation = () => {
     // Get order data from location state or generate new order
     if (location.state?.orderData) {
       setOrderData(location.state.orderData);
+      // Store order data in localStorage for Orders page
+      localStorage.setItem('order', JSON.stringify(location.state.orderData));
     } else {
       // Generate order data if not passed from checkout
       const orderId = `ORD${Date.now()}`;
       const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
       const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       
-      setOrderData({
+      const newOrderData = {
         orderId,
         items: cartItems,
         totalAmount,
         paymentStatus: 'Successful',
         orderDate: new Date().toLocaleDateString()
-      });
+      };
+      
+      setOrderData(newOrderData);
+      // Store order data in localStorage for Orders page
+      localStorage.setItem('order', JSON.stringify(newOrderData));
     }
 
     // Clear cart after successful order

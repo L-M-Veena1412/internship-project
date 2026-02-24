@@ -33,7 +33,7 @@ const mockProducts = [
     description: 'Sweet and earthy organic beetroots, rich in nutrients.',
     category: 'fresh-vegetables',
     subcategory: 'exotic-vegetables',
-    image: 'https://images.unsplash.com/photo-1596797038534-cc22207a8189?w=400&h=400&fit=crop',
+    image: '/images/products/beetroot.jpg',
     inStock: true,
     featured: false,
     rating: 4.3,
@@ -48,11 +48,11 @@ const mockProducts = [
     description: 'Fresh organic spinach leaves, rich in vitamins and minerals.',
     category: 'fresh-vegetables',
     subcategory: 'leafy-vegetables',
-    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=400&fit=crop',
+    image: '/images/products/spinach.jpg',
     inStock: true,
-    featured: true,
-    rating: 4.6,
-    reviews: 156
+    featured: false,
+    rating: 4.5,
+    reviews: 167
   },
   {
     id: 4,
@@ -61,7 +61,7 @@ const mockProducts = [
     description: 'Aromatic organic coriander leaves perfect for garnishing.',
     category: 'fresh-vegetables',
     subcategory: 'leafy-vegetables',
-    image: 'https://images.unsplash.com/photo-1592833152262-6d9b8212ec5c?w=400&h=400&fit=crop',
+    image: '/images/products/coriander.jpg',
     inStock: true,
     featured: false,
     rating: 4.4,
@@ -73,8 +73,8 @@ const mockProducts = [
     price: 3.49,
     description: 'Crisp organic lettuce leaves perfect for salads.',
     category: 'fresh-vegetables',
-    subcategory: 'exotic-vegetables',
-    image: 'https://images.unsplash.com/photo-1525373610924-44025a67c489?w=400&h=400&fit=crop',
+    subcategory: 'leafy-vegetables',
+    image: '/images/products/lettuce.jpg',
     inStock: true,
     featured: false,
     rating: 4.3,
@@ -86,8 +86,8 @@ const mockProducts = [
     price: 4.99,
     description: 'Vibrant organic red cabbage, rich in antioxidants.',
     category: 'fresh-vegetables',
-    subcategory: 'exotic-vegetables',
-    image: 'https://images.unsplash.com/photo-1598170039365-9e5b5d4d4d0e?w=400&h=400&fit=crop',
+    subcategory: 'leafy-vegetables',
+    image: '/images/products/cabbage.jpg',
     inStock: true,
     featured: true,
     rating: 4.5,
@@ -99,8 +99,8 @@ const mockProducts = [
     price: 5.49,
     description: 'Fresh organic broccoli florets, packed with nutrients.',
     category: 'fresh-vegetables',
-    subcategory: 'exotic-vegetables',
-    image: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=400&h=400&fit=crop',
+    subcategory: 'leafy-vegetables',
+    image: '/images/products/broccoli.jpg',
     inStock: true,
     featured: true,
     rating: 4.7,
@@ -112,12 +112,12 @@ const mockProducts = [
     price: 3.99,
     description: 'Tender organic zucchini perfect for grilling or sautéing.',
     category: 'fresh-vegetables',
-    subcategory: 'exotic-vegetables',
-    image: 'https://images.unsplash.com/photo-1581375321637-3a8c9c8e8b0c?w=400&h=400&fit=crop',
+    subcategory: 'fruiting-vegetables',
+    image: '/images/products/zucchini.jpg',
     inStock: true,
     featured: false,
-    rating: 4.4,
-    reviews: 145
+    rating: 4.1,
+    reviews: 67
   },
   {
     id: 30,
@@ -126,7 +126,7 @@ const mockProducts = [
     description: 'Juicy organic tomatoes, perfect for cooking.',
     category: 'fresh-vegetables',
     subcategory: 'local-seasonal-vegetables',
-    image: 'https://images.unsplash.com/photo-1546470427-e92b2c9c09d6?w=400&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1596797038534-7c9a7e8d5a0c?w=400&h=400&fit=crop',
     inStock: true,
     featured: true,
     rating: 4.6,
@@ -138,11 +138,11 @@ const mockProducts = [
     price: 3.99,
     description: 'Organic potatoes, versatile for all cooking methods.',
     category: 'fresh-vegetables',
-    subcategory: 'local-seasonal-vegetables',
-    image: 'https://images.unsplash.com/photo-1518977676601-b5f672357bb5?w=400&h=400&fit=crop',
+    subcategory: 'root-vegetables',
+    image: 'https://images.unsplash.com/photo-1445282768811-6a790c3c3529?w=400&h=400&fit=crop',
     inStock: true,
     featured: false,
-    rating: 4.5,
+    rating: 4.4,
     reviews: 178
   },
   {
@@ -152,11 +152,11 @@ const mockProducts = [
     description: 'Fresh organic brinjal, perfect for curries and grilling.',
     category: 'fresh-vegetables',
     subcategory: 'local-seasonal-vegetables',
-    image: 'https://images.unsplash.com/photo-1590783559159-7c9a7e8d5a0c?w=400&h=400&fit=crop',
+    image: '/images/products/brinjal.jpg',
     inStock: true,
     featured: false,
-    rating: 4.3,
-    reviews: 92
+    rating: 4.2,
+    reviews: 89
   },
   {
     id: 33,
@@ -165,11 +165,11 @@ const mockProducts = [
     description: 'Crisp organic green beans, rich in fiber.',
     category: 'fresh-vegetables',
     subcategory: 'local-seasonal-vegetables',
-    image: 'https://images.unsplash.com/photo-1534605168264-649b7a3f8d6d?w=400&h=400&fit=crop',
+    image: '/images/products/green-beans.jpg',
     inStock: true,
-    featured: true,
-    rating: 4.6,
-    reviews: 156
+    featured: false,
+    rating: 4.3,
+    reviews: 145
   },
   
   // Fresh Vegetables - Bulb Vegetables
@@ -180,11 +180,11 @@ const mockProducts = [
     description: 'Fresh organic onions, essential for cooking.',
     category: 'fresh-vegetables',
     subcategory: 'bulb-vegetables',
-    image: 'https://images.unsplash.com/photo-1518977676601-b5f672357bb5?w=400&h=400&fit=crop',
+    image: '/images/products/onion.jpg',
     inStock: true,
     featured: false,
-    rating: 4.2,
-    reviews: 134
+    rating: 4.3,
+    reviews: 89
   },
   {
     id: 6,
@@ -193,11 +193,11 @@ const mockProducts = [
     description: 'Aromatic organic garlic bulbs, perfect for flavoring dishes.',
     category: 'fresh-vegetables',
     subcategory: 'bulb-vegetables',
-    image: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400&h=400&fit=crop',
+    image: '/images/products/garlic.jpg',
     inStock: true,
     featured: false,
-    rating: 4.7,
-    reviews: 198
+    rating: 4.6,
+    reviews: 78
   },
   
   // Fresh Vegetables - Fruiting Vegetables
@@ -208,7 +208,7 @@ const mockProducts = [
     description: 'Fresh, juicy organic tomatoes grown without pesticides.',
     category: 'fresh-vegetables',
     subcategory: 'fruiting-vegetables',
-    image: 'https://images.unsplash.com/photo-1546470427-e92b2c9c09d6?w=400&h=400&fit=crop',
+    image: '/images/products/tomato.jpg',
     inStock: true,
     featured: true,
     rating: 4.8,
@@ -221,11 +221,11 @@ const mockProducts = [
     description: 'Colorful organic bell peppers, sweet and crisp.',
     category: 'fresh-vegetables',
     subcategory: 'fruiting-vegetables',
-    image: 'https://images.unsplash.com/photo-1581375381222-f502e57040b4?w=400&h=400&fit=crop',
+    image: '/images/products/bell-peppers.jpg',
     inStock: true,
     featured: false,
-    rating: 4.5,
-    reviews: 112
+    rating: 4.6,
+    reviews: 201
   },
   
   // Fresh Fruits - Citrus Fruits
@@ -236,11 +236,11 @@ const mockProducts = [
     description: 'Sweet and juicy organic oranges, rich in vitamin C.',
     category: 'fresh-fruits',
     subcategory: 'citrus-fruits',
-    image: 'https://images.unsplash.com/photo-1547514701-42782101795e?w=400&h=400&fit=crop',
+    image: '/images/products/orange.jpg',
     inStock: true,
-    featured: true,
-    rating: 4.9,
-    reviews: 342
+    featured: false,
+    rating: 4.7,
+    reviews: 189
   },
   {
     id: 10,
@@ -249,11 +249,11 @@ const mockProducts = [
     description: 'Tangy organic lemons, perfect for cooking and drinks.',
     category: 'fresh-fruits',
     subcategory: 'citrus-fruits',
-    image: 'https://images.unsplash.com/photo-1590502593542-17db4dc36b4d?w=400&h=400&fit=crop',
+    image: '/images/products/lemon.jpg',
     inStock: true,
     featured: false,
-    rating: 4.6,
-    reviews: 178
+    rating: 4.5,
+    reviews: 134
   },
   
   // Fresh Fruits - Tropical Fruits
@@ -264,11 +264,11 @@ const mockProducts = [
     description: 'Sweet and tropical organic mangoes, perfectly ripe.',
     category: 'fresh-fruits',
     subcategory: 'tropical-fruits',
-    image: 'https://images.unsplash.com/photo-1553279768-8898476d8d0a?w=400&h=400&fit=crop',
+    image: '/images/products/mango.jpg',
     inStock: true,
-    featured: true,
+    featured: false,
     rating: 4.8,
-    reviews: 289
+    reviews: 267
   },
   {
     id: 12,
@@ -277,11 +277,11 @@ const mockProducts = [
     description: 'Creamy organic bananas, rich in potassium.',
     category: 'fresh-fruits',
     subcategory: 'tropical-fruits',
-    image: 'https://images.unsplash.com/photo-1566393028639-2495dd8a8d9c?w=400&h=400&fit=crop',
+    image: '/images/products/banana.jpg',
     inStock: true,
     featured: false,
-    rating: 4.4,
-    reviews: 156
+    rating: 4.6,
+    reviews: 289
   },
   
   // Fresh Fruits - Berries
@@ -292,11 +292,11 @@ const mockProducts = [
     description: 'Sweet and juicy organic strawberries perfect for desserts.',
     category: 'fresh-fruits',
     subcategory: 'berries',
-    image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&h=400&fit=crop',
+    image: '/images/products/strawberry.jpg',
     inStock: true,
-    featured: true,
+    featured: false,
     rating: 4.9,
-    reviews: 423
+    reviews: 312
   },
   {
     id: 14,
@@ -305,11 +305,11 @@ const mockProducts = [
     description: 'Sweet and tart organic blueberries, packed with antioxidants.',
     category: 'fresh-fruits',
     subcategory: 'berries',
-    image: 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=400&h=400&fit=crop',
+    image: '/images/products/blueberry.jpg',
     inStock: true,
-    featured: true,
-    rating: 4.7,
-    reviews: 198
+    featured: false,
+    rating: 4.8,
+    reviews: 278
   },
   
   // Fresh Fruits - Exotic Fruits
@@ -320,11 +320,11 @@ const mockProducts = [
     description: 'Exotic organic dragon fruit with vibrant pink color and unique flavor.',
     category: 'fresh-fruits',
     subcategory: 'exotic-fruits',
-    image: 'https://images.unsplash.com/photo-1546630392-34680b5395c6?w=400&h=400&fit=crop',
+    image: '/images/products/dragon-fruit.jpg',
     inStock: true,
-    featured: true,
-    rating: 4.8,
-    reviews: 145
+    featured: false,
+    rating: 4.7,
+    reviews: 156
   },
   {
     id: 35,
@@ -333,7 +333,7 @@ const mockProducts = [
     description: 'Tangy and sweet organic kiwi fruit, rich in vitamin C.',
     category: 'fresh-fruits',
     subcategory: 'exotic-fruits',
-    image: 'https://images.unsplash.com/photo-1618897996318-6a9038e8dc6c?w=400&h=400&fit=crop',
+    image: '/images/products/kiwi.jpg',
     inStock: true,
     featured: false,
     rating: 4.6,
@@ -346,7 +346,7 @@ const mockProducts = [
     description: 'Creamy organic avocados, perfect for toast and salads.',
     category: 'fresh-fruits',
     subcategory: 'exotic-fruits',
-    image: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=400&h=400&fit=crop',
+    image: '/images/products/avocado.jpg',
     inStock: true,
     featured: true,
     rating: 4.9,
@@ -358,14 +358,14 @@ const mockProducts = [
     id: 15,
     name: 'Organic Cow Milk',
     price: 4.99,
-    description: 'Fresh organic whole milk from grass-fed cows.',
+    description: 'Fresh organic cow milk, rich and creamy.',
     category: 'dairy-products',
     subcategory: 'milk',
-    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=400&fit=crop',
+    image: '/images/products/milk.jpg',
     inStock: true,
     featured: false,
-    rating: 4.6,
-    reviews: 234
+    rating: 4.7,
+    reviews: 189
   },
   {
     id: 16,
@@ -374,35 +374,22 @@ const mockProducts = [
     description: 'Creamy organic almond milk, dairy-free alternative.',
     category: 'dairy-products',
     subcategory: 'milk',
-    image: 'https://images.unsplash.com/photo-1559329007-406870828b39?w=400&h=400&fit=crop',
+    image: '/images/products/almond-milk.jpg',
     inStock: true,
     featured: false,
-    rating: 4.3,
+    rating: 4.5,
     reviews: 145
   },
   
   // Dairy Products - Cheese
   {
     id: 17,
-    name: 'Cheddar Cheese',
-    price: 7.99,
-    description: 'Aged organic cheddar cheese with rich flavor.',
-    category: 'dairy-products',
-    subcategory: 'cheese',
-    image: 'https://images.unsplash.com/photo-1483695028932-b5c0ce5606b3?w=400&h=400&fit=crop',
-    inStock: true,
-    featured: true,
-    rating: 4.8,
-    reviews: 312
-  },
-  {
-    id: 18,
-    name: 'Fresh Mozzarella',
-    price: 6.49,
+    name: 'Mozzarella Cheese',
+    price: 6.99,
     description: 'Soft and creamy organic mozzarella cheese.',
     category: 'dairy-products',
     subcategory: 'cheese',
-    image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&h=400&fit=crop',
+    image: '/images/products/cheese.jpg',
     inStock: true,
     featured: false,
     rating: 4.7,
@@ -417,7 +404,7 @@ const mockProducts = [
     description: 'Rich and creamy organic butter from grass-fed cows.',
     category: 'dairy-products',
     subcategory: 'butter',
-    image: 'https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=400&h=400&fit=crop',
+    image: '/images/subcategories/berries.jpg',
     inStock: true,
     featured: false,
     rating: 4.5,
@@ -432,7 +419,7 @@ const mockProducts = [
     description: 'Thick and creamy organic Greek yogurt.',
     category: 'dairy-products',
     subcategory: 'yogurt',
-    image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=400&fit=crop',
+    image: '/images/products/yogurt.jpg',
     inStock: true,
     featured: false,
     rating: 4.6,
@@ -475,7 +462,7 @@ const mockProducts = [
     description: 'Decadent organic chocolate cake, perfect for celebrations.',
     category: 'bakery-items',
     subcategory: 'cakes',
-    image: 'https://images.unsplash.com/photo-1464349095981-b1df89268b01?w=400&h=400&fit=crop',
+    image: '/images/products/chocolate-cake.jpg',
     inStock: true,
     featured: true,
     rating: 4.9,
@@ -490,7 +477,7 @@ const mockProducts = [
     description: 'Freshly baked organic chocolate chip cookies.',
     category: 'bakery-items',
     subcategory: 'cookies',
-    image: 'https://images.unsplash.com/photo-1499636133215-a44bd298d76b?w=400&h=400&fit=crop',
+    image: '/images/products/cookies.jpg',
     inStock: true,
     featured: false,
     rating: 4.7,
@@ -505,7 +492,7 @@ const mockProducts = [
     description: 'Buttery and flaky organic croissants, perfect for breakfast.',
     category: 'bakery-items',
     subcategory: 'pastries',
-    image: 'https://images.unsplash.com/photo-1559329007-406870828b39?w=400&h=400&fit=crop',
+    image: '/images/products/croissant.jpg',
     inStock: true,
     featured: false,
     rating: 4.6,
@@ -518,7 +505,7 @@ const mockCategories = [
     id: 1,
     name: 'Fresh Vegetables',
     slug: 'fresh-vegetables',
-    image: 'https://images.unsplash.com/photo-1540420773422-336899f073db?w=400&h=300&fit=crop',
+    image: '/images/subcategories/leafy-vegetables.jpg',
     description: 'Organic vegetables fresh from farm',
     subcategories: [
       { id: 11, name: 'Local / Seasonal Vegetables', slug: 'local-seasonal-vegetables' },
@@ -533,7 +520,7 @@ const mockCategories = [
     id: 2,
     name: 'Fresh Fruits',
     slug: 'fresh-fruits',
-    image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&h=300&fit=crop',
+    image: '/images/subcategories/citrus-fruits.jpg',
     description: 'Sweet and juicy organic fruits',
     subcategories: [
       { id: 21, name: 'Citrus Fruits', slug: 'citrus-fruits' },
@@ -546,7 +533,7 @@ const mockCategories = [
     id: 3,
     name: 'Dairy Products',
     slug: 'dairy-products',
-    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=300&fit=crop',
+    image: '/images/products/milk.jpg',
     description: 'Fresh organic dairy products',
     subcategories: [
       { id: 31, name: 'Milk', slug: 'milk' },
@@ -559,7 +546,7 @@ const mockCategories = [
     id: 4,
     name: 'Bakery Items',
     slug: 'bakery-items',
-    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop',
+    image: '/images/products/bread.jpg',
     description: 'Freshly baked organic goods',
     subcategories: [
       { id: 41, name: 'Bread', slug: 'bread' },
