@@ -294,8 +294,8 @@ const About = () => {
                 </div>
                 
                 <h3 className="text-lg font-semibold mb-2">Phone</h3>
-                <p className="text-white/90">+1 (555) 123-4567</p>
-                <p className="text-white/90 text-sm">Mon-Fri: 9AM-6PM</p>
+                <p className="text-white/90">+91 98765 43210</p>
+                <p className="text-white/90 text-sm">Mon–Sat: 9:00 AM – 7:00 PM IST</p>
               </motion.div>
               
               <motion.div
@@ -307,9 +307,10 @@ const About = () => {
                   <FaHeadset className="text-2xl" />
                 </div>
                 
-                <h3 className="text-lg font-semibold mb-2">Support</h3>
-                <p className="text-white/90">24/7 Customer Service</p>
-                <p className="text-white/90 text-sm">Live Chat Available</p>
+                <h3 className="text-lg font-semibold mb-2">Address</h3>
+                <p className="text-white/90">No. 45, 7th Block, 5th Cross</p>
+                <p className="text-white/90 text-sm">Koramangala, Bengaluru</p>
+                <p className="text-white/90 text-sm">Karnataka – 560095, India</p>
               </motion.div>
             </div>
             

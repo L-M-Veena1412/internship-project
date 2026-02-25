@@ -187,9 +187,10 @@ const Contact = () => {
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">Address</h3>
                       <p className="text-gray-600">
-                        123 Organic Street<br />
-                        Green City, GC 12345<br />
-                        United States
+                        No. 45, 7th Block, 5th Cross<br />
+                        Koramangala<br />
+                        Bengaluru, Karnataka – 560095<br />
+                        India
                       </p>
                     </div>
                   </div>
@@ -203,8 +204,8 @@ const Contact = () => {
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-1">Phone</h3>
                       <p className="text-gray-600">
-                        +1 (555) 123-4567<br />
-                        Mon-Fri: 9am-6pm EST
+                        +91 98765 43210<br />
+                        Mon–Sat: 9:00 AM – 7:00 PM IST
                       </p>
                     </div>
                   </div>
