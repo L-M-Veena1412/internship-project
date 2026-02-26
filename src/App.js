@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import CategoryPage from './pages/CategoryPage';
+import SubcategoryPage from './pages/SubcategoryPage';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
@@ -105,6 +106,7 @@ function App() {
                   <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
                   <Route path="/category/:categorySlug" element={<PageTransition><CategoryPage /></PageTransition>} />
                   <Route path="/category/:categorySlug/:subcategorySlug" element={<PageTransition><CategoryPage /></PageTransition>} />
+                  <Route path="/category/:categorySlug" element={<SubcategoryPage />} />
                   <Route path="/product/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
                   <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
                   <Route path="/login" element={<PageTransition><Login /></PageTransition>} />

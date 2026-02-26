@@ -24,7 +24,7 @@ const productImages = {
   'onion.jpg': 'https://images.unsplash.com/photo-1518977686604-6c9e9c0d6b1?w=400&h=400&fit=crop',
   'spinach.jpg': 'https://images.unsplash.com/photo-1576091160569-2c6c8b6b5c1?w=400&h=400&fit=crop',
   'broccoli.jpg': 'https://images.unsplash.com/photo-1530587142479-6d9a8b0f4c?w=400&h=400&fit=crop',
-  'cabbage.jpg': 'https://hasora.in/cdn/shop/products/SquareSimple_2_6bc8140f-7fb9-42d1-81b7-183f85f2ae04.jpg?v=1613637220&width=600',
+  'cabbage.jpg': 'https://images.unsplash.com/photo-1574233326934-6d9a8b0f4c?w=400&h=400&fit=crop',
   'zucchini.jpg': 'https://images.unsplash.com/photo-1581375386699-c70f1f9d5b1?w=400&h=400&fit=crop',
   'green-beans.jpg': 'https://images.unsplash.com/photo-1581375386699-c70f1f9d5b1?w=400&h=400&fit=crop',
   'lettuce.jpg': 'https://images.unsplash.com/photo-1530587142479-6d9a8b0f4c?w=400&h=400&fit=crop',
