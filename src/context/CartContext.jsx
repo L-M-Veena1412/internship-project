@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 
 const CartContext = createContext();
 
@@ -77,7 +77,7 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(state.items));
   }, [state.items]);
 
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = useCallback((product, quantity = 1) => {
     dispatch({
       type: 'ADD_TO_CART',
       payload: {
@@ -85,16 +85,16 @@ export const CartProvider = ({ children }) => {
         quantity
       }
     });
-  };
+  }, []);
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = useCallback((productId) => {
     dispatch({
       type: 'REMOVE_FROM_CART',
       payload: productId
     });
-  };
+  }, []);
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = useCallback((productId, quantity) => {
     if (quantity <= 0) {
       removeFromCart(productId);
     } else {
@@ -103,19 +103,19 @@ export const CartProvider = ({ children }) => {
         payload: { id: productId, quantity }
       });
     }
-  };
+  }, [removeFromCart]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     dispatch({ type: 'CLEAR_CART' });
-  };
+  }, []);
 
-  const getCartTotal = () => {
+  const getCartTotal = useCallback(() => {
     return state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
+  }, [state.items]);
 
-  const getCartItemsCount = () => {
+  const getCartItemsCount = useCallback(() => {
     return state.items.reduce((count, item) => count + item.quantity, 0);
-  };
+  }, [state.items]);
 
   const value = {
     items: state.items,

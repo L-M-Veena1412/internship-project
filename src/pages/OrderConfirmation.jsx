@@ -3,12 +3,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import Button from '../components/Button';
+// eslint-disable-next-line no-unused-vars
 
 const OrderConfirmation = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { clearCart } = useCart();
+  const cartContext = useCart();
   const [orderData, setOrderData] = useState(null);
+  const [cartCleared, setCartCleared] = useState(false);
 
   useEffect(() => {
     // Get order data from location state or generate new order
@@ -34,11 +36,16 @@ const OrderConfirmation = () => {
       // Store order data in localStorage for Orders page
       localStorage.setItem('order', JSON.stringify(newOrderData));
     }
+  }, [location.state]);
 
-    // Clear cart after successful order
-    clearCart();
-    localStorage.removeItem('cart');
-  }, [location.state, clearCart]);
+  // Clear cart after successful order - separate useEffect to prevent re-renders
+  useEffect(() => {
+    if (orderData && !cartCleared) {
+      cartContext.clearCart();
+      localStorage.removeItem('cart');
+      setCartCleared(true); // Set flag to prevent repeated calls
+    }
+  }, [orderData, cartCleared, cartContext]);
 
   if (!orderData) {
     return (
