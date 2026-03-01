@@ -87,7 +87,7 @@ const Navbar = () => {
               {isLoggedIn ? (
                 <>
                   <span className="text-sm text-gray-600">
-                    Welcome, {user?.email}
+                    Welcome, {user?.name || (user?.email?.split('@')[0]?.charAt(0).toUpperCase() + user?.email?.split('@')[0]?.slice(1) || user?.email)}
                   </span>
                   <Button variant="ghost" size="small" onClick={handleLogout}>
                     Logout
@@ -186,7 +186,7 @@ const Navbar = () => {
                   {isLoggedIn ? (
                     <>
                       <div className="px-4 py-2 text-sm text-gray-600">
-                        Welcome, {user?.email}
+                        Welcome, {user?.name || (user?.email?.split('@')[0]?.charAt(0).toUpperCase() + user?.email?.split('@')[0]?.slice(1) || user?.email)}
                       </div>
                       <Button variant="outline" className="w-full" onClick={handleLogout}>
                         Logout

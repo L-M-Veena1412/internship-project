@@ -497,6 +497,12 @@ export const getProducts = async (filters = {}) => {
   if (filters.subcategory)
     filteredProducts = filteredProducts.filter(p => p.subcategory === filters.subcategory);
 
+  if (filters.search) {
+    filteredProducts = filteredProducts.filter(p => 
+      p.name.toLowerCase().includes(filters.search.toLowerCase())
+    );
+  }
+
   return { data: filteredProducts };
 
 };

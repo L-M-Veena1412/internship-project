@@ -1,9 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+  
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    
+    // Show success message and clear input
+    alert('Subscribed successfully!');
+    setEmail('');
+    setSubscribed(true);
+    
+    // Reset subscribed state after 3 seconds
+    setTimeout(() => setSubscribed(false), 3000);
+  };
   
   const footerLinks = {
     Shop: [
@@ -113,16 +134,22 @@ const Footer = () => {
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-2">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
               <input
                 type="email"
                 placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="px-4 py-2 rounded-lg text-dark-text bg-white focus:outline-none focus:ring-2 focus:ring-olive-green"
+                required
               />
-              <button className="px-6 py-2 bg-olive-green text-white rounded-lg hover:bg-dark-green transition-colors font-medium">
-                Subscribe
+              <button 
+                type="submit"
+                className="px-6 py-2 bg-olive-green text-white rounded-lg hover:bg-dark-green transition-colors font-medium"
+              >
+                {subscribed ? 'Subscribed!' : 'Subscribe'}
               </button>
-            </div>
+            </form>
           </div>
         </motion.div>
         

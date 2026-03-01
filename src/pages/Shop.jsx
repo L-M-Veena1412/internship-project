@@ -101,7 +101,20 @@ const Shop = () => {
   
   const handleSearch = (e) => {
     e.preventDefault();
-    setSearchTerm(e.target.search.value);
+    const searchValue = e.target.search.value;
+    setSearchTerm(searchValue);
+    
+    // Update URL params immediately
+    const params = new URLSearchParams();
+    if (searchValue.trim()) {
+      params.set('search', searchValue.trim());
+    } else {
+      params.delete('search');
+    }
+    if (filters.category) params.set('category', filters.category);
+    if (searchParams.get('featured') === 'true') params.set('featured', 'true');
+    
+    setSearchParams(params.toString());
   };
   
   const clearFilters = () => {
@@ -273,7 +286,9 @@ const Shop = () => {
             {/* Results Count */}
             <div className="mb-6 flex items-center justify-between">
               <p className="text-gray-600">
-                {loading ? 'Loading...' : `${products.length} products found`}
+                {loading ? 'Loading...' : 
+                 products.length === 0 ? 'No products found' : `${products.length} products found`
+                }
               </p>
               
               {/* Mobile Sort */}
