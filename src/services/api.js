@@ -19,7 +19,7 @@ const mockProducts = [
   {
     id: 1,
     name: 'Carrot',
-    price: 4.99,
+    price: 0.99,
     description: 'Fresh organic carrots.',
     category: 'fresh-vegetables',
     subcategory: 'root-vegetables',
@@ -32,7 +32,7 @@ const mockProducts = [
   {
     id: 2,
     name: 'Beetroot',
-    price: 3.49,
+    price: 0.79,
     description: 'Organic beetroot.',
     category: 'fresh-vegetables',
     subcategory: 'root-vegetables',
@@ -45,7 +45,7 @@ const mockProducts = [
   {
     id: 3,
     name: 'Potato',
-    price: 2.99,
+    price: 0.49,
     description: 'Fresh potatoes.',
     category: 'fresh-vegetables',
     subcategory: 'root-vegetables',
@@ -60,7 +60,7 @@ const mockProducts = [
   {
     id: 4,
     name: 'Spinach',
-    price: 2.99,
+    price: 0.79,
     description: 'Organic spinach.',
     category: 'fresh-vegetables',
     subcategory: 'leafy-vegetables',
@@ -73,7 +73,7 @@ const mockProducts = [
   {
     id: 5,
     name: 'Lettuce',
-    price: 3.49,
+    price: 0.99,
     description: 'Fresh lettuce.',
     category: 'fresh-vegetables',
     subcategory: 'leafy-vegetables',
@@ -88,7 +88,7 @@ const mockProducts = [
   {
     id: 6,
     name: 'Onion',
-    price: 2.49,
+    price: 0.79,
     description: 'Fresh onions.',
     category: 'fresh-vegetables',
     subcategory: 'bulb-vegetables',
@@ -101,7 +101,7 @@ const mockProducts = [
   {
     id: 7,
     name: 'Garlic',
-    price: 3.99,
+    price: 0.99,
     description: 'Organic garlic.',
     category: 'fresh-vegetables',
     subcategory: 'bulb-vegetables',
@@ -116,7 +116,7 @@ const mockProducts = [
   {
     id: 8,
     name: 'Tomato',
-    price: 5.99,
+    price: 1.29,
     description: 'Fresh tomatoes.',
     category: 'fresh-vegetables',
     subcategory: 'fruiting-vegetables',
@@ -129,7 +129,7 @@ const mockProducts = [
   {
     id: 9,
     name: 'Bell Peppers',
-    price: 4.49,
+    price: 1.29,
     description: 'Organic bell peppers.',
     category: 'fresh-vegetables',
     subcategory: 'fruiting-vegetables',
@@ -142,7 +142,7 @@ const mockProducts = [
   {
     id: 10,
     name: 'Brinjal',
-    price: 3.99,
+    price: 1.79,
     description: 'Fresh brinjal.',
     category: 'fresh-vegetables',
     subcategory: 'fruiting-vegetables',
@@ -157,7 +157,7 @@ const mockProducts = [
   {
     id: 11,
     name: 'Cabbage',
-    price: 2.99,
+    price: 1.49,
     description: 'Fresh cabbage.',
     category: 'fresh-vegetables',
     subcategory: 'local-seasonal-vegetables',
@@ -172,7 +172,7 @@ const mockProducts = [
   {
     id: 12,
     name: 'Broccoli',
-    price: 5.49,
+    price: 1.29,
     description: 'Fresh broccoli.',
     category: 'fresh-vegetables',
     subcategory: 'exotic-vegetables',
@@ -185,7 +185,7 @@ const mockProducts = [
   {
     id: 13,
     name: 'Zucchini',
-    price: 4.49,
+    price: 1.99,
     description: 'Organic zucchini.',
     category: 'fresh-vegetables',
     subcategory: 'exotic-vegetables',
@@ -200,7 +200,7 @@ const mockProducts = [
   {
     id: 14,
     name: 'Orange',
-    price: 6.99,
+    price: 1.49,
     description: 'Sweet oranges.',
     category: 'fresh-fruits',
     subcategory: 'citrus-fruits',
@@ -213,7 +213,7 @@ const mockProducts = [
   {
     id: 15,
     name: 'Lemon',
-    price: 5.49,
+    price: 0.99,
     description: 'Fresh lemons.',
     category: 'fresh-fruits',
     subcategory: 'citrus-fruits',
@@ -228,7 +228,7 @@ const mockProducts = [
   {
     id: 16,
     name: 'Mango',
-    price: 8.99,
+    price: 1.99,
     description: 'Sweet mango.',
     category: 'fresh-fruits',
     subcategory: 'tropical-fruits',
@@ -241,7 +241,7 @@ const mockProducts = [
   {
     id: 17,
     name: 'Banana',
-    price: 3.99,
+    price: 0.99,
     description: 'Organic bananas.',
     category: 'fresh-fruits',
     subcategory: 'tropical-fruits',
@@ -256,7 +256,7 @@ const mockProducts = [
   {
     id: 18,
     name: 'Strawberry',
-    price: 6.99,
+    price: 1.99,
     description: 'Fresh strawberries.',
     category: 'fresh-fruits',
     subcategory: 'berries',
@@ -269,7 +269,7 @@ const mockProducts = [
   {
     id: 19,
     name: 'Blueberry',
-    price: 7.99,
+    price: 1.49,
     description: 'Fresh blueberries.',
     category: 'fresh-fruits',
     subcategory: 'berries',
@@ -284,7 +284,7 @@ const mockProducts = [
   {
     id: 20,
     name: 'Dragon Fruit',
-    price: 8.99,
+    price: 2.49,
     description: 'Exotic dragon fruit.',
     category: 'fresh-fruits',
     subcategory: 'exotic-fruits',
@@ -297,7 +297,7 @@ const mockProducts = [
   {
     id: 21,
     name: 'Kiwi',
-    price: 5.99,
+    price: 1.49,
     description: 'Fresh kiwi.',
     category: 'fresh-fruits',
     subcategory: 'exotic-fruits',
@@ -312,7 +312,7 @@ const mockProducts = [
   {
     id: 22,
     name: 'Milk',
-    price: 4.99,
+    price: 1.29,
     description: 'Organic milk.',
     category: 'dairy-products',
     subcategory: 'milk',
@@ -325,7 +325,7 @@ const mockProducts = [
   {
     id: 23,
     name: 'Cheese',
-    price: 6.99,
+    price: 1.99,
     description: 'Fresh cheese.',
     category: 'dairy-products',
     subcategory: 'cheese',
@@ -338,7 +338,7 @@ const mockProducts = [
   {
     id: 24,
     name: 'Butter',
-    price: 5.49,
+    price: 1.49,
     description: 'Organic butter.',
     category: 'dairy-products',
     subcategory: 'butter',
@@ -351,7 +351,7 @@ const mockProducts = [
   {
     id: 25,
     name: 'Yogurt',
-    price: 3.49,
+    price: 1.99,
     description: 'Fresh yogurt.',
     category: 'dairy-products',
     subcategory: 'yogurt',
@@ -366,7 +366,7 @@ const mockProducts = [
   {
     id: 26,
     name: 'Bread',
-    price: 6.99,
+    price: 1.49,
     description: 'Fresh bread.',
     category: 'bakery-items',
     subcategory: 'bread',
@@ -379,7 +379,7 @@ const mockProducts = [
   {
     id: 27,
     name: 'Chocolate Cake',
-    price: 12.99,
+    price: 2.99,
     description: 'Chocolate cake.',
     category: 'bakery-items',
     subcategory: 'cakes',
@@ -392,7 +392,7 @@ const mockProducts = [
   {
     id: 28,
     name: 'Cookies',
-    price: 4.99,
+    price: 1.49,
     description: 'Fresh cookies.',
     category: 'bakery-items',
     subcategory: 'cookies',
@@ -405,7 +405,7 @@ const mockProducts = [
   {
     id: 29,
     name: 'Pastries',
-    price: 5.99,
+    price: 1.99,
     description: 'Fresh pastries.',
     category: 'bakery-items',
     subcategory: 'pastries',

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { formatPriceINR } from '../utils/currency';
 import Button from '../components/Button';
 
 const Orders = () => {
@@ -128,7 +129,7 @@ const Orders = () => {
                     </div>
                     <div>
                       <span className="text-gray-500">Total Amount:</span>
-                      <p className="font-semibold text-gray-900">${order.totalAmount.toFixed(2)}</p>
+                      <p className="font-semibold text-gray-900">{formatPriceINR(order.totalAmount)}</p>
                     </div>
                   </div>
                 </div>
@@ -222,13 +223,13 @@ const Orders = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            ${item.price.toFixed(2)}
+                            {formatPriceINR(item.price)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {item.quantity}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            {formatPriceINR(item.price * item.quantity)}
                           </td>
                         </tr>
                       ))}
@@ -244,7 +245,7 @@ const Orders = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>${order.totalAmount.toFixed(2)}</span>
+                    <span>{formatPriceINR(order.totalAmount)}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
@@ -253,7 +254,7 @@ const Orders = () => {
                   <div className="border-t pt-3">
                     <div className="flex justify-between font-semibold text-gray-900 text-lg">
                       <span>Total</span>
-                      <span>${order.totalAmount.toFixed(2)}</span>
+                      <span>{formatPriceINR(order.totalAmount)}</span>
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { formatPriceINR } from '../utils/currency';
 import Button from '../components/Button';
 
 const Checkout = () => {
@@ -10,7 +11,9 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   
   const cartTotal = getCartTotal();
-  const shipping = cartTotal > 50 ? 0 : 5.99;
+  const freeShippingThreshold = 50; // USD
+  const shippingCost = 5.99; // USD
+  const shipping = cartTotal > freeShippingThreshold ? 0 : shippingCost;
   const finalTotal = cartTotal + shipping;
   
   const handleImageError = (e) => {
@@ -338,7 +341,7 @@ const Checkout = () => {
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                     <div className="text-sm font-medium text-gray-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatPriceINR(item.price * item.quantity)}
                     </div>
                   </div>
                 ))}
@@ -348,16 +351,16 @@ const Checkout = () => {
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>${cartTotal.toFixed(2)}</span>
+                  <span>{formatPriceINR(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}</span>
+                  <span>{shipping === 0 ? 'FREE' : formatPriceINR(shipping)}</span>
                 </div>
                 <div className="border-t pt-2">
                   <div className="flex justify-between font-semibold text-gray-900 text-lg">
                     <span>Total</span>
-                    <span>${finalTotal.toFixed(2)}</span>
+                    <span>{formatPriceINR(finalTotal)}</span>
                   </div>
                 </div>
               </div>

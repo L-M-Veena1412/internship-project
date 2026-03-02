@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import ProductGrid from '../components/ProductGrid';
 import { getProducts, getCategories } from '../services/api';
+import { getPriceRangesINR } from '../utils/currency';
 import Button from '../components/Button';
 
 const Shop = () => {
@@ -18,6 +19,18 @@ const Shop = () => {
     sortBy: 'name'
   });
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  
+  // Sync state with URL parameters when they change
+  useEffect(() => {
+    const urlCategory = searchParams.get('category') || '';
+    const urlSearch = searchParams.get('search') || '';
+    
+    setFilters(prev => ({
+      ...prev,
+      category: urlCategory
+    }));
+    setSearchTerm(urlSearch);
+  }, [searchParams]);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -90,10 +103,10 @@ const Shop = () => {
     const newFilters = { ...filters, [filterType]: value };
     setFilters(newFilters);
     
-    // Update URL params
+    // Update URL params - clear search when changing category to avoid unwanted filtering
     const params = new URLSearchParams();
     if (newFilters.category) params.set('category', newFilters.category);
-    if (searchTerm) params.set('search', searchTerm);
+    if (filterType !== 'category' && searchTerm) params.set('search', searchTerm);
     if (searchParams.get('featured') === 'true') params.set('featured', 'true');
     
     setSearchParams(params.toString());
@@ -127,13 +140,7 @@ const Shop = () => {
     setSearchParams('');
   };
   
-  const priceRanges = [
-    { label: 'All Prices', value: '' },
-    { label: 'Under $5', value: '0-5' },
-    { label: '$5 - $10', value: '5-10' },
-    { label: '$10 - $20', value: '10-20' },
-    { label: 'Over $20', value: '20-' }
-  ];
+  const priceRanges = getPriceRangesINR();
   
   const sortOptions = [
     { label: 'Name (A-Z)', value: 'name' },

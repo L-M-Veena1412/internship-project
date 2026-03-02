@@ -1,14 +1,17 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { formatPriceINR } from '../utils/currency';
 import Button from '../components/Button';
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart();
   
   const cartTotal = getCartTotal();
-  const shipping = cartTotal > 50 ? 0 : 5.99;
+  const freeShippingThreshold = 50; // USD
+  const shippingCost = 5.99; // USD
+  const shipping = cartTotal > freeShippingThreshold ? 0 : shippingCost;
   const finalTotal = cartTotal + shipping;
   
   const handleImageError = (e) => {
@@ -97,7 +100,7 @@ const Cart = () => {
                             {item.name}
                           </h3>
                           <p className="text-gray-600 text-sm">
-                            ${item.price} per unit
+                            {formatPriceINR(item.price)} per unit
                           </p>
                         </div>
                         
@@ -138,7 +141,7 @@ const Cart = () => {
                         
                         <div className="text-right">
                           <p className="font-semibold text-dark-text">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            {formatPriceINR(item.price * item.quantity)}
                           </p>
                         </div>
                       </div>
@@ -172,26 +175,26 @@ const Cart = () => {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>${cartTotal.toFixed(2)}</span>
+                    <span>{formatPriceINR(cartTotal)}</span>
                   </div>
                   
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
                     <span>
-                      {shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}
+                      {shipping === 0 ? 'FREE' : formatPriceINR(shipping)}
                     </span>
                   </div>
                   
-                  {cartTotal < 50 && (
+                  {cartTotal < freeShippingThreshold && (
                     <div className="text-sm text-olive-green bg-green-50 p-3 rounded-lg">
-                      Add ${(50 - cartTotal).toFixed(2)} more for free shipping!
+                      Add {formatPriceINR(freeShippingThreshold - cartTotal)} more for free shipping!
                     </div>
                   )}
                   
                   <div className="border-t pt-3">
                     <div className="flex justify-between font-semibold text-dark-text text-lg">
                       <span>Total</span>
-                      <span>${finalTotal.toFixed(2)}</span>
+                      <span>{formatPriceINR(finalTotal)}</span>
                     </div>
                   </div>
                 </div>

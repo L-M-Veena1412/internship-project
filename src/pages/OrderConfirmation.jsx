@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { formatPriceINR } from '../utils/currency';
 import Button from '../components/Button';
 // eslint-disable-next-line no-unused-vars
 
@@ -126,7 +127,7 @@ const OrderConfirmation = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-1">Total Amount</h3>
-                  <p className="text-lg font-semibold text-gray-900">${orderData.totalAmount.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-gray-900">{formatPriceINR(orderData.totalAmount)}</p>
                 </div>
               </div>
             </div>
@@ -171,13 +172,13 @@ const OrderConfirmation = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ${item.price.toFixed(2)}
+                          {formatPriceINR(item.price)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {item.quantity}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          {formatPriceINR(item.price * item.quantity)}
                         </td>
                       </tr>
                     ))}

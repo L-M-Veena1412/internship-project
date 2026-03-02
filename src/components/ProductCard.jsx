@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { formatPriceINR } from '../utils/currency';
 import Button from './Button';
 
 const ProductCard = ({ product }) => {
@@ -61,7 +62,7 @@ const ProductCard = ({ product }) => {
           
           <div className="flex items-center justify-between">
             <span className="text-2xl font-bold text-olive-green">
-              ${product.price}
+              {formatPriceINR(product.price)}
             </span>
             
             <Button
