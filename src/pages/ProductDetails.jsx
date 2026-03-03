@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getProductById, getProducts } from '../services/api';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 import { formatPriceINR } from '../utils/currency';
 import Button from '../components/Button';
 import Loader from '../components/Loader';
@@ -11,6 +12,7 @@ import ProductCard from '../components/ProductCard';
 const ProductDetails = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
+  const { showToast } = useToast();
   
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -51,6 +53,7 @@ const ProductDetails = () => {
   const handleAddToCart = () => {
     if (product) {
       addToCart(product, quantity);
+      showToast('Item added to cart successfully');
     }
   };
   

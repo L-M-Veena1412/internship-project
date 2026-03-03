@@ -2,16 +2,19 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 import { formatPriceINR } from '../utils/currency';
 import Button from './Button';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const { showToast } = useToast();
   
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product, 1);
+    showToast('Item added to cart successfully');
   };
 
   const handleImageError = (e) => {

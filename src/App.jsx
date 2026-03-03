@@ -2,8 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider, useToast } from './context/ToastContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import Toast from './components/Toast';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import ProductDetails from './pages/ProductDetails';
@@ -72,6 +74,16 @@ const PageTransition = ({ children }) => (
 
 function App() {
   return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
+  );
+}
+
+function AppContent() {
+  const { toast, hideToast } = useToast();
+  
+  return (
     <CartProvider>
       <Router>
         <div className="min-h-screen bg-cream">
@@ -94,6 +106,13 @@ function App() {
           
           <Footer />
           <ScrollToTop />
+          
+          {/* Global Toast Notification */}
+          <Toast 
+            message={toast.message} 
+            isVisible={toast.isVisible} 
+            onClose={hideToast} 
+          />
         </div>
       </Router>
     </CartProvider>

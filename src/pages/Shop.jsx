@@ -128,6 +128,17 @@ const Shop = () => {
     if (searchParams.get('featured') === 'true') params.set('featured', 'true');
     
     setSearchParams(params.toString());
+    
+    // Auto-scroll to product results after search
+    setTimeout(() => {
+      const productGridElement = document.getElementById('product-results');
+      if (productGridElement) {
+        productGridElement.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 100);
   };
   
   const clearFilters = () => {
@@ -315,7 +326,9 @@ const Shop = () => {
             </div>
             
             {/* Product Grid */}
-            <ProductGrid products={products} loading={loading} error={error} />
+            <div id="product-results">
+              <ProductGrid products={products} loading={loading} error={error} />
+            </div>
           </motion.div>
         </div>
       </div>
