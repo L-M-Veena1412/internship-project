@@ -22,7 +22,7 @@ const NewsletterSection = () => {
   };
   
   return (
-    <section className="py-20 bg-olive-green">
+    <section className="py-12 sm:py-16 md:py-20 bg-olive-green">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -30,10 +30,10 @@ const NewsletterSection = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
             Stay Fresh, Stay Updated
           </h2>
-          <p className="text-xl text-green-100 mb-8">
+          <p className="text-base sm:text-lg md:text-xl text-green-100 mb-6 sm:mb-8">
             Get exclusive offers, new product announcements, and organic living tips delivered to your inbox
           </p>
           
@@ -45,7 +45,7 @@ const NewsletterSection = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email address"
                 required
-                className="flex-1 px-6 py-3 rounded-lg text-dark-text focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+                className="flex-1 px-4 sm:px-6 py-3 rounded-lg text-dark-text focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
               />
               <button
                 type="submit"

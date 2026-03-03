@@ -52,24 +52,24 @@ const Home = () => {
       <HeroSection />
       
       {/* Categories Section */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-8 sm:mb-12 md:mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl font-bold text-dark-text mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-text mb-4">
               Shop by Category
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
               Explore our wide range of organic products, carefully curated for your healthy lifestyle
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {categories.map((category, index) => (
               <CategoryCard key={category.id} category={category} />
             ))}
@@ -78,19 +78,19 @@ const Home = () => {
       </section>
       
       {/* Featured Products Section */}
-      <section className="py-20 bg-cream">
+      <section className="py-12 sm:py-16 md:py-20 bg-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-8 sm:mb-12 md:mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl font-bold text-dark-text mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-text mb-4">
               Featured Products
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
               Hand-picked favorites from our organic collection
             </p>
           </motion.div>

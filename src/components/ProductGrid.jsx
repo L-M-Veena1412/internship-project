@@ -5,17 +5,17 @@ import ProductCard from './ProductCard';
 const ProductGrid = ({ products, loading, error }) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {[...Array(8)].map((_, index) => (
           <div key={index} className="bg-white rounded-custom shadow-soft overflow-hidden">
             <div className="w-full h-48 bg-gray-200 animate-pulse" />
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <div className="h-6 bg-gray-200 rounded animate-pulse mb-2" />
               <div className="h-4 bg-gray-200 rounded animate-pulse mb-3 w-3/4" />
               <div className="h-4 bg-gray-200 rounded animate-pulse mb-3" />
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <div className="h-8 bg-gray-200 rounded animate-pulse w-20" />
-                <div className="h-10 bg-gray-200 rounded animate-pulse w-20" />
+                <div className="h-10 bg-gray-200 rounded animate-pulse w-full sm:w-20" />
               </div>
             </div>
           </div>
@@ -54,7 +54,7 @@ const ProductGrid = ({ products, loading, error }) => {
   
   return (
     <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}

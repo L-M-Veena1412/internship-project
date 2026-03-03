@@ -17,7 +17,7 @@ const CategoryCard = ({ category }) => {
       className="relative overflow-hidden rounded-custom shadow-soft hover:shadow-medium transition-all duration-300 group cursor-pointer"
     >
       <Link to={`/category/${category.slug}`} className="block">
-        <div className="relative h-64">
+        <div className="relative h-48 sm:h-64">
           <img
             src={category.image}
             alt={category.name}
@@ -26,9 +26,9 @@ const CategoryCard = ({ category }) => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           
-          <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-            <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
-            <p className="text-sm opacity-90 mb-3">{category.description}</p>
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
+            <h3 className="text-xl sm:text-2xl font-bold mb-2">{category.name}</h3>
+            <p className="text-xs sm:text-sm opacity-90 mb-3 line-clamp-2">{category.description}</p>
             
             {category.subcategories && (
               <div className="text-xs opacity-75 mb-3">
@@ -37,11 +37,12 @@ const CategoryCard = ({ category }) => {
             )}
             
             <motion.div
-              className="inline-flex items-center text-sm font-medium"
+              className="inline-flex items-center text-xs sm:text-sm font-medium"
               whileHover={{ x: 5 }}
               transition={{ duration: 0.2 }}
             >
-              Explore Subcategories
+              <span className="hidden sm:inline">Explore Subcategories</span>
+              <span className="sm:hidden">Explore</span>
               <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>

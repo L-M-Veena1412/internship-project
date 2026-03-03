@@ -151,34 +151,34 @@ const Shop = () => {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
         <motion.div
-          className="mb-8"
+          className="mb-6 sm:mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl font-bold text-dark-text mb-4">Shop</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-dark-text mb-4">Shop</h1>
           
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="max-w-2xl">
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 name="search"
                 placeholder="Search for products..."
                 defaultValue={searchTerm}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green w-full"
               />
-              <Button type="submit" variant="primary">
+              <Button type="submit" variant="primary" className="w-full sm:w-auto">
                 Search
               </Button>
             </div>
           </form>
         </motion.div>
         
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Filters Sidebar */}
           <motion.aside
             className="lg:w-64 flex-shrink-0"
@@ -186,7 +186,7 @@ const Shop = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <div className="bg-white p-6 rounded-custom shadow-soft">
+            <div className="bg-white p-4 sm:p-6 rounded-custom shadow-soft">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-dark-text">Filters</h2>
                 <Button

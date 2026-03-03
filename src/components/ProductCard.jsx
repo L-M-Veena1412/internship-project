@@ -42,26 +42,26 @@ const ProductCard = ({ product }) => {
           )}
         </div>
         
-        <div className="p-4">
-          <h3 className="font-semibold text-dark-text text-lg mb-2 line-clamp-2">
+        <div className="p-3 sm:p-4">
+          <h3 className="font-semibold text-dark-text text-base sm:text-lg mb-2 line-clamp-2">
             {product.name}
           </h3>
           
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          <p className="text-gray-600 text-xs sm:text-sm mb-3 line-clamp-2">
             {product.description}
           </p>
           
           <div className="flex items-center mb-3">
             <div className="flex items-center">
-              <span className="text-yellow-400">★</span>
-              <span className="text-sm text-gray-600 ml-1">
+              <span className="text-yellow-400 text-sm">★</span>
+              <span className="text-xs sm:text-sm text-gray-600 ml-1">
                 {product.rating} ({product.reviews})
               </span>
             </div>
           </div>
           
-          <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold text-olive-green">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span className="text-xl sm:text-2xl font-bold text-olive-green">
               {formatPriceINR(product.price)}
             </span>
             
@@ -69,12 +69,12 @@ const ProductCard = ({ product }) => {
               variant="primary"
               size="small"
               onClick={handleAddToCart}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              Add
+              <span className="text-xs sm:text-sm">Add</span>
             </Button>
           </div>
         </div>

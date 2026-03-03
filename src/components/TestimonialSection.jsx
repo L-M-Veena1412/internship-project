@@ -30,24 +30,24 @@ const TestimonialSection = () => {
   ];
   
   return (
-    <section className="py-20 bg-cream">
+    <section className="py-12 sm:py-16 md:py-20 bg-cream">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-12 md:mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl font-bold text-dark-text mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-text mb-4">
             What Our Customers Say
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
             Join thousands of satisfied customers who have made the switch to organic living
           </p>
         </motion.div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.id}
@@ -56,14 +56,14 @@ const TestimonialSection = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
               whileHover={{ y: -5 }}
-              className="bg-white p-8 rounded-custom shadow-soft hover:shadow-medium transition-all duration-300"
+              className="bg-white p-6 sm:p-8 rounded-custom shadow-soft hover:shadow-medium transition-all duration-300"
             >
               {/* Rating */}
               <div className="flex mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
                   <svg
                     key={i}
-                    className="w-5 h-5 text-yellow-400"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -73,7 +73,7 @@ const TestimonialSection = () => {
               </div>
               
               {/* Content */}
-              <p className="text-gray-700 mb-6 italic">
+              <p className="text-gray-700 mb-6 italic text-sm sm:text-base">
                 "{testimonial.content}"
               </p>
               
@@ -82,11 +82,11 @@ const TestimonialSection = () => {
                 <img
                   src={testimonial.avatar}
                   alt={testimonial.name}
-                  className="w-12 h-12 rounded-full mr-4"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4"
                 />
                 <div>
-                  <h4 className="font-semibold text-dark-text">{testimonial.name}</h4>
-                  <p className="text-sm text-gray-600">{testimonial.role}</p>
+                  <h4 className="font-semibold text-dark-text text-sm sm:text-base">{testimonial.name}</h4>
+                  <p className="text-xs sm:text-sm text-gray-600">{testimonial.role}</p>
                 </div>
               </div>
             </motion.div>
@@ -95,7 +95,7 @@ const TestimonialSection = () => {
         
         {/* Stats */}
         <motion.div
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8"
+          className="mt-12 sm:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}

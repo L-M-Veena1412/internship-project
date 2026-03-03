@@ -6,11 +6,11 @@ import { FaLeaf, FaTruck, FaShieldAlt, FaShoppingCart, FaEnvelope, FaPhone, FaHe
 const About = () => {
   return (
     <div className="min-h-screen bg-cream">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         
         {/* Breadcrumb */}
         <motion.nav
-          className="mb-8"
+          className="mb-6 sm:mb-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
@@ -26,57 +26,57 @@ const About = () => {
 
         {/* Introduction Section */}
         <motion.section
-          className="mb-16"
+          className="mb-12 sm:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <div className="text-center max-w-4xl mx-auto">
             <motion.div
-              className="inline-flex items-center justify-center w-20 h-20 bg-olive-green/10 rounded-full mb-6"
+              className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-olive-green/10 rounded-full mb-4 sm:mb-6"
               whileHover={{ scale: 1.1, rotate: 360 }}
               transition={{ duration: 0.5 }}
             >
-              <FaLeaf className="text-3xl text-olive-green" />
+              <FaLeaf className="text-2xl sm:text-3xl text-olive-green" />
             </motion.div>
             
-            <h1 className="text-4xl md:text-5xl font-bold text-dark-text mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-dark-text mb-4 sm:mb-6">
               About OrganicStore
             </h1>
             
-            <p className="text-lg text-gray-600 leading-relaxed mb-8">
+            <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-6 sm:mb-8">
               At OrganicStore, we are dedicated to providing fresh, organic, and natural products 
               that nourish your body and support a healthy lifestyle. Our commitment to quality 
               ensures that every product you purchase meets the highest standards of organic 
               certification and freshness.
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-8 sm:mt-12">
               <motion.div
-                className="bg-white p-6 rounded-custom shadow-soft text-center"
+                className="bg-white p-4 sm:p-6 rounded-custom shadow-soft text-center"
                 whileHover={{ scale: 1.05, y: -5 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="text-3xl font-bold text-olive-green mb-2">1000+</div>
-                <div className="text-gray-600">Organic Products</div>
+                <div className="text-2xl sm:text-3xl font-bold text-olive-green mb-2">1000+</div>
+                <div className="text-gray-600 text-sm sm:text-base">Organic Products</div>
               </motion.div>
               
               <motion.div
-                className="bg-white p-6 rounded-custom shadow-soft text-center"
+                className="bg-white p-4 sm:p-6 rounded-custom shadow-soft text-center"
                 whileHover={{ scale: 1.05, y: -5 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
-                <div className="text-3xl font-bold text-olive-green mb-2">50K+</div>
-                <div className="text-gray-600">Happy Customers</div>
+                <div className="text-2xl sm:text-3xl font-bold text-olive-green mb-2">50K+</div>
+                <div className="text-gray-600 text-sm sm:text-base">Happy Customers</div>
               </motion.div>
               
               <motion.div
-                className="bg-white p-6 rounded-custom shadow-soft text-center"
+                className="bg-white p-4 sm:p-6 rounded-custom shadow-soft text-center"
                 whileHover={{ scale: 1.05, y: -5 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
               >
-                <div className="text-3xl font-bold text-olive-green mb-2">24/7</div>
-                <div className="text-gray-600">Customer Support</div>
+                <div className="text-2xl sm:text-3xl font-bold text-olive-green mb-2">24/7</div>
+                <div className="text-gray-600 text-sm sm:text-base">Customer Support</div>
               </motion.div>
             </div>
           </div>
@@ -84,17 +84,17 @@ const About = () => {
 
         {/* Our Mission Section */}
         <motion.section
-          className="mb-16"
+          className="mb-12 sm:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <div className="bg-white rounded-custom shadow-soft p-8 md:p-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-dark-text text-center mb-8">
+          <div className="bg-white rounded-custom shadow-soft p-6 sm:p-8 md:p-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-text text-center mb-6 sm:mb-8">
               Our Mission
             </h2>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center">
               <div>
                 <p className="text-gray-600 leading-relaxed mb-6">
                   Our mission is to make healthy, organic food accessible to everyone while 

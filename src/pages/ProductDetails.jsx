@@ -97,30 +97,24 @@ const ProductDetails = () => {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Breadcrumb */}
         <motion.nav
-          className="mb-8"
+          className="mb-6 sm:mb-8 text-sm text-gray-600"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.3 }}
         >
-          <ol className="flex items-center space-x-2 text-sm text-gray-600">
-            <li>
-              <Link to="/" className="hover:text-olive-green">Home</Link>
-            </li>
-            <li>/</li>
-            <li>
-              <Link to="/shop" className="hover:text-olive-green">Shop</Link>
-            </li>
-            <li>/</li>
-            <li className="text-dark-text font-medium">{product.name}</li>
-          </ol>
+          <Link to="/" className="hover:text-olive-green transition-colors">Home</Link>
+          <span className="mx-2">/</span>
+          <Link to="/shop" className="hover:text-olive-green transition-colors">Shop</Link>
+          <span className="mx-2">/</span>
+          <span className="text-gray-900">{product?.name || 'Product'}</span>
         </motion.nav>
         
         {/* Product Details */}
         <motion.div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12 sm:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -160,9 +154,9 @@ const ProductDetails = () => {
           </div>
           
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-dark-text mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-dark-text mb-2">
                 {product.name}
               </h1>
               
