@@ -12,7 +12,7 @@ const MobileNavigation = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { cartItems } = useCart();
-  const { isLoggedIn, user, logout } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
   
   // Calculate total cart items with fallback
   const cartItemCount = (cartItems || []).reduce((total, item) => total + (item?.quantity || 0), 0);
