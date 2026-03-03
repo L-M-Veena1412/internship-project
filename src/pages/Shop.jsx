@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import ProductGrid from '../components/ProductGrid';
@@ -8,6 +8,7 @@ import Button from '../components/Button';
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const productsRef = useRef(null);
   
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -15,6 +16,7 @@ const Shop = () => {
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
+    subcategory: searchParams.get('subcategory') || '',
     priceRange: '',
     sortBy: 'name'
   });
@@ -24,11 +26,24 @@ const Shop = () => {
   useEffect(() => {
     const urlCategory = searchParams.get('category') || '';
     const urlSearch = searchParams.get('search') || '';
+    const urlSubcategory = searchParams.get('subcategory') || '';
     
-    setFilters(prev => ({
-      ...prev,
-      category: urlCategory
-    }));
+    console.log('Shop page - URL params:', { urlCategory, urlSearch, urlSubcategory });
+    
+    // If subcategory is present, prioritize it over category
+    if (urlSubcategory) {
+      setFilters(prev => ({
+        ...prev,
+        category: '', // Clear category filter when subcategory is present
+        subcategory: urlSubcategory // Add subcategory to filters
+      }));
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        category: urlCategory,
+        subcategory: '' // Clear subcategory when not present
+      }));
+    }
     setSearchTerm(urlSearch);
   }, [searchParams]);
   
@@ -39,18 +54,21 @@ const Shop = () => {
         
         // Parse category filter to extract category and subcategory
         let categoryFilter = filters.category;
-        let subcategoryFilter = undefined;
+        let subcategoryFilter = filters.subcategory;
         
+        // Handle legacy category/subcategory format
         if (filters.category && filters.category.includes('/')) {
           const [category, subcategory] = filters.category.split('/');
           categoryFilter = category;
           subcategoryFilter = subcategory;
         }
         
+        console.log('Shop page - Filters:', { categoryFilter, subcategoryFilter, searchTerm });
+        
         const [productsRes, categoriesRes] = await Promise.all([
           getProducts({
             category: categoryFilter || undefined,
-            subcategory: subcategoryFilter,
+            subcategory: subcategoryFilter || undefined,
             search: searchTerm || undefined,
             featured: searchParams.get('featured') === 'true'
           }),
@@ -99,6 +117,23 @@ const Shop = () => {
     fetchData();
   }, [filters, searchTerm, searchParams]);
   
+  // Auto-scroll to products when subcategory is present in URL
+  useEffect(() => {
+    const subcategoryFromURL = searchParams.get('subcategory');
+    console.log('Auto-scroll effect - subcategoryFromURL:', subcategoryFromURL);
+    
+    if (subcategoryFromURL && productsRef.current) {
+      console.log('Auto-scrolling to products section');
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        productsRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
+    }
+  }, [searchParams]);
+  
   const handleFilterChange = (filterType, value) => {
     const newFilters = { ...filters, [filterType]: value };
     setFilters(newFilters);
@@ -129,7 +164,7 @@ const Shop = () => {
     
     setSearchParams(params.toString());
     
-    // Auto-scroll to product results after search
+    // Auto-scroll to product results after search with longer delay for DOM updates
     setTimeout(() => {
       const productGridElement = document.getElementById('product-results');
       if (productGridElement) {
@@ -138,7 +173,7 @@ const Shop = () => {
           block: 'start'
         });
       }
-    }, 100);
+    }, 300); // Increased delay for better reliability
   };
   
   const clearFilters = () => {
@@ -325,9 +360,25 @@ const Shop = () => {
               </div>
             </div>
             
+            {/* Search Results Indicator */}
+            {searchTerm && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-olive-green/10 border border-olive-green/20 rounded-lg"
+              >
+                <p className="text-olive-green font-medium">
+                  {products.length > 0 
+                    ? `Found ${products.length} product${products.length === 1 ? '' : 's'} for "${searchTerm}"`
+                    : `No products found for "${searchTerm}"`
+                  }
+                </p>
+              </motion.div>
+            )}
+            
             {/* Product Grid */}
-            <div id="product-results">
-              <ProductGrid products={products} loading={loading} error={error} />
+            <div ref={productsRef} id="product-results">
+              <ProductGrid products={products} loading={loading} error={error} searchQuery={searchTerm} />
             </div>
           </motion.div>
         </div>

@@ -2,9 +2,13 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const Toast = ({ message, isVisible, onClose }) => {
+  console.log('Toast component props:', { message, isVisible });
+  
   useEffect(() => {
+    console.log('Toast useEffect called with isVisible:', isVisible);
     if (isVisible) {
       const timer = setTimeout(() => {
+        console.log('Toast timer triggered, calling onClose');
         onClose();
       }, 3000);
       
@@ -12,7 +16,12 @@ const Toast = ({ message, isVisible, onClose }) => {
     }
   }, [isVisible, onClose]);
 
-  if (!isVisible) return null;
+  if (!isVisible) {
+    console.log('Toast not visible, returning null');
+    return null;
+  }
+
+  console.log('Toast rendering with message:', message);
 
   return (
     <motion.div

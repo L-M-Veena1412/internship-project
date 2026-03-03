@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import Toast from './components/Toast';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
+import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
@@ -94,6 +95,7 @@ function AppContent() {
               <Routes>
                 <Route path="/" element={<PageTransition><Home /></PageTransition>} />
                 <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
+                <Route path="/products/:subcategory" element={<PageTransition><Products /></PageTransition>} />
                 <Route path="/product/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
                 <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
                 <Route path="/login" element={<PageTransition><Login /></PageTransition>} />

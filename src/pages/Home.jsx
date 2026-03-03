@@ -52,7 +52,7 @@ const Home = () => {
       <HeroSection />
       
       {/* Categories Section */}
-      <section className="py-12 sm:py-16 md:py-20 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             className="text-center mb-8 sm:mb-12 md:mb-16"
@@ -69,7 +69,21 @@ const Home = () => {
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/* Mobile Horizontal Scroll */}
+          <div className="md:hidden">
+            <div className="overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory">
+              <div className="flex space-x-4" style={{ minWidth: 'max-content' }}>
+                {categories.map((category, index) => (
+                  <div key={category.id} className="flex-shrink-0 w-64 snap-start">
+                    <CategoryCard category={category} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Desktop Grid */}
+          <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {categories.map((category, index) => (
               <CategoryCard key={category.id} category={category} />
             ))}
