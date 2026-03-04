@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import HeroSection from '../components/HeroSection';
 import CategoryCard from '../components/CategoryCard';
 import ProductGrid from '../components/ProductGrid';
+import ProductCard from '../components/ProductCard';
 import TestimonialSection from '../components/TestimonialSection';
 import NewsletterSection from '../components/NewsletterSection';
 import { getProducts, getCategories, getFeaturedProducts } from '../services/api';
@@ -109,7 +110,23 @@ const Home = () => {
             </p>
           </motion.div>
           
-          <ProductGrid products={featuredProducts} loading={loading} error={error} />
+          {/* Mobile Horizontal Scroll */}
+          <div className="md:hidden">
+            <div className="overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory">
+              <div className="flex space-x-4" style={{ minWidth: 'max-content' }}>
+                {featuredProducts.map((product, index) => (
+                  <div key={product.id} className="flex-shrink-0 w-56 snap-start">
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Desktop Grid */}
+          <div className="hidden md:block">
+            <ProductGrid products={featuredProducts} loading={loading} error={error} />
+          </div>
           
           <div className="text-center mt-12">
             <Link to="/shop">
@@ -142,7 +159,23 @@ const Home = () => {
             </p>
           </motion.div>
           
-          <ProductGrid products={bestSellers} loading={loading} error={error} />
+          {/* Mobile Horizontal Scroll */}
+          <div className="md:hidden">
+            <div className="overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory">
+              <div className="flex space-x-4" style={{ minWidth: 'max-content' }}>
+                {bestSellers.map((product, index) => (
+                  <div key={product.id} className="flex-shrink-0 w-56 snap-start">
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Desktop Grid */}
+          <div className="hidden md:block">
+            <ProductGrid products={bestSellers} loading={loading} error={error} />
+          </div>
         </div>
       </section>
       

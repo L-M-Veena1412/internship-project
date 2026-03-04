@@ -55,18 +55,34 @@ const Navbar = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            {/* Logo */}
+            {/* Mobile Left - Hamburger Only */}
+            <div className="flex items-center md:hidden">
+              <button
+                className="p-2 rounded-lg text-dark-text hover:bg-gray-100"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isMobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
+
+            {/* Center - Logo */}
             <Link 
               to="/" 
-              className="flex items-center space-x-2 text-2xl font-bold text-olive-green hover:text-dark-green transition-colors"
+              className="flex items-center justify-center space-x-2 text-2xl font-bold text-dark-text hover:text-gray-700 transition-colors"
             >
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8 3.59 8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
               </svg>
-              <span>OrganicStore</span>
+              <span className="hidden sm:inline">OrganicStore</span>
             </Link>
             
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - Hidden on Mobile */}
             <div className="hidden md:flex items-center space-x-8">
               {navLinks.map((link) => (
                 <Link
@@ -83,31 +99,47 @@ const Navbar = () => {
               ))}
             </div>
             
-            {/* Desktop Actions */}
-            <div className="hidden md:flex items-center space-x-4">
-              {isLoggedIn ? (
-                <>
-                  <span className="text-sm text-gray-600">
-                    Welcome, {user?.name || (user?.email?.split('@')[0]?.charAt(0).toUpperCase() + user?.email?.split('@')[0]?.slice(1) || user?.email)}
-                  </span>
-                  <Button variant="ghost" size="small" onClick={handleLogout}>
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <Link to="/login">
-                  <Button variant="ghost" size="small">
-                    Login
-                  </Button>
-                </Link>
-              )}
+            {/* Right Side Actions */}
+            <div className="flex items-center space-x-3">
+              {/* Search Icon - Always Visible */}
+              <button
+                className="p-2 rounded-lg text-dark-text hover:bg-gray-100"
+                onClick={() => {
+                  // Navigate to shop page with search focus
+                  navigate('/shop');
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
               
+              {/* Login - Always Visible */}
+              <div className="flex items-center">
+                {isLoggedIn ? (
+                  <button
+                    onClick={handleLogout}
+                    className="p-2 rounded-lg text-dark-text hover:bg-gray-100"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </button>
+                ) : (
+                  <Link to="/login" className="p-2 rounded-lg text-dark-text hover:bg-gray-100">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </Link>
+                )}
+              </div>
+              
+              {/* Cart - Always Visible */}
               <Link to="/cart" className="relative">
                 <Button variant="outline" size="small" className="flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  Cart
                   {cartItemsCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-olive-green text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                       {cartItemsCount}
@@ -116,20 +148,6 @@ const Navbar = () => {
                 </Button>
               </Link>
             </div>
-            
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden p-2 rounded-lg text-dark-text hover:bg-gray-100"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
           </div>
         </div>
       </motion.nav>
