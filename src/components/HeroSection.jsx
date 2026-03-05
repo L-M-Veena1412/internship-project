@@ -5,19 +5,23 @@ import Button from './Button';
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative h-screen md:min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
           src="https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=1920&h=1080&fit=crop"
           alt="Fresh organic produce"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover bg-center bg-cover"
+          style={{
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30" />
       </div>
       
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="relative z-10 h-full w-full flex items-center justify-center px-4 sm:px-6 lg:px-8 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,7 +72,7 @@ const HeroSection = () => {
         
         {/* Scroll Indicator */}
         <motion.div
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white"
+          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1 }}
