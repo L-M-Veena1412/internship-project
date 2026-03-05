@@ -71,13 +71,13 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Center - Logo */}
+            {/* Center - Logo - Hidden on Mobile Only */}
             <Link 
               to="/" 
-              className="flex items-center justify-center space-x-2 text-2xl font-bold text-dark-text hover:text-gray-700 transition-colors"
+              className="hidden md:flex items-center justify-center space-x-2 text-2xl font-bold text-dark-text hover:text-gray-700 transition-colors"
             >
               <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8 3.59 8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
               </svg>
               <span className="hidden sm:inline">OrganicStore</span>
             </Link>
