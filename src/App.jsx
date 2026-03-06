@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider, useToast } from './context/ToastContext';
 import Navbar from './components/Navbar';
+import MobileBottomNav from './components/MobileBottomNav';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
 import Home from './pages/Home';
@@ -112,6 +113,7 @@ function AppContent() {
           </main>
           
           <Footer />
+          <MobileBottomNav />
           <ScrollToTop />
           
           {/* Global Toast Notification */}

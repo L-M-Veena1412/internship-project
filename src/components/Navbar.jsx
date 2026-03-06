@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
@@ -14,12 +14,43 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [searchHistory, setSearchHistory] = useState(() => {
+    const saved = localStorage.getItem('searchHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [trendingSearches] = useState([
+    'organic vegetables',
+    'fresh fruits',
+    'dairy products',
+    'organic honey'
+  ]);
 
+  const searchInputRef = useRef(null);
   const { getCartItemsCount } = useCart();
-  const { isLoggedIn, logout, user } = useAuth(); // Added user to show name if available
+  const { isLoggedIn, logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const cartItemsCount = getCartItemsCount();
+
+  const saveToHistory = (term) => {
+    if (!term.trim()) return;
+    const newHistory = [term, ...searchHistory.filter(i => i !== term)].slice(0, 5);
+    setSearchHistory(newHistory);
+    localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+  };
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem('searchHistory');
+  };
+
+  // Improved selection handler to fix "No products found" issue
+  const handleSelectSearch = (term) => {
+    saveToHistory(term);
+    navigate(`/shop?search=${encodeURIComponent(term)}`);
+    setIsSearchOpen(false);
+    setSearchQuery('');
+  };
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -42,12 +73,14 @@ const Navbar = () => {
   }, [searchQuery]);
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/shop?search=${searchQuery}`);
-      setIsSearchOpen(false);
-      setSearchQuery('');
+      handleSelectSearch(searchQuery.trim());
     }
+  };
+
+  const handleImageError = (e) => {
+    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop';
   };
   
   useEffect(() => {
@@ -57,20 +90,12 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isProfileDropdownOpen && !event.target.closest('.profile-dropdown')) {
-        setIsProfileDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isProfileDropdownOpen]);
-  
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-    setIsSearchOpen(false);
-    setSearchQuery('');
-  }, [location]);
+    if (isSearchOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [isSearchOpen]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -90,35 +115,201 @@ const Navbar = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           
+          {/* MOBILE SEARCH OVERLAY */}
           <AnimatePresence>
             {isSearchOpen && (
               <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-white z-50 flex items-center px-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-white z-[100] md:hidden"
               >
-                <div className="flex flex-col w-full max-w-3xl mx-auto relative">
-                  <div className="flex items-center w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-1 shadow-sm">
-                    <button onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }} className="p-2 text-gray-500">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center p-4 border-b">
+                    <button onClick={() => setIsSearchOpen(false)} className="p-2">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
                     </button>
-                    
-                    <form onSubmit={handleSearchSubmit} className="flex-1">
-                      <input 
-                        type="text"
-                        placeholder="Search for organic products..."
-                        className="w-full bg-transparent border-none outline-none px-3 py-2 text-sm font-medium text-dark-text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        autoFocus
-                      />
-                    </form>
+                    <div className="flex-1 mx-2 relative">
+                      <form onSubmit={handleSearchSubmit}>
+                        <input 
+                          autoFocus
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search for items..."
+                          className="w-full bg-gray-100 rounded-full pl-4 pr-10 py-2 focus:outline-none"
+                        />
+                        {searchQuery && (
+                          <button 
+                            type="button" 
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        )}
+                      </form>
+                    </div>
                   </div>
-                  {/* ... Search results mapping (same as before) ... */}
+
+                  <div className="flex-1 overflow-y-auto p-4">
+                    {searchQuery.length === 0 ? (
+                      <>
+                        {searchHistory.length > 0 && (
+                          <div className="mb-6">
+                            <div className="flex justify-between mb-2">
+                              <h3 className="font-bold text-gray-500 text-sm uppercase">Recent</h3>
+                              <button onClick={clearHistory} className="text-xs text-olive-green font-bold">Clear All</button>
+                            </div>
+                            {searchHistory.map(term => (
+                              <div key={term} onClick={() => handleSelectSearch(term)} className="flex items-center gap-3 py-3 border-b border-gray-50 cursor-pointer">
+                                <span className="text-gray-400">🕒</span>
+                                <span className="text-gray-700">{term}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="font-bold text-gray-500 text-sm uppercase mb-2">Trending</h3>
+                          {trendingSearches.map(term => (
+                            <div key={term} onClick={() => handleSelectSearch(term)} className="flex items-center gap-3 py-3 border-b border-gray-50 cursor-pointer">
+                              <span className="text-orange-500">🔥</span>
+                              <span className="text-gray-700">{term}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-4">
+                        {searchResults.map((item) => (
+                          <div key={item.id} onClick={() => { navigate(`/product/${item.id}`); setIsSearchOpen(false); }} className="flex items-center gap-4 cursor-pointer">
+                            <img src={item.image} className="w-12 h-12 rounded object-cover" onError={handleImageError} alt="" />
+                            <div className="flex-1">
+                              <p className="font-semibold text-gray-800">{item.name}</p>
+                              <p className="text-xs text-gray-400">{item.subcategory || item.category}</p>
+                            </div>
+                            <p className="font-bold text-gray-900">₹{item.price}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
+          {/* DESKTOP SEARCH OVERLAY */}
+         {/* MOBILE SEARCH OVERLAY */}
+<AnimatePresence>
+  {isSearchOpen && (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-white z-[999] md:hidden flex flex-col h-screen overflow-hidden"
+    >
+      {/* Header: Arrow + Search Input + Clear Button */}
+      <div className="flex items-center p-4 border-b border-gray-100 gap-3">
+        <button onClick={() => setIsSearchOpen(false)} className="p-1">
+          <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        <div className="flex-1 relative">
+          <form onSubmit={handleSearchSubmit}>
+            <input 
+              autoFocus
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for items..."
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-10 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-olive-green"
+            />
+            {searchQuery && (
+              <button 
+                type="button" 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </form>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-y-auto bg-white">
+        {searchQuery.length === 0 ? (
+          <div className="p-5">
+            {/* Trending Section based on */}
+            <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Trending</h3>
+            <div className="space-y-5">
+              {trendingSearches.map(term => (
+                <div 
+                  key={term} 
+                  onClick={() => handleSelectSearch(term)} 
+                  className="flex items-center gap-4 text-gray-600 cursor-pointer active:bg-gray-50 -mx-2 p-2 rounded-lg"
+                >
+                  <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <span className="text-sm font-medium">{term}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 space-y-6">
+            {/* Product List based on */}
+            {searchResults.map((item) => (
+              <div 
+                key={item.id} 
+                onClick={() => { navigate(`/product/${item.id}`); setIsSearchOpen(false); }} 
+                className="flex items-center gap-4 cursor-pointer"
+              >
+                <img 
+                  src={item.image} 
+                  className="w-14 h-14 rounded-lg object-cover bg-gray-50 border border-gray-100" 
+                  onError={handleImageError} 
+                  alt="" 
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-gray-800 text-sm truncate uppercase tracking-tight">{item.name}</p>
+                  <p className="text-xs text-gray-400 lowercase">{item.subcategory || item.category}</p>
+                </div>
+                <div className="text-sm font-black text-gray-900 pr-1">
+                  ₹{item.price}
+                </div>
+              </div>
+            ))}
+            
+            {/* Fallback for empty results */}
+            {searchResults.length === 0 && searchQuery.length > 2 && (
+              <div className="text-center py-10 px-4">
+                <p className="text-gray-400 text-sm">No products found for "{searchQuery}"</p>
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="mt-2 text-olive-green text-xs font-bold underline"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+          {/* MAIN NAVBAR CONTENT (Logo, Links, Icons) */}
           <div className="flex md:grid md:grid-cols-3 items-center justify-between">
             <div className="flex items-center justify-start">
               <button className="p-2 rounded-lg text-dark-text md:hidden" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -150,35 +341,40 @@ const Navbar = () => {
                 {cartItemsCount > 0 && <span className="absolute top-0 right-0 bg-olive-green text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">{cartItemsCount}</span>}
               </Link>
 
-              {/* AUTHENTICATION UI - RESTORED */}
               {isLoggedIn ? (
                 <div className="relative profile-dropdown">
-                  <button 
-                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className="p-2 rounded-lg text-dark-text hover:bg-gray-100 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                  <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="p-2 rounded-lg text-dark-text hover:bg-gray-100 transition-colors">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                   </button>
-
                   <AnimatePresence>
                     {isProfileDropdownOpen && (
                       <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }} 
+                        animate={{ opacity: 1, y: 0, scale: 1 }} 
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
                         className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
                       >
-                        <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                          <p className="text-xs text-gray-500">Signed in as</p>
-                          <p className="text-sm font-semibold truncate">{user?.email || 'User'}</p>
-                        </div>
-                        <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Profile</Link>
-                        <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Orders</Link>
+                        <Link 
+                          to="/profile" 
+                          onClick={() => { setTimeout(() => setIsProfileDropdownOpen(false), 200); }}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          My Profile
+                        </Link>
+                        <Link 
+                          to="/orders" 
+                          onClick={() => { setTimeout(() => setIsProfileDropdownOpen(false), 200); }}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          Orders
+                        </Link>
                         <hr className="my-1 border-gray-100" />
                         <button 
-                          onClick={() => { logout(); setIsProfileDropdownOpen(false); }} 
+                          onClick={() => { 
+                            logout(); 
+                            setTimeout(() => setIsProfileDropdownOpen(false), 200); 
+                          }} 
                           className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                         >
                           Logout

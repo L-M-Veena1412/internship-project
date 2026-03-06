@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import HeroSection from '../components/HeroSection';
-import CategoryCard from '../components/CategoryCard';
+import CategoryGrid from '../components/CategoryGrid';
 import ProductGrid from '../components/ProductGrid';
 import ProductCard from '../components/ProductCard';
 import TestimonialSection from '../components/TestimonialSection';
@@ -52,45 +52,8 @@ const Home = () => {
       {/* Hero Section */}
       <HeroSection />
       
-      {/* Categories Section */}
-      <section className="py-12 sm:py-16 md:py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            className="text-center mb-8 sm:mb-12 md:mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-text mb-4">
-              Shop by Category
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-              Explore our wide range of organic products, carefully curated for your healthy lifestyle
-            </p>
-          </motion.div>
-          
-          {/* Mobile Horizontal Scroll */}
-          <div className="md:hidden">
-            <div className="overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory">
-              <div className="flex space-x-4" style={{ minWidth: 'max-content' }}>
-                {categories.map((category, index) => (
-                  <div key={category.id} className="flex-shrink-0 w-64 snap-start">
-                    <CategoryCard category={category} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          {/* Desktop Grid */}
-          <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {categories.map((category, index) => (
-              <CategoryCard key={category.id} category={category} />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Category Grid */}
+      <CategoryGrid categories={categories} />
       
       {/* Featured Products Section */}
       <section className="py-12 sm:py-16 md:py-20 bg-cream">

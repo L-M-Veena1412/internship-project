@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { formatPriceINR } from '../utils/currency';
-import Button from './Button';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -24,57 +23,77 @@ const ProductCard = ({ product }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       whileHover={{ y: -5 }}
-      className="bg-white rounded-custom shadow-soft hover:shadow-medium transition-all duration-300 overflow-hidden group h-full flex flex-col"
+      className="bg-white rounded-custom shadow-soft hover:shadow-xl border border-gray-200 transition-all duration-300 overflow-hidden group relative flex flex-col h-full"
     >
-      <Link to={`/product/${product.id}`} className="block flex-1">
-        <div className="relative overflow-hidden aspect-square sm:aspect-auto">
+      <Link to={`/product/${product.id}`} className="block flex-1 flex flex-col">
+        {/* Image Container with Fixed Aspect Ratio */}
+        <div className="relative aspect-[4/5] w-full bg-gray-50 overflow-hidden">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-32 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={handleImageError}
           />
-          {product.featured && (
-            <span className="absolute top-2 left-2 bg-olive-green text-white px-2 py-0.5 text-[10px] font-medium rounded">
+          
+          {/* Discount Badge - Top Left */}
+          {product.discount && (
+            <span className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 text-xs font-bold rounded shadow-sm">
+              {product.discount}% OFF
+            </span>
+          )}
+          
+          {/* Featured Badge */}
+          {product.featured && !product.discount && (
+            <span className="absolute top-3 left-3 bg-olive-green text-white px-2 py-1 text-xs font-medium rounded shadow-sm">
               Featured
             </span>
           )}
+          
+          {/* Add to Cart Button - Bottom Right */}
+          <button
+            onClick={handleAddToCart}
+            className="absolute bottom-3 right-3 w-10 h-10 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
+            aria-label="Add to cart"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
         </div>
         
-        <div className="p-3 sm:p-4 flex flex-col flex-1">
-          <h3 className="font-semibold text-dark-text text-sm sm:text-lg mb-1 line-clamp-1 sm:line-clamp-2 sm:h-[3.5rem]">
+        {/* Product Info */}
+        <div className="p-4 flex flex-col flex-1 mt-auto">
+          {/* Product Name - Limited to 2 lines */}
+          <h3 className="font-semibold text-dark-text text-sm mb-2 line-clamp-2 min-h-[2.5rem] leading-tight">
             {product.name}
           </h3>
           
-          <p className="text-gray-500 text-[10px] sm:text-sm mb-2 line-clamp-1">
+          {/* Category */}
+          <p className="text-gray-500 text-xs mb-2 line-clamp-1">
             {product.category.replace('-', ' ')}
           </p>
           
-          <div className="flex items-center mb-3">
+          {/* Rating */}
+          <div className="flex items-center mb-2">
             <span className="text-yellow-400 text-xs">★</span>
-            <span className="text-[10px] sm:text-sm text-gray-600 ml-1">
+            <span className="text-xs text-gray-600 ml-1">
               {product.rating}
             </span>
           </div>
           
-          <div className="mt-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <span className="text-base sm:text-xl font-bold text-olive-green">
-                {formatPriceINR(product.price)}
+          {/* Price Display - Consistent Alignment */}
+          <div className="flex items-center gap-2">
+            {/* Current Price - Bold Black */}
+            <span className="text-base font-bold text-black">
+              {formatPriceINR(product.price)}
+            </span>
+            
+            {/* MRP - Strikethrough Gray */}
+            {product.mrp && product.mrp > product.price && (
+              <span className="text-xs text-gray-400 line-through">
+                {formatPriceINR(product.mrp)}
               </span>
-              
-              <Button
-                variant="primary"
-                size="small"
-                onClick={handleAddToCart}
-                className="flex items-center justify-center gap-1 w-full sm:w-auto py-2 px-2"
-              >
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <span className="text-xs">Add</span>
-              </Button>
-            </div>
+            )}
           </div>
         </div>
       </Link>
