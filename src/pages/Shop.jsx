@@ -22,26 +22,22 @@ const Shop = () => {
   });
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   
-  // Sync state with URL parameters when they change
   useEffect(() => {
     const urlCategory = searchParams.get('category') || '';
     const urlSearch = searchParams.get('search') || '';
     const urlSubcategory = searchParams.get('subcategory') || '';
     
-    console.log('Shop page - URL params:', { urlCategory, urlSearch, urlSubcategory });
-    
-    // If subcategory is present, prioritize it over category
     if (urlSubcategory) {
       setFilters(prev => ({
         ...prev,
-        category: '', // Clear category filter when subcategory is present
-        subcategory: urlSubcategory // Add subcategory to filters
+        category: '',
+        subcategory: urlSubcategory
       }));
     } else {
       setFilters(prev => ({
         ...prev,
         category: urlCategory,
-        subcategory: '' // Clear subcategory when not present
+        subcategory: ''
       }));
     }
     setSearchTerm(urlSearch);
@@ -51,19 +47,14 @@ const Shop = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // Parse category filter to extract category and subcategory
         let categoryFilter = filters.category;
         let subcategoryFilter = filters.subcategory;
         
-        // Handle legacy category/subcategory format
         if (filters.category && filters.category.includes('/')) {
           const [category, subcategory] = filters.category.split('/');
           categoryFilter = category;
           subcategoryFilter = subcategory;
         }
-        
-        console.log('Shop page - Filters:', { categoryFilter, subcategoryFilter, searchTerm });
         
         const [productsRes, categoriesRes] = await Promise.all([
           getProducts({
@@ -77,29 +68,21 @@ const Shop = () => {
         
         let filteredProducts = productsRes.data;
         
-        // Apply price filter
         if (filters.priceRange) {
           const [min, max] = filters.priceRange.split('-').map(Number);
           filteredProducts = filteredProducts.filter(product => {
-            if (max) {
-              return product.price >= min && product.price <= max;
-            }
+            if (max) return product.price >= min && product.price <= max;
             return product.price >= min;
           });
         }
         
-        // Apply sorting
         filteredProducts.sort((a, b) => {
           switch (filters.sortBy) {
-            case 'price-low':
-              return a.price - b.price;
-            case 'price-high':
-              return b.price - a.price;
-            case 'rating':
-              return b.rating - a.rating;
+            case 'price-low': return a.price - b.price;
+            case 'price-high': return b.price - a.price;
+            case 'rating': return b.rating - a.rating;
             case 'name':
-            default:
-              return a.name.localeCompare(b.name);
+            default: return a.name.localeCompare(b.name);
           }
         });
         
@@ -108,23 +91,16 @@ const Shop = () => {
         setError(null);
       } catch (err) {
         setError('Failed to load products. Please try again later.');
-        console.error('Error fetching shop data:', err);
       } finally {
         setLoading(false);
       }
     };
-    
     fetchData();
   }, [filters, searchTerm, searchParams]);
   
-  // Auto-scroll to products when subcategory is present in URL
   useEffect(() => {
     const subcategoryFromURL = searchParams.get('subcategory');
-    console.log('Auto-scroll effect - subcategoryFromURL:', subcategoryFromURL);
-    
     if (subcategoryFromURL && productsRef.current) {
-      console.log('Auto-scrolling to products section');
-      // Small delay to ensure DOM is ready
       setTimeout(() => {
         productsRef.current.scrollIntoView({
           behavior: 'smooth',
@@ -137,57 +113,20 @@ const Shop = () => {
   const handleFilterChange = (filterType, value) => {
     const newFilters = { ...filters, [filterType]: value };
     setFilters(newFilters);
-    
-    // Update URL params - clear search when changing category to avoid unwanted filtering
     const params = new URLSearchParams();
     if (newFilters.category) params.set('category', newFilters.category);
     if (filterType !== 'category' && searchTerm) params.set('search', searchTerm);
     if (searchParams.get('featured') === 'true') params.set('featured', 'true');
-    
     setSearchParams(params.toString());
-  };
-  
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const searchValue = e.target.search.value;
-    setSearchTerm(searchValue);
-    
-    // Update URL params immediately
-    const params = new URLSearchParams();
-    if (searchValue.trim()) {
-      params.set('search', searchValue.trim());
-    } else {
-      params.delete('search');
-    }
-    if (filters.category) params.set('category', filters.category);
-    if (searchParams.get('featured') === 'true') params.set('featured', 'true');
-    
-    setSearchParams(params.toString());
-    
-    // Auto-scroll to product results after search with longer delay for DOM updates
-    setTimeout(() => {
-      const productGridElement = document.getElementById('product-results');
-      if (productGridElement) {
-        productGridElement.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
-    }, 300); // Increased delay for better reliability
   };
   
   const clearFilters = () => {
-    setFilters({
-      category: '',
-      priceRange: '',
-      sortBy: 'name'
-    });
+    setFilters({ category: '', priceRange: '', sortBy: 'name' });
     setSearchTerm('');
     setSearchParams('');
   };
   
   const priceRanges = getPriceRangesINR();
-  
   const sortOptions = [
     { label: 'Name (A-Z)', value: 'name' },
     { label: 'Price (Low to High)', value: 'price-low' },
@@ -198,31 +137,8 @@ const Shop = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Header */}
-        <motion.div
-          className="mb-6 sm:mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1 className="text-3xl sm:text-4xl font-bold text-dark-text mb-4">Shop</h1>
-          
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="max-w-2xl">
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
-                name="search"
-                placeholder="Search for products..."
-                defaultValue={searchTerm}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green w-full"
-              />
-              <Button type="submit" variant="primary" className="w-full sm:w-auto">
-                Search
-              </Button>
-            </div>
-          </form>
-        </motion.div>
+        
+        {/* SHOP HEADER AND SEARCH BAR REMOVED FROM HERE */}
         
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Filters Sidebar */}
@@ -232,20 +148,14 @@ const Shop = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <div className="bg-white p-4 sm:p-6 rounded-custom shadow-soft">
+            <div className="bg-white p-4 sm:p-6 rounded-custom shadow-soft border border-gray-100">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-dark-text">Filters</h2>
-                <Button
-                  variant="ghost"
-                  size="small"
-                  onClick={clearFilters}
-                  className="text-sm"
-                >
+                <Button variant="ghost" size="small" onClick={clearFilters} className="text-sm">
                   Clear All
                 </Button>
               </div>
               
-              {/* Categories */}
               <div className="mb-6">
                 <h3 className="font-medium text-dark-text mb-3">Categories</h3>
                 <div className="space-y-2">
@@ -258,7 +168,7 @@ const Shop = () => {
                       onChange={(e) => handleFilterChange('category', e.target.value)}
                       className="mr-2 text-olive-green focus:ring-olive-green"
                     />
-                    <span className="text-sm">All Categories</span>
+                    <span className="text-sm text-gray-700">All Categories</span>
                   </label>
                   {categories.map((category) => (
                     <div key={category.id} className="ml-4">
@@ -271,12 +181,12 @@ const Shop = () => {
                           onChange={(e) => handleFilterChange('category', e.target.value)}
                           className="mr-2 text-olive-green focus:ring-olive-green"
                         />
-                        <span className="text-sm font-medium">{category.name}</span>
+                        <span className="text-sm font-medium text-gray-700">{category.name}</span>
                       </label>
                       {category.subcategories && (
                         <div className="ml-4 mt-1 space-y-1">
                           {category.subcategories.map((sub) => (
-                            <label key={sub.id} className="flex items-center text-xs text-gray-600">
+                            <label key={sub.id} className="flex items-center text-xs text-gray-500">
                               <input
                                 type="radio"
                                 name="category"
@@ -295,7 +205,6 @@ const Shop = () => {
                 </div>
               </div>
               
-              {/* Price Range */}
               <div className="mb-6">
                 <h3 className="font-medium text-dark-text mb-3">Price Range</h3>
                 <select
@@ -304,14 +213,11 @@ const Shop = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green text-sm"
                 >
                   {priceRanges.map((range) => (
-                    <option key={range.value} value={range.value}>
-                      {range.label}
-                    </option>
+                    <option key={range.value} value={range.value}>{range.label}</option>
                   ))}
                 </select>
               </div>
               
-              {/* Sort By */}
               <div>
                 <h3 className="font-medium text-dark-text mb-3">Sort By</h3>
                 <select
@@ -320,31 +226,25 @@ const Shop = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green text-sm"
                 >
                   {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
+                    <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
                 </select>
               </div>
             </div>
           </motion.aside>
           
-          {/* Products */}
+          {/* Product Grid Section */}
           <motion.div
             className="flex-1"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {/* Results Count */}
             <div className="mb-6 flex items-center justify-between">
-              <p className="text-gray-600">
-                {loading ? 'Loading...' : 
-                 products.length === 0 ? 'No products found' : `${products.length} products found`
-                }
+              <p className="text-gray-500 text-sm">
+                {loading ? 'Loading...' : products.length === 0 ? 'No products found' : `${products.length} products found`}
               </p>
               
-              {/* Mobile Sort */}
               <div className="lg:hidden">
                 <select
                   value={filters.sortBy}
@@ -352,31 +252,20 @@ const Shop = () => {
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green text-sm"
                 >
                   {sortOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
+                    <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
                 </select>
               </div>
             </div>
             
-            {/* Search Results Indicator */}
             {searchTerm && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 bg-olive-green/10 border border-olive-green/20 rounded-lg"
-              >
-                <p className="text-olive-green font-medium">
-                  {products.length > 0 
-                    ? `Found ${products.length} product${products.length === 1 ? '' : 's'} for "${searchTerm}"`
-                    : `No products found for "${searchTerm}"`
-                  }
+              <div className="mb-6 p-4 bg-olive-green/5 border border-olive-green/10 rounded-lg">
+                <p className="text-olive-green text-sm font-medium">
+                  Showing results for "{searchTerm}"
                 </p>
-              </motion.div>
+              </div>
             )}
             
-            {/* Product Grid */}
             <div ref={productsRef} id="product-results">
               <ProductGrid products={products} loading={loading} error={error} searchQuery={searchTerm} />
             </div>

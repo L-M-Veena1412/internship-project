@@ -273,20 +273,31 @@ const ProductDetails = () => {
         </motion.div>
         
         {/* Related Products */}
-        {relatedProducts.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <h2 className="text-2xl font-bold text-dark-text mb-8">Related Products</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((relatedProduct) => (
-                <ProductCard key={relatedProduct.id} product={relatedProduct} />
-              ))}
-            </div>
-          </motion.div>
-        )}
+{relatedProducts.length > 0 && (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6, delay: 0.2 }}
+    className="mt-12"
+  >
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-xl sm:text-2xl font-bold text-dark-text">Related Products</h2>
+      <span className="text-sm text-olive-green font-medium sm:hidden">Swipe →</span>
+    </div>
+
+    {/* Horizontal Scroll Container for Mobile, Grid for Desktop */}
+    <div className="flex overflow-x-auto pb-4 gap-4 snap-x no-scrollbar lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 sm:gap-6">
+      {relatedProducts.map((relatedProduct) => (
+        <div 
+          key={relatedProduct.id} 
+          className="min-w-[70%] sm:min-w-[45%] lg:min-w-0 snap-start"
+        >
+          <ProductCard product={relatedProduct} />
+        </div>
+      ))}
+    </div>
+  </motion.div>
+)}
       </div>
     </div>
   );

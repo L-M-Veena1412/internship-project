@@ -19,6 +19,7 @@ import OrderConfirmation from './pages/OrderConfirmation';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import NotFound from './pages/NotFound';
+import Profile from './pages/Profile';
 
 // Scroll to top component
 const ScrollToTop = () => {
@@ -121,6 +122,11 @@ function App() {
                   <Route path="/order-confirmation" element={<PageTransition><OrderConfirmation /></PageTransition>} />
                   <Route path="/orders" element={<PageTransition><Orders /></PageTransition>} />
                   <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+                  <Route path="/profile" element={
+  <ProtectedRoute>
+    <PageTransition><Profile /></PageTransition>
+  </ProtectedRoute>
+} />
                 </Routes>
               </AnimatePresence>
             </main>
