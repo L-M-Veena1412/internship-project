@@ -5,98 +5,119 @@ import { useCart } from '../context/CartContext';
 import { formatPriceINR } from '../utils/currency';
 
 const ProductCard = ({ product }) => {
-  const { addToCart } = useCart();
+  const { cart, addToCart, removeFromCart, updateQuantity } = useCart();
   
+  const cartItem = cart.find(item => item.id === product.id);
+  const currentQty = cartItem ? cartItem.quantity : 0;
+
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product, 1);
   };
 
-  const handleImageError = (e) => {
-    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop';
+  const handleIncreaseQty = (e) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    updateQuantity(product.id, currentQty + 1);
   };
-  
+
+  const handleDecreaseQty = (e) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    if (currentQty > 1) {
+      updateQuantity(product.id, currentQty - 1);
+    } else {
+      removeFromCart(product.id);
+    }
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ y: -5 }}
-      className="bg-white rounded-custom shadow-soft hover:shadow-xl border border-gray-200 transition-all duration-300 overflow-hidden group relative flex flex-col h-full"
+    <motion.div 
+      whileHover={{ y: -4 }}
+      className="bg-white rounded-3xl border border-gray-100 flex flex-col h-full relative p-3 shadow-sm hover:shadow-md transition-all duration-300"
     >
-      <Link to={`/product/${product.id}`} className="block flex-1 flex flex-col">
-        {/* Image Container with Fixed Aspect Ratio */}
-        <div className="relative aspect-[4/5] w-full bg-gray-50 overflow-hidden">
+      {/* Image Link */}
+      <Link to={`/product/${product.id}`} className="block">
+        <div className="relative aspect-square w-full bg-[#F8F9F7] rounded-2xl overflow-hidden mb-3">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={handleImageError}
+            className="w-full h-full object-contain p-4 mix-blend-multiply"
           />
           
-          {/* Discount Badge - Top Left */}
+          <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-lg border border-gray-100 shadow-sm">
+            <span className="text-[8px] font-black text-olive-green uppercase tracking-wider">Organic</span>
+          </div>
+
           {product.discount && (
-            <span className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 text-xs font-bold rounded shadow-sm">
-              {product.discount}% OFF
-            </span>
+            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 text-[9px] font-black rounded-lg">
+              -{product.discount}%
+            </div>
           )}
-          
-          {/* Featured Badge */}
-          {product.featured && !product.discount && (
-            <span className="absolute top-3 left-3 bg-olive-green text-white px-2 py-1 text-xs font-medium rounded shadow-sm">
-              Featured
-            </span>
-          )}
-          
-          {/* Add to Cart Button - Bottom Right */}
-          <button
-            onClick={handleAddToCart}
-            className="absolute bottom-3 right-3 w-10 h-10 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
-            aria-label="Add to cart"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
         </div>
-        
-        {/* Product Info */}
-        <div className="p-4 flex flex-col flex-1 mt-auto">
-          {/* Product Name - Limited to 2 lines */}
-          <h3 className="font-semibold text-dark-text text-sm mb-2 line-clamp-2 min-h-[2.5rem] leading-tight">
+      </Link>
+
+      {/* Details Container */}
+      <div className="flex flex-col flex-1 px-1">
+        {/* Clickable Category Badge */}
+        <Link 
+          to={`/shop?category=${product.category}`}
+          className="text-gray-400 text-[9px] font-bold uppercase tracking-[0.1em] mb-1 hover:text-olive-green transition-colors w-fit"
+        >
+          {product.category?.replace(/-/g, ' ')}
+        </Link>
+
+        {/* Product Name Link */}
+        <Link to={`/product/${product.id}`}>
+          <h3 className="font-bold text-gray-800 text-xs md:text-sm line-clamp-2 leading-tight min-h-[32px] mb-2 hover:text-olive-green transition-colors">
             {product.name}
           </h3>
-          
-          {/* Category */}
-          <p className="text-gray-500 text-xs mb-2 line-clamp-1">
-            {product.category.replace('-', ' ')}
-          </p>
-          
-          {/* Rating */}
-          <div className="flex items-center mb-2">
-            <span className="text-yellow-400 text-xs">★</span>
-            <span className="text-xs text-gray-600 ml-1">
-              {product.rating}
-            </span>
+        </Link>
+
+        {/* Rating */}
+        <div className="flex items-center gap-1.5 mb-3">
+          <div className="flex items-center">
+            {[...Array(5)].map((_, i) => (
+              <span key={i} className={`text-[10px] ${i < Math.floor(product.rating || 4) ? 'text-yellow-400' : 'text-gray-200'}`}>★</span>
+            ))}
           </div>
-          
-          {/* Price Display - Consistent Alignment */}
-          <div className="flex items-center gap-2">
-            {/* Current Price - Bold Black */}
-            <span className="text-base font-bold text-black">
+          <span className="text-[9px] font-bold text-gray-400">({product.reviews || '48'})</span>
+        </div>
+        
+        {/* Price & Action Row */}
+        <div className="mt-auto flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-sm md:text-base font-black text-gray-900">
               {formatPriceINR(product.price)}
             </span>
-            
-            {/* MRP - Strikethrough Gray */}
-            {product.mrp && product.mrp > product.price && (
-              <span className="text-xs text-gray-400 line-through">
+            {product.mrp > product.price && (
+              <span className="text-[10px] text-gray-400 line-through">
                 {formatPriceINR(product.mrp)}
               </span>
             )}
           </div>
+
+          <div className="flex items-center">
+            {currentQty === 0 ? (
+              <button
+                onClick={handleAddToCart}
+                className="w-8 h-8 md:w-9 md:h-9 bg-olive-green text-white rounded-full flex items-center justify-center shadow-lg shadow-olive-green/20 hover:scale-110 active:scale-95 transition-transform"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 bg-olive-green/10 border border-olive-green/20 rounded-full px-1.5 py-1">
+                <button onClick={handleDecreaseQty} className="w-5 h-5 flex items-center justify-center text-olive-green font-bold text-xs">-</button>
+                <span className="text-xs font-black text-gray-900 min-w-[12px] text-center">{currentQty}</span>
+                <button onClick={handleIncreaseQty} className="w-5 h-5 flex items-center justify-center text-olive-green font-bold text-xs">+</button>
+              </div>
+            )}
+          </div>
         </div>
-      </Link>
+      </div>
     </motion.div>
   );
 };

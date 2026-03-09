@@ -1,82 +1,67 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from './ProductCard';
 
-const ProductGrid = ({ products, loading, error, searchQuery }) => {
+const ProductGrid = ({ products, loading, error, isSwipeable = false, variant = 'default' }) => {
+  
+  // Skeleton Loader
   if (loading) {
+    const skeletonClasses = variant === 'shop'
+      ? "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      : (isSwipeable ? "flex gap-3 overflow-hidden px-1" : "grid grid-cols-3 gap-2 px-1");
+
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-        {[...Array(8)].map((_, index) => (
-          <div key={index} className="bg-white rounded-custom shadow-soft overflow-hidden">
-            <div className="w-full h-48 bg-gray-200 animate-pulse" />
-            <div className="p-3 sm:p-4">
-              <div className="h-6 bg-gray-200 rounded animate-pulse mb-2" />
-              <div className="h-4 bg-gray-200 rounded animate-pulse mb-3 w-3/4" />
-              <div className="h-4 bg-gray-200 rounded animate-pulse mb-3" />
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                <div className="h-8 bg-gray-200 rounded animate-pulse w-20" />
-                <div className="h-10 bg-gray-200 rounded animate-pulse w-full sm:w-20" />
-              </div>
-            </div>
+      <div className={skeletonClasses}>
+        {[...Array(variant === 'shop' ? 6 : 3)].map((_, index) => (
+          <div key={index} className="bg-white rounded-3xl border border-gray-100 p-3 animate-pulse">
+            <div className="aspect-square bg-gray-100 rounded-2xl mb-3" />
+            <div className="h-3 bg-gray-100 rounded w-full mb-2" />
+            <div className="h-3 bg-gray-100 rounded w-2/3" />
           </div>
         ))}
       </div>
     );
   }
-  
-  if (error) {
+
+  // Error or Empty State
+  if (error || !products || products.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-red-500 mb-4">
-          <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <h3 className="text-xl font-semibold text-dark-text mb-2">Something went wrong</h3>
-        <p className="text-gray-600">{error}</p>
+      <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+        <p className="text-gray-400 font-bold text-sm">No products found in this selection.</p>
       </div>
     );
   }
-  
-  if (!products || products.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-gray-400 mb-4">
-          <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-          </svg>
-        </div>
-        <h3 className="text-xl font-semibold text-dark-text mb-2">
-          {searchQuery ? `No products found for "${searchQuery}"` : "No products found"}
-        </h3>
-        <p className="text-gray-600">
-          {searchQuery 
-            ? "Try searching with different keywords or browse our categories"
-            : "Try adjusting your filters or browse our categories"
-          }
-        </p>
-      </div>
-    );
-  }
-  
+
+  // Layout Classes
+  const gridClasses = variant === 'shop'
+    ? "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" 
+    : (isSwipeable 
+        ? "flex overflow-x-auto gap-3 pb-4 px-2 scrollbar-hide snap-x snap-mandatory" 
+        : "grid grid-cols-3 gap-2 px-1");
+
   return (
-    <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      {products.map((product, index) => (
-        <motion.div
-          key={product.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
-        >
-          <ProductCard product={product} />
-        </motion.div>
-      ))}
-    </motion.div>
+    <div className="relative w-full">
+      <motion.div 
+        layout
+        className={gridClasses}
+      >
+        <AnimatePresence mode='popLayout'>
+          {products.map((product) => (
+            <motion.div
+              key={product.id}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className={isSwipeable ? "min-w-[150px] md:min-w-[200px] snap-start" : ""}
+            >
+              <ProductCard product={product} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
+    </div>
   );
 };
 

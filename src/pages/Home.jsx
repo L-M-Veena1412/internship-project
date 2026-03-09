@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import HeroSection from '../components/HeroSection';
 import CategoryGrid from '../components/CategoryGrid';
 import ProductGrid from '../components/ProductGrid';
-import ProductCard from '../components/ProductCard';
 import TestimonialSection from '../components/TestimonialSection';
 import NewsletterSection from '../components/NewsletterSection';
-import { getProducts, getCategories, getFeaturedProducts } from '../services/api';
 import Button from '../components/Button';
-import { Link } from 'react-router-dom';
+import { getProducts, getCategories, getFeaturedProducts } from '../services/api';
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
@@ -21,7 +20,6 @@ const Home = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
         const [categoriesRes, featuredRes, productsRes] = await Promise.all([
           getCategories(),
           getFeaturedProducts(),
@@ -31,13 +29,12 @@ const Home = () => {
         setCategories(categoriesRes.data);
         setFeaturedProducts(featuredRes.data);
         
-        // Simulate best sellers (top rated products)
-        const sortedByRating = productsRes.data.sort((a, b) => b.rating - a.rating);
-        setBestSellers(sortedByRating.slice(0, 4));
+        const sortedByRating = [...productsRes.data].sort((a, b) => b.rating - a.rating);
+        setBestSellers(sortedByRating.slice(0, 8));
         
         setError(null);
       } catch (err) {
-        setError('Failed to load data. Please try again later.');
+        setError('Failed to load data.');
         console.error('Error fetching home data:', err);
       } finally {
         setLoading(false);
@@ -48,178 +45,113 @@ const Home = () => {
   }, []);
   
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
+    <div className="min-h-screen bg-white">
       <HeroSection />
       
-      {/* Category Grid */}
       <CategoryGrid categories={categories} />
       
-      {/* Featured Products Section */}
-      <section className="py-12 sm:py-16 md:py-20 bg-cream">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Featured Products Section - Swipe text removed */}
+      <section className="py-12 bg-cream/30">
+        <div className="max-w-7xl mx-auto">
           <motion.div
-            className="text-center mb-8 sm:mb-12 md:mb-16"
-            initial={{ opacity: 0, y: 30 }}
+            className="text-center mb-8 px-4"
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-text mb-4">
+            <h2 className="text-3xl md:text-4xl font-black text-dark-text mb-3">
               Featured Products
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-              Hand-picked favorites from our organic collection
+            <p className="text-gray-500 max-w-2xl mx-auto text-sm">
+              Hand-picked favorites from our organic collection.
             </p>
           </motion.div>
           
-          {/* Mobile Horizontal Scroll */}
-          <div className="md:hidden">
-            <div className="overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory">
-              <div className="flex space-x-4" style={{ minWidth: 'max-content' }}>
-                {featuredProducts.map((product, index) => (
-                  <div key={product.id} className="flex-shrink-0 w-56 snap-start">
-                    <ProductCard product={product} />
-                  </div>
-                ))}
-              </div>
+          <ProductGrid 
+            products={featuredProducts} 
+            loading={loading} 
+            error={error} 
+            isSwipeable={true}
+          />
+        </div>
+      </section>
+      
+      {/* Best Sellers Section - Swipe text removed */}
+      <section className="py-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-8 px-4">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-black text-dark-text">Best Sellers</h2>
+              <div className="h-1 w-12 bg-olive-green mt-2 rounded-full"></div>
             </div>
-          </div>
-          
-          {/* Desktop Grid */}
-          <div className="hidden md:block">
-            <ProductGrid products={featuredProducts} loading={loading} error={error} />
-          </div>
-          
-          <div className="text-center mt-12">
-            <Link to="/shop">
-              <Button variant="primary" size="large">
-                View All Products
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Button>
+            
+            <Link to="/shop" className="group flex items-center gap-2 text-olive-green font-bold text-sm">
+              Explore All 
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
             </Link>
           </div>
+          
+          <ProductGrid 
+            products={bestSellers} 
+            loading={loading} 
+            error={error} 
+            isSwipeable={true} 
+          />
         </div>
       </section>
       
-      {/* Best Sellers Section */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-olive-green text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl font-bold text-dark-text mb-4">
-              Best Sellers
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Customer favorites that keep them coming back for more
-            </p>
-          </motion.div>
-          
-          {/* Mobile Horizontal Scroll */}
-          <div className="md:hidden">
-            <div className="overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory">
-              <div className="flex space-x-4" style={{ minWidth: 'max-content' }}>
-                {bestSellers.map((product, index) => (
-                  <div key={product.id} className="flex-shrink-0 w-56 snap-start">
-                    <ProductCard product={product} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          {/* Desktop Grid */}
-          <div className="hidden md:block">
-            <ProductGrid products={bestSellers} loading={loading} error={error} />
-          </div>
-        </div>
-      </section>
-      
-      {/* Brand Story Section */}
-      <section className="py-20 bg-olive-green text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
+              initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-4xl font-bold mb-6">
-                Our Organic Journey
+              <span className="inline-block px-4 py-1 rounded-full bg-white/10 text-green-200 text-xs font-bold tracking-widest uppercase mb-6">
+                Our Story
+              </span>
+              <h2 className="text-4xl md:text-5xl font-black mb-8 leading-tight">
+                Grown with Love, <br />
+                <span className="text-green-300">Rooted in Nature.</span>
               </h2>
-              <div className="space-y-4 text-green-100">
+              <div className="space-y-6 text-green-50/80 text-lg leading-relaxed">
                 <p>
-                  Founded in 2015, OrganicStore began with a simple mission: to make fresh, 
-                  organic produce accessible to everyone. What started as a small family farm 
-                  has grown into a trusted source for healthy, sustainable food.
-                </p>
-                <p>
-                  We partner with local farmers who share our commitment to organic farming 
-                  practices, ensuring that every product we deliver meets the highest standards 
-                  of quality and sustainability.
-                </p>
-                <p>
-                  From our farm to your table, we're dedicated to bringing you the freshest, 
-                  most flavorful organic produce while supporting a healthier planet.
+                  OrganicStore began with a simple mission: to make fresh, 
+                  organic produce accessible to everyone.
                 </p>
               </div>
               
-              <div className="mt-8">
+              <div className="mt-10">
                 <Link to="/about">
-                  <Button variant="secondary" size="large" className="bg-white/10 backdrop-blur-sm text-white border-white hover:bg-white/20">
-                    Learn Our Story
+                  <Button variant="secondary" className="bg-white text-olive-green hover:bg-green-50 border-none px-8 py-4 font-bold shadow-xl">
+                    Discover More
                   </Button>
                 </Link>
               </div>
             </motion.div>
             
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.8 }}
               viewport={{ once: true }}
               className="relative"
             >
-              <img
-                src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=600&h=400&fit=crop"
-                alt="Organic farm"
-                className="rounded-custom shadow-medium"
-              />
-              
-              {/* Stats Overlay */}
-              <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm p-6 rounded-custom shadow-medium">
-                <div className="grid grid-cols-3 gap-6 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-olive-green">8+</div>
-                    <div className="text-sm text-gray-600">Years</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-olive-green">50+</div>
-                    <div className="text-sm text-gray-600">Products</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-olive-green">10k+</div>
-                    <div className="text-sm text-gray-600">Customers</div>
-                  </div>
-                </div>
+              <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&h=600&fit=crop"
+                  alt="Organic farm"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </motion.div>
           </div>
         </div>
       </section>
       
-      {/* Testimonials Section */}
       <TestimonialSection />
-      
-      {/* Newsletter Section */}
       <NewsletterSection />
     </div>
   );

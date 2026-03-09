@@ -40,16 +40,10 @@ const cartReducer = (state, action) => {
       };
 
     case 'CLEAR_CART':
-      return {
-        ...state,
-        items: []
-      };
+      return { ...state, items: [] };
 
     case 'LOAD_CART':
-      return {
-        ...state,
-        items: action.payload
-      };
+      return { ...state, items: action.payload };
 
     default:
       return state;
@@ -59,55 +53,39 @@ const cartReducer = (state, action) => {
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, { items: [] });
 
-  // Load cart from localStorage on mount
+  // Persistence logic
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
-        const parsedCart = JSON.parse(savedCart);
-        dispatch({ type: 'LOAD_CART', payload: parsedCart });
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error);
+        dispatch({ type: 'LOAD_CART', payload: JSON.parse(savedCart) });
+      } catch (e) {
+        console.error("Failed to parse cart");
       }
     }
   }, []);
 
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(state.items));
   }, [state.items]);
 
   const addToCart = useCallback((product, quantity = 1) => {
-    dispatch({
-      type: 'ADD_TO_CART',
-      payload: {
-        ...product,
-        quantity
-      }
-    });
+    dispatch({ type: 'ADD_TO_CART', payload: { ...product, quantity } });
   }, []);
 
   const removeFromCart = useCallback((productId) => {
-    dispatch({
-      type: 'REMOVE_FROM_CART',
-      payload: productId
-    });
+    dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
   }, []);
 
   const updateQuantity = useCallback((productId, quantity) => {
     if (quantity <= 0) {
       removeFromCart(productId);
     } else {
-      dispatch({
-        type: 'UPDATE_QUANTITY',
-        payload: { id: productId, quantity }
-      });
+      dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
     }
   }, [removeFromCart]);
 
-  const clearCart = useCallback(() => {
-    dispatch({ type: 'CLEAR_CART' });
-  }, []);
+  const clearCart = useCallback(() => dispatch({ type: 'CLEAR_CART' }), []);
 
   const getCartTotal = useCallback(() => {
     return state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -118,7 +96,7 @@ export const CartProvider = ({ children }) => {
   }, [state.items]);
 
   const value = {
-    items: state.items,
+    cart: state.items, // CHANGED: Renamed from 'items' to 'cart' for component compatibility
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -136,8 +114,6 @@ export const CartProvider = ({ children }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
+  if (!context) throw new Error('useCart must be used within a CartProvider');
   return context;
 };
