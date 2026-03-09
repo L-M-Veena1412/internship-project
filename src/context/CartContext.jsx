@@ -6,21 +6,19 @@ const cartReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_TO_CART':
       const existingItem = state.items.find(item => item.id === action.payload.id);
-      
       if (existingItem) {
         return {
           ...state,
           items: state.items.map(item =>
             item.id === action.payload.id
-              ? { ...item, quantity: item.quantity + action.payload.quantity }
+              ? { ...item, quantity: item.quantity + (action.payload.quantity || 1) }
               : item
           )
         };
       }
-      
       return {
         ...state,
-        items: [...state.items, action.payload]
+        items: [...state.items, { ...action.payload, quantity: action.payload.quantity || 1 }]
       };
 
     case 'REMOVE_FROM_CART':
@@ -43,7 +41,7 @@ const cartReducer = (state, action) => {
       return { ...state, items: [] };
 
     case 'LOAD_CART':
-      return { ...state, items: action.payload };
+      return { ...state, items: Array.isArray(action.payload) ? action.payload : [] };
 
     default:
       return state;
@@ -53,18 +51,20 @@ const cartReducer = (state, action) => {
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, { items: [] });
 
-  // Persistence logic
+  // Load from LocalStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
-        dispatch({ type: 'LOAD_CART', payload: JSON.parse(savedCart) });
+        const parsed = JSON.parse(savedCart);
+        dispatch({ type: 'LOAD_CART', payload: parsed });
       } catch (e) {
         console.error("Failed to parse cart");
       }
     }
   }, []);
 
+  // Save to LocalStorage on change
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(state.items));
   }, [state.items]);
@@ -96,7 +96,8 @@ export const CartProvider = ({ children }) => {
   }, [state.items]);
 
   const value = {
-    cart: state.items, // CHANGED: Renamed from 'items' to 'cart' for component compatibility
+    items: state.items, // Matches your Checkout.jsx
+    cart: state.items,  // Alias for compatibility
     addToCart,
     removeFromCart,
     updateQuantity,

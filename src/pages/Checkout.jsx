@@ -7,7 +7,7 @@ import Button from '../components/Button';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { items, getCartTotal } = useCart();
+  const { items = [], getCartTotal } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
   
   const cartTotal = getCartTotal();
