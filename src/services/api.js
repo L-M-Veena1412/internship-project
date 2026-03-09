@@ -28,6 +28,15 @@ const mockProducts = [
     featured: true,
     rating: 4.5,
     reviews: 128,
+    overview: 'Premium organic carrots harvested at peak freshness. These vibrant orange roots are packed with beta-carotene, fiber, and essential vitamins. Perfect for snacking, juicing, or adding natural sweetness to your favorite recipes.',
+    details: [
+      { label: '100% Pure & Natural:', description: 'Grown without synthetic pesticides or chemical fertilizers.' },
+      { label: 'Rich in Beta-Carotene:', description: 'Excellent source of vitamin A for eye health and immunity.' },
+      { label: 'Farm Fresh:', description: 'Harvested daily and delivered within 24 hours to your doorstep.' },
+      { label: 'Versatile Usage:', description: 'Perfect for raw salads, cooking, juicing, or healthy snacking.' },
+      { label: 'Nutrient Dense:', description: 'High in fiber, vitamin K, and essential minerals.' },
+      { label: 'Storage Instructions:', description: 'Refrigerate in a plastic bag with holes for up to 2 weeks.' }
+    ]
   },
   {
     id: 2,
@@ -41,6 +50,15 @@ const mockProducts = [
     featured: false,
     rating: 4.3,
     reviews: 89,
+    overview: 'Deep crimson organic beetroots with earthy sweetness and exceptional nutritional value. These root vegetables are rich in nitrates and antioxidants, supporting cardiovascular health and athletic performance.',
+    details: [
+      { label: '100% Pure & Natural:', description: 'Certified organic with no artificial additives or preservatives.' },
+      { label: 'Heart Healthy:', description: 'Rich in nitrates that help lower blood pressure and improve circulation.' },
+      { label: 'Antioxidant Rich:', description: 'Contains betalains that fight inflammation and cellular damage.' },
+      { label: 'Farm Fresh:', description: 'Harvested at optimal ripeness for maximum flavor and nutrition.' },
+      { label: 'Versatile Superfood:', description: 'Excellent for salads, juices, roasting, or as natural food coloring.' },
+      { label: 'Storage Instructions:', description: 'Remove greens and store roots in refrigerator for up to 3 weeks.' }
+    ]
   },
   {
     id: 3,
@@ -54,6 +72,15 @@ const mockProducts = [
     featured: false,
     rating: 4.4,
     reviews: 90,
+    overview: 'Premium organic potatoes with fluffy texture and mild, nutty flavor. These versatile tubers are a staple ingredient perfect for boiling, baking, frying, or mashing into delicious comfort foods.',
+    details: [
+      { label: '100% Pure & Natural:', description: 'Grown in nutrient-rich soil without chemical pesticides.' },
+      { label: 'Energy Rich:', description: 'Excellent source of complex carbohydrates for sustained energy.' },
+      { label: 'High in Potassium:', description: 'Supports heart health and proper muscle function.' },
+      { label: 'Farm Fresh:', description: 'Cured and stored properly to maintain freshness and flavor.' },
+      { label: 'Culinary Versatile:', description: 'Perfect for fries, mashed potatoes, baked dishes, and curries.' },
+      { label: 'Storage Instructions:', description: 'Store in cool, dark place away from onions for up to 2 months.' }
+    ]
   },
 
   // LEAFY VEGETABLES

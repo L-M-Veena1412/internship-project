@@ -20,6 +20,7 @@ const ProductDetails = () => {
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(true);
   
   useEffect(() => {
     const fetchProduct = async () => {
@@ -159,7 +160,7 @@ const ProductDetails = () => {
           </div>
           
           {/* Product Info */}
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-6">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-dark-text mb-2">
                 {product.name}
@@ -267,6 +268,61 @@ const ProductDetails = () => {
                   </svg>
                   <span className="text-sm text-gray-600">Sustainably Sourced</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Short Description */}
+            <div className="w-full">
+              <h3 className="text-lg font-semibold text-dark-text mb-3">Product Overview</h3>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                {product.overview || 'Experience the finest quality organic produce, carefully selected and delivered fresh from local farms. This product embodies our commitment to sustainable agriculture and natural farming practices.'}
+              </p>
+            </div>
+
+            {/* Product Details Accordion */}
+            <div className="w-full">
+              <div className="border border-gray-200 rounded-xl overflow-hidden">
+                <button
+                  onClick={() => setIsDetailsOpen(!isDetailsOpen)}
+                  className="w-full px-6 py-4 bg-white flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <h3 className="text-lg font-semibold text-dark-text">Product Details</h3>
+                  <svg
+                    className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                      isDetailsOpen ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {isDetailsOpen && (
+                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <div className="space-y-4">
+                      {(product.details || [
+                        { label: '100% Pure & Natural:', description: 'Free from artificial additives, preservatives, and synthetic chemicals.' },
+                        { label: 'Farm to Table:', description: 'Sourced directly from certified organic farms within 24 hours of harvest.' },
+                        { label: 'Nutrient Rich:', description: 'Higher vitamin and mineral content compared to conventional produce.' },
+                        { label: 'Eco-Friendly:', description: 'Packaged in sustainable materials with minimal environmental impact.' },
+                        { label: 'Quality Assured:', description: 'Rigorous quality checks at every stage from farm to delivery.' },
+                        { label: 'Storage Instructions:', description: 'Store in a cool, dry place. Refrigerate after opening for maximum freshness.' }
+                      ]).map((detail, index) => (
+                        <div key={index} className="space-y-1">
+                          <div className="flex items-start gap-2">
+                            <span className="text-gray-400 text-xs mt-1">•</span>
+                            <span className="font-bold text-gray-900 text-sm">{detail.label}</span>
+                          </div>
+                          <p className="text-gray-600 text-sm ml-4 leading-relaxed">
+                            {detail.description}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
