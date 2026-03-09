@@ -49,13 +49,18 @@ const Shop = () => {
       const term = activeSearch.toLowerCase();
       result = result.filter(p => 
         p.name.toLowerCase().includes(term) || 
-        p.category.toLowerCase().includes(term)
+        p.category.toLowerCase().includes(term) ||
+        p.subcategory.toLowerCase().includes(term)
       );
     }
 
-    // Category Filter
+    // Category Filter - Handle both category and subcategory with case-insensitive comparison
     if (activeCategory !== 'all') {
-      result = result.filter(p => p.category === activeCategory);
+      result = result.filter(p => {
+        const categoryMatch = p.category.toLowerCase() === activeCategory.toLowerCase();
+        const subcategoryMatch = p.subcategory.toLowerCase() === activeCategory.toLowerCase();
+        return categoryMatch || subcategoryMatch;
+      });
     }
 
     // Price Range Filter

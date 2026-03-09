@@ -24,8 +24,14 @@ const FilterSidebar = ({
 
   // Helper to handle category clicks safely
   const handleCategoryClick = (cat) => {
-    const categoryName = typeof cat === 'object' ? cat.name : cat;
-    onCategoryChange(categoryName);
+    if (typeof cat === 'object') {
+      // If it's an object, use the slug for filtering
+      onCategoryChange(cat.slug);
+    } else {
+      // If it's a string, check if it matches any category slug
+      const matchedCategory = categories.find(c => c.slug === cat || c.name === cat);
+      onCategoryChange(matchedCategory ? matchedCategory.slug : cat);
+    }
   };
 
   return (
@@ -53,12 +59,13 @@ const FilterSidebar = ({
           </button>
           {categories.map((cat) => {
             const name = typeof cat === 'object' ? cat.name : cat;
+            const slug = typeof cat === 'object' ? cat.slug : cat;
             return (
               <button
-                key={name}
-                onClick={() => handleCategoryClick(name)}
+                key={slug}
+                onClick={() => handleCategoryClick(cat)}
                 className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all ${
-                  activeCategory === name ? 'bg-olive-green text-white shadow-md' : 'bg-white border border-gray-100 text-gray-600'
+                  activeCategory === slug ? 'bg-olive-green text-white shadow-md' : 'bg-white border border-gray-100 text-gray-600'
                 }`}
               >
                 <span>{renderCategoryIcon(name)}</span>
@@ -126,18 +133,22 @@ const FilterSidebar = ({
 
               {activeTab === 'category' && (
                 <div className="space-y-6">
-                  {['all', ...categories.map(c => typeof c === 'object' ? c.name : c)].map((cat) => (
-                    <label key={cat} className="flex items-center justify-between group cursor-pointer">
-                      <span className={`text-sm font-bold capitalize ${activeCategory === cat ? 'text-olive-green' : 'text-gray-600'}`}>
-                        {cat === 'all' ? '🛒 All Categories' : `${renderCategoryIcon(cat)} ${cat.replace(/-/g, ' ')}`}
-                      </span>
-                      <input 
-                        type="radio" name="cat" checked={activeCategory === cat} 
-                        onChange={() => handleCategoryClick(cat)} 
-                        className="w-5 h-5 accent-olive-green" 
-                      />
-                    </label>
-                  ))}
+                  {['all', ...categories.map(c => c.slug)].map((catSlug) => {
+                    const cat = categories.find(c => c.slug === catSlug);
+                    const displayName = catSlug === 'all' ? '🛒 All Categories' : `${renderCategoryIcon(cat?.name || catSlug)} ${cat?.name || catSlug.replace(/-/g, ' ')}`;
+                    return (
+                      <label key={catSlug} className="flex items-center justify-between group cursor-pointer">
+                        <span className={`text-sm font-bold capitalize ${activeCategory === catSlug ? 'text-olive-green' : 'text-gray-600'}`}>
+                          {displayName}
+                        </span>
+                        <input 
+                          type="radio" name="cat" checked={activeCategory === catSlug} 
+                          onChange={() => handleCategoryClick(catSlug)} 
+                          className="w-5 h-5 accent-olive-green" 
+                        />
+                      </label>
+                    );
+                  })}
                 </div>
               )}
 
@@ -209,15 +220,16 @@ const FilterSidebar = ({
               </label>
               {categories.map((cat) => {
                 const name = typeof cat === 'object' ? cat.name : cat;
+                const slug = typeof cat === 'object' ? cat.slug : cat;
                 return (
-                  <label key={name} className="flex items-center gap-3 cursor-pointer group">
+                  <label key={slug} className="flex items-center gap-3 cursor-pointer group">
                     <input 
                       type="radio" 
-                      checked={activeCategory === name}
-                      onChange={() => handleCategoryClick(name)}
+                      checked={activeCategory === slug}
+                      onChange={() => handleCategoryClick(cat)}
                       className="w-4 h-4 accent-olive-green" 
                     />
-                    <span className={`text-sm font-bold capitalize ${activeCategory === name ? 'text-olive-green' : 'text-gray-500'} group-hover:text-olive-green transition-colors`}>
+                    <span className={`text-sm font-bold capitalize ${activeCategory === slug ? 'text-olive-green' : 'text-gray-500'} group-hover:text-olive-green transition-colors`}>
                       {renderCategoryIcon(name)} {name.replace(/-/g, ' ')}
                     </span>
                   </label>

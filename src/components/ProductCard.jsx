@@ -46,9 +46,17 @@ const ProductCard = ({ product }) => {
             className="w-full h-full object-contain p-4 mix-blend-multiply"
           />
           
-          <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-lg border border-gray-100 shadow-sm">
-            <span className="text-[8px] font-black text-olive-green uppercase tracking-wider">Organic</span>
-          </div>
+          {/* 1. Container now allows image to be visible outside its 'bounds' if needed */}
+<div className="relative bg-gray-50 rounded-3xl p-4 flex items-center justify-center"> 
+  {/* 2. 'Organic' tag removed entirely */}
+  
+  {/* 3. Image is now the hero without the clipping wrapper */}
+  <img 
+    src={product.image} 
+    alt={product.name} 
+    className="w-full h-32 object-contain transform hover:scale-110 transition-transform duration-300" 
+  />
+</div>
 
           {product.discount && (
             <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 text-[9px] font-black rounded-lg">
