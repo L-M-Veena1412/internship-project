@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
   
   // Tabs State
@@ -28,13 +28,11 @@ const Profile = () => {
     window.location.href = '/';
   };
 
-  const handleSave = () => {
-    // Simulating a backend save to localStorage for frontend demo
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    const updatedUser = { ...userData, name: newName };
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    setIsEditing(false);
-    window.location.reload(); 
+  const handleSave = async () => {
+    const result = await updateProfile({ name: newName, phone: user?.phone || null });
+    if (result.success) {
+      setIsEditing(false);
+    }
   };
 
   const tabs = ['Personal Info', 'Addresses', 'Order History'];

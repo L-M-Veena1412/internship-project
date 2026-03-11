@@ -36,7 +36,7 @@ const Register = () => {
     }
     
     try {
-      const result = signup(formData.email, formData.password);
+      const result = await signup(formData.name, formData.email, formData.password);
       
       if (result.success) {
         // Redirect to login after successful registration

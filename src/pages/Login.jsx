@@ -27,7 +27,7 @@ const Login = () => {
     setError('');
     
     try {
-      const result = login(formData.email, formData.password);
+      const result = await login(formData.email, formData.password);
       
       if (result.success) {
         // Redirect to checkout if they came from there, otherwise home

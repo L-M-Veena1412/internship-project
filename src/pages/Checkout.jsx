@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { formatPriceINR } from '../utils/currency';
+import { placeOrder, getOrderById } from '../services/api';
 import Button from '../components/Button';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { items = [], getCartTotal } = useCart();
+  const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   
   const cartTotal = getCartTotal();
   const freeShippingThreshold = 50; // USD
@@ -24,7 +28,7 @@ const Checkout = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    email: user?.email || '',
     phone: '',
     address: '',
     city: '',
@@ -43,33 +47,62 @@ const Checkout = () => {
     }));
   };
 
+  useEffect(() => {
+    if (user?.email) {
+      setFormData((prev) => ({ ...prev, email: user.email }));
+    }
+  }, [user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
+    setSubmitError('');
 
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Generate order data
-    const orderData = {
-      orderId: `ORD${Date.now()}`,
-      items: items,
-      totalAmount: finalTotal,
-      paymentStatus: 'Successful',
-      orderDate: new Date().toLocaleDateString(),
-      customerInfo: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        address: formData.address,
+    try {
+      const placeOrderRes = await placeOrder({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+        address_line: formData.address,
         city: formData.city,
         state: formData.state,
-        zipCode: formData.zipCode
-      }
-    };
+        zip_code: formData.zipCode,
+        payment_method: 'card',
+      });
 
-    // Navigate to order confirmation with order data
-    navigate('/order-confirmation', { state: { orderData } });
+      const orderId = placeOrderRes.orderId;
+      const orderRes = await getOrderById(orderId);
+      const order = orderRes.data;
+
+      const orderData = {
+        orderId: `ORD${order.id}`,
+        items: (order.items || []).map((item) => ({
+          id: item.product_id,
+          name: item.product_name,
+          image: item.product_image,
+          price: Number(item.unit_price),
+          quantity: Number(item.quantity),
+        })),
+        totalAmount: Number(order.total_amount),
+        paymentStatus: order.payment_status,
+        orderDate: new Date(order.created_at).toLocaleDateString(),
+        customerInfo: {
+          firstName: order.first_name || formData.firstName,
+          lastName: order.last_name || formData.lastName,
+          email: formData.email,
+          address: order.address_line || formData.address,
+          city: order.city || formData.city,
+          state: order.state || formData.state,
+          zipCode: order.zip_code || formData.zipCode,
+        },
+      };
+
+      navigate('/order-confirmation', { state: { orderData } });
+    } catch (error) {
+      setSubmitError(error?.response?.data?.message || 'Could not place order. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const containerVariants = {
@@ -120,6 +153,12 @@ const Checkout = () => {
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Checkout</h1>
               
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                {submitError && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                    {submitError}
+                  </div>
+                )}
+
                 {/* Customer Information */}
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Customer Information</h2>
