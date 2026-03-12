@@ -3,22 +3,25 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { formatPriceINR } from '../utils/currency';
+import { convertToINR, formatINR } from '../utils/currency';
 import { placeOrder, getOrderById } from '../services/api';
 import Button from '../components/Button';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { items = [], getCartTotal } = useCart();
+  const { items = [] } = useCart();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [submitError, setSubmitError] = useState('');
   
-  const cartTotal = getCartTotal();
-  const freeShippingThreshold = 50; // USD
-  const shippingCost = 5.99; // USD
-  const shipping = cartTotal > freeShippingThreshold ? 0 : shippingCost;
-  const finalTotal = cartTotal + shipping;
+  const subtotalInr = items.reduce(
+    (total, item) => total + convertToINR(item.price) * item.quantity,
+    0
+  );
+  const freeShippingThresholdInr = 100;
+  const shippingCostInr = 49;
+  const shippingInr = subtotalInr > freeShippingThresholdInr ? 0 : shippingCostInr;
+  const finalTotalInr = subtotalInr + shippingInr;
   
   const handleImageError = (e) => {
     // Fallback to a placeholder image if the original fails to load
@@ -380,7 +383,7 @@ const Checkout = () => {
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                     <div className="text-sm font-medium text-gray-900">
-                      {formatPriceINR(item.price * item.quantity)}
+                      {formatINR(convertToINR(item.price) * item.quantity)}
                     </div>
                   </div>
                 ))}
@@ -390,16 +393,16 @@ const Checkout = () => {
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>{formatPriceINR(cartTotal)}</span>
+                  <span>{formatINR(subtotalInr)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? 'FREE' : formatPriceINR(shipping)}</span>
+                  <span>{shippingInr === 0 ? 'FREE' : formatINR(shippingInr)}</span>
                 </div>
                 <div className="border-t pt-2">
                   <div className="flex justify-between font-semibold text-gray-900 text-lg">
                     <span>Total</span>
-                    <span>{formatPriceINR(finalTotal)}</span>
+                    <span>{formatINR(finalTotalInr)}</span>
                   </div>
                 </div>
               </div>

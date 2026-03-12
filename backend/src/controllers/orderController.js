@@ -1,5 +1,9 @@
 const db = require('../config/db');
 
+const INR_RATE = 83;
+const FREE_DELIVERY_THRESHOLD_INR = 100;
+const DELIVERY_FEE_INR = 49;
+
 // ── POST /api/orders ─────────────────────────────────────────
 // Checkout: saves address, creates order, saves order items, clears cart
 const placeOrder = async (req, res) => {
@@ -41,8 +45,8 @@ const placeOrder = async (req, res) => {
     const addressId = addrResult.insertId;
 
     // 3. Calculate totals
-    const freeShippingThreshold = 50;
-    const shippingCost = 5.99;
+    const freeShippingThreshold = FREE_DELIVERY_THRESHOLD_INR / INR_RATE;
+    const shippingCost = DELIVERY_FEE_INR / INR_RATE;
     const subTotal = cartRows.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const shipping  = subTotal > freeShippingThreshold ? 0 : shippingCost;
     const total     = parseFloat((subTotal + shipping).toFixed(2));

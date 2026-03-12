@@ -2,21 +2,25 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { formatPriceINR } from '../utils/currency';
+import { convertToINR, formatINR, formatPriceINR } from '../utils/currency';
 import Button from '../components/Button';
 
 const Cart = () => {
   // Renamed 'items' to 'cart' to match your Context's exported value
-  const { cart, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
   
   // Safety check: Ensure cart is always an array before calling .length
   const cartItems = cart || [];
   
-  const cartTotal = getCartTotal();
-  const freeShippingThreshold = 500; // Adjusted to a typical INR value for your context
-  const shippingCost = 50; 
-  const shipping = cartTotal > freeShippingThreshold ? 0 : shippingCost;
-  const finalTotal = cartTotal + shipping;
+  const subtotalInr = cartItems.reduce(
+    (total, item) => total + convertToINR(item.price) * item.quantity,
+    0
+  );
+  const freeShippingThresholdInr = 100;
+  const minimumSubtotalForFreeInr = freeShippingThresholdInr + 1;
+  const shippingCostInr = 49;
+  const shippingInr = subtotalInr > freeShippingThresholdInr ? 0 : shippingCostInr;
+  const finalTotalInr = subtotalInr + shippingInr;
   
   const handleImageError = (e) => {
     e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop';
@@ -135,7 +139,7 @@ const Cart = () => {
                           </div>
                           
                           <p className="font-black text-dark-text">
-                            {formatPriceINR(item.price * item.quantity)}
+                            {formatINR(convertToINR(item.price) * item.quantity)}
                           </p>
                         </div>
                       </div>
@@ -165,26 +169,26 @@ const Cart = () => {
                 <div className="space-y-4 mb-8">
                   <div className="flex justify-between text-gray-500 font-medium">
                     <span>Subtotal</span>
-                    <span>{formatPriceINR(cartTotal)}</span>
+                    <span>{formatINR(subtotalInr)}</span>
                   </div>
                   
                   <div className="flex justify-between text-gray-500 font-medium">
                     <span>Delivery</span>
-                    <span className={shipping === 0 ? 'text-green-500 font-bold' : ''}>
-                      {shipping === 0 ? 'FREE' : formatPriceINR(shipping)}
+                    <span className={shippingInr === 0 ? 'text-green-500 font-bold' : ''}>
+                      {shippingInr === 0 ? 'FREE' : formatINR(shippingInr)}
                     </span>
                   </div>
                   
-                  {cartTotal < freeShippingThreshold && (
+                  {shippingInr > 0 && (
                     <div className="text-[11px] font-bold text-olive-green bg-green-50 p-3 rounded-xl border border-green-100 leading-tight uppercase tracking-wider text-center">
-                      Add {formatPriceINR(freeShippingThreshold - cartTotal)} more for FREE Delivery!
+                      Add {formatINR(Math.max(0, minimumSubtotalForFreeInr - subtotalInr))} more for FREE Delivery!
                     </div>
                   )}
                   
                   <div className="border-t border-dashed border-gray-200 pt-4">
                     <div className="flex justify-between font-black text-dark-text text-2xl">
                       <span>Total</span>
-                      <span>{formatPriceINR(finalTotal)}</span>
+                      <span>{formatINR(finalTotalInr)}</span>
                     </div>
                   </div>
                 </div>

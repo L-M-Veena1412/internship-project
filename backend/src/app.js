@@ -12,9 +12,21 @@ const orderRoutes    = require('./routes/orders');
 
 const app = express();
 
+const allowedOrigins = (
+  process.env.CLIENT_URLS || process.env.CLIENT_URL || 'http://localhost:3000'
+)
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 // ── Middleware ──────────────────────────────────────────────
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow server-to-server, Postman, and health checks without browser origin header
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS: origin not allowed'));
+  },
   credentials: true,
 }));
 app.use(express.json());
