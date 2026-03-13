@@ -18,6 +18,7 @@ import Contact from './pages/Contact';
 import Profile from './pages/Profile';
 import TestProfile from './pages/TestProfile';
 import Orders from './pages/Orders';
+import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 
 // Scroll to top component
@@ -87,14 +88,15 @@ function App() {
 
 function AppContent() {
   const { toast, hideToast } = useToast();
+  const isAdminRoute = window.location.pathname.startsWith('/admin');
   
   return (
     <CartProvider>
       <Router>
         <div className="min-h-screen bg-cream">
-          <Navbar />
+          {!isAdminRoute && <Navbar />}
           
-          <main className="pt-16">
+          <main className={isAdminRoute ? '' : 'pt-16'}>
             <AnimatePresence mode="wait">
               <Routes>
                 <Route path="/" element={<PageTransition><Home /></PageTransition>} />
@@ -107,14 +109,15 @@ function AppContent() {
                 <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
                 <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
                 <Route path="/orders" element={<PageTransition><Orders /></PageTransition>} />
+                <Route path="/admin/*" element={<Admin />} />
                 <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
               </Routes>
             </AnimatePresence>
           </main>
           
-          <Footer />
-          <MobileBottomNav />
-          <ScrollToTop />
+          {!isAdminRoute && <Footer />}
+          {!isAdminRoute && <MobileBottomNav />}
+          {!isAdminRoute && <ScrollToTop />}
           
           {/* Global Toast Notification */}
           <Toast 
