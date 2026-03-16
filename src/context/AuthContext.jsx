@@ -1,4 +1,14 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import {
+  loginUser,
+  registerUser,
+  getCurrentUser,
+  updateCurrentUser,
+  setSessionFromAuthResponse,
+  clearSession,
+  getStoredUser,
+  isAuthenticated,
+} from '../services/api';
 
 const AuthContext = createContext();
 
@@ -16,57 +26,78 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check authentication status on mount
-    const loggedInStatus = localStorage.getItem('isLoggedIn') === 'true';
-    const userData = localStorage.getItem('user');
-    
-    setIsLoggedIn(loggedInStatus);
-    setUser(userData ? JSON.parse(userData) : null);
-    setLoading(false);
+    const bootstrapAuth = async () => {
+      try {
+        if (!isAuthenticated()) {
+          setIsLoggedIn(false);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        const me = await getCurrentUser();
+        setIsLoggedIn(true);
+        setUser(me || getStoredUser());
+        if (me) {
+          localStorage.setItem('user', JSON.stringify(me));
+        }
+      } catch (error) {
+        clearSession();
+        setIsLoggedIn(false);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    bootstrapAuth();
   }, []);
 
-  const login = (email, password) => {
-    // Get users from localStorage
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    
-    // Find user with matching email and password
-    const foundUser = users.find(user => user.email === email && user.password === password);
-    
-    if (foundUser) {
+  const login = async (email, password) => {
+    try {
+      const data = await loginUser({ email, password });
+      setSessionFromAuthResponse(data);
       setIsLoggedIn(true);
-      setUser({ email: foundUser.email });
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('user', JSON.stringify({ email: foundUser.email }));
+      setUser(data.user);
       return { success: true };
-    } else {
-      return { success: false, message: 'Invalid email or password' };
+    } catch (error) {
+      return {
+        success: false,
+        message: error?.response?.data?.message || 'Invalid email or password',
+      };
     }
   };
 
-  const signup = (email, password) => {
-    // Get existing users
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    
-    // Check if user already exists
-    const existingUser = users.find(user => user.email === email);
-    
-    if (existingUser) {
-      return { success: false, message: 'User with this email already exists' };
+  const signup = async (name, email, password) => {
+    try {
+      await registerUser({ name, email, password });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error?.response?.data?.message || 'Registration failed',
+      };
     }
-    
-    // Add new user
-    const newUser = { email, password, createdAt: new Date().toISOString() };
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-    
-    return { success: true };
+  };
+
+  const updateProfile = async (payload) => {
+    try {
+      const updatedUser = await updateCurrentUser(payload);
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return { success: true, user: updatedUser };
+    } catch (error) {
+      return {
+        success: false,
+        message: error?.response?.data?.message || 'Profile update failed',
+      };
+    }
   };
 
   const logout = () => {
+    clearSession();
     setIsLoggedIn(false);
     setUser(null);
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('user');
   };
 
   const value = {
@@ -74,8 +105,9 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     signup,
+    updateProfile,
     logout,
-    loading
+    loading,
   };
 
   return (

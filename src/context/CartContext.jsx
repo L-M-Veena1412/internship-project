@@ -1,48 +1,52 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useReducer } from 'react';
+import { useAuth } from './AuthContext';
+import {
+  getCart,
+  addCartItem,
+  updateCartItem,
+  removeCartItem,
+  clearServerCart,
+} from '../services/api';
 
 const CartContext = createContext();
 
 const cartReducer = (state, action) => {
   switch (action.type) {
-    case 'ADD_TO_CART':
-      const existingItem = state.items.find(item => item.id === action.payload.id);
+    case 'ADD_TO_CART': {
+      const existingItem = state.items.find((item) => item.id === action.payload.id);
       if (existingItem) {
         return {
           ...state,
-          items: state.items.map(item =>
+          items: state.items.map((item) =>
             item.id === action.payload.id
               ? { ...item, quantity: item.quantity + (action.payload.quantity || 1) }
               : item
-          )
+          ),
         };
       }
       return {
         ...state,
-        items: [...state.items, { ...action.payload, quantity: action.payload.quantity || 1 }]
+        items: [...state.items, { ...action.payload, quantity: action.payload.quantity || 1 }],
       };
-
+    }
     case 'REMOVE_FROM_CART':
       return {
         ...state,
-        items: state.items.filter(item => item.id !== action.payload)
+        items: state.items.filter((item) => item.id !== action.payload),
       };
-
     case 'UPDATE_QUANTITY':
       return {
         ...state,
-        items: state.items.map(item =>
+        items: state.items.map((item) =>
           item.id === action.payload.id
             ? { ...item, quantity: action.payload.quantity }
             : item
-        )
+        ),
       };
-
     case 'CLEAR_CART':
       return { ...state, items: [] };
-
     case 'LOAD_CART':
       return { ...state, items: Array.isArray(action.payload) ? action.payload : [] };
-
     default:
       return state;
   }
@@ -50,45 +54,109 @@ const cartReducer = (state, action) => {
 
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, { items: [] });
+  const { isLoggedIn } = useAuth();
 
-  // Load from LocalStorage on mount
+  const loadServerCart = useCallback(async () => {
+    const response = await getCart();
+    dispatch({ type: 'LOAD_CART', payload: response.data || [] });
+  }, []);
+
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      try {
-        const parsed = JSON.parse(savedCart);
-        dispatch({ type: 'LOAD_CART', payload: parsed });
-      } catch (e) {
-        console.error("Failed to parse cart");
+    const loadCart = async () => {
+      if (isLoggedIn) {
+        try {
+          await loadServerCart();
+        } catch (error) {
+          console.error('Failed to load server cart', error);
+          dispatch({ type: 'LOAD_CART', payload: [] });
+        }
+        return;
       }
-    }
-  }, []);
 
-  // Save to LocalStorage on change
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        try {
+          dispatch({ type: 'LOAD_CART', payload: JSON.parse(savedCart) });
+        } catch (error) {
+          console.error('Failed to parse local cart', error);
+          dispatch({ type: 'LOAD_CART', payload: [] });
+        }
+      } else {
+        dispatch({ type: 'LOAD_CART', payload: [] });
+      }
+    };
+
+    loadCart();
+  }, [isLoggedIn, loadServerCart]);
+
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(state.items));
-  }, [state.items]);
-
-  const addToCart = useCallback((product, quantity = 1) => {
-    dispatch({ type: 'ADD_TO_CART', payload: { ...product, quantity } });
-  }, []);
-
-  const removeFromCart = useCallback((productId) => {
-    dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
-  }, []);
-
-  const updateQuantity = useCallback((productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
+    if (!isLoggedIn) {
+      localStorage.setItem('cart', JSON.stringify(state.items));
     }
-  }, [removeFromCart]);
+  }, [state.items, isLoggedIn]);
 
-  const clearCart = useCallback(() => dispatch({ type: 'CLEAR_CART' }), []);
+  const addToCart = useCallback(
+    async (product, quantity = 1) => {
+      if (isLoggedIn) {
+        await addCartItem({ product_id: product.id, quantity });
+        await loadServerCart();
+        return;
+      }
+
+      dispatch({ type: 'ADD_TO_CART', payload: { ...product, quantity } });
+    },
+    [isLoggedIn, loadServerCart]
+  );
+
+  const removeFromCart = useCallback(
+    async (productId) => {
+      if (isLoggedIn) {
+        const item = state.items.find((cartItem) => cartItem.id === productId);
+        if (item?.cartItemId) {
+          await removeCartItem(item.cartItemId);
+          await loadServerCart();
+        }
+        return;
+      }
+
+      dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
+    },
+    [isLoggedIn, state.items, loadServerCart]
+  );
+
+  const updateQuantity = useCallback(
+    async (productId, quantity) => {
+      if (quantity <= 0) {
+        await removeFromCart(productId);
+        return;
+      }
+
+      if (isLoggedIn) {
+        const item = state.items.find((cartItem) => cartItem.id === productId);
+        if (item?.cartItemId) {
+          await updateCartItem(item.cartItemId, quantity);
+          await loadServerCart();
+        }
+        return;
+      }
+
+      dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
+    },
+    [isLoggedIn, state.items, removeFromCart, loadServerCart]
+  );
+
+  const clearCart = useCallback(async () => {
+    if (isLoggedIn) {
+      await clearServerCart();
+      dispatch({ type: 'CLEAR_CART' });
+      return;
+    }
+
+    dispatch({ type: 'CLEAR_CART' });
+  }, [isLoggedIn]);
 
   const getCartTotal = useCallback(() => {
-    return state.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return state.items.reduce((total, item) => total + item.price * item.quantity, 0);
   }, [state.items]);
 
   const getCartItemsCount = useCallback(() => {
@@ -96,21 +164,18 @@ export const CartProvider = ({ children }) => {
   }, [state.items]);
 
   const value = {
-    items: state.items, // Matches your Checkout.jsx
-    cart: state.items,  // Alias for compatibility
+    items: state.items,
+    cart: state.items,
+    cartItems: state.items,
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
     getCartTotal,
-    getCartItemsCount
+    getCartItemsCount,
   };
 
-  return (
-    <CartContext.Provider value={value}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => {

@@ -1,20 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { formatPriceINR } from '../utils/currency';
+import { useAuth } from '../context/AuthContext';
+import { convertToINR, formatINR } from '../utils/currency';
+import { placeOrder, getOrderById } from '../services/api';
 import Button from '../components/Button';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { items = [], getCartTotal } = useCart();
+  const { items = [] } = useCart();
+  const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   
-  const cartTotal = getCartTotal();
-  const freeShippingThreshold = 50; // USD
-  const shippingCost = 5.99; // USD
-  const shipping = cartTotal > freeShippingThreshold ? 0 : shippingCost;
-  const finalTotal = cartTotal + shipping;
+  const subtotalInr = items.reduce(
+    (total, item) => total + convertToINR(item.price) * item.quantity,
+    0
+  );
+  const freeShippingThresholdInr = 100;
+  const shippingCostInr = 49;
+  const shippingInr = subtotalInr > freeShippingThresholdInr ? 0 : shippingCostInr;
+  const finalTotalInr = subtotalInr + shippingInr;
   
   const handleImageError = (e) => {
     // Fallback to a placeholder image if the original fails to load
@@ -24,7 +31,7 @@ const Checkout = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    email: user?.email || '',
     phone: '',
     address: '',
     city: '',
@@ -43,33 +50,62 @@ const Checkout = () => {
     }));
   };
 
+  useEffect(() => {
+    if (user?.email) {
+      setFormData((prev) => ({ ...prev, email: user.email }));
+    }
+  }, [user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
+    setSubmitError('');
 
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Generate order data
-    const orderData = {
-      orderId: `ORD${Date.now()}`,
-      items: items,
-      totalAmount: finalTotal,
-      paymentStatus: 'Successful',
-      orderDate: new Date().toLocaleDateString(),
-      customerInfo: {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        address: formData.address,
+    try {
+      const placeOrderRes = await placeOrder({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phone,
+        address_line: formData.address,
         city: formData.city,
         state: formData.state,
-        zipCode: formData.zipCode
-      }
-    };
+        zip_code: formData.zipCode,
+        payment_method: 'card',
+      });
 
-    // Navigate to order confirmation with order data
-    navigate('/order-confirmation', { state: { orderData } });
+      const orderId = placeOrderRes.orderId;
+      const orderRes = await getOrderById(orderId);
+      const order = orderRes.data;
+
+      const orderData = {
+        orderId: `ORD${order.id}`,
+        items: (order.items || []).map((item) => ({
+          id: item.product_id,
+          name: item.product_name,
+          image: item.product_image,
+          price: Number(item.unit_price),
+          quantity: Number(item.quantity),
+        })),
+        totalAmount: Number(order.total_amount),
+        paymentStatus: order.payment_status,
+        orderDate: new Date(order.created_at).toLocaleDateString(),
+        customerInfo: {
+          firstName: order.first_name || formData.firstName,
+          lastName: order.last_name || formData.lastName,
+          email: formData.email,
+          address: order.address_line || formData.address,
+          city: order.city || formData.city,
+          state: order.state || formData.state,
+          zipCode: order.zip_code || formData.zipCode,
+        },
+      };
+
+      navigate('/order-confirmation', { state: { orderData } });
+    } catch (error) {
+      setSubmitError(error?.response?.data?.message || 'Could not place order. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const containerVariants = {
@@ -120,6 +156,12 @@ const Checkout = () => {
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Checkout</h1>
               
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                {submitError && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                    {submitError}
+                  </div>
+                )}
+
                 {/* Customer Information */}
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Customer Information</h2>
@@ -341,7 +383,7 @@ const Checkout = () => {
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                     <div className="text-sm font-medium text-gray-900">
-                      {formatPriceINR(item.price * item.quantity)}
+                      {formatINR(convertToINR(item.price) * item.quantity)}
                     </div>
                   </div>
                 ))}
@@ -351,16 +393,16 @@ const Checkout = () => {
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>{formatPriceINR(cartTotal)}</span>
+                  <span>{formatINR(subtotalInr)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span>{shipping === 0 ? 'FREE' : formatPriceINR(shipping)}</span>
+                  <span>{shippingInr === 0 ? 'FREE' : formatINR(shippingInr)}</span>
                 </div>
                 <div className="border-t pt-2">
                   <div className="flex justify-between font-semibold text-gray-900 text-lg">
                     <span>Total</span>
-                    <span>{formatPriceINR(finalTotal)}</span>
+                    <span>{formatINR(finalTotalInr)}</span>
                   </div>
                 </div>
               </div>

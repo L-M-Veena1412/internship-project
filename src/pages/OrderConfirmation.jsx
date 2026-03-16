@@ -3,8 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { formatPriceINR } from '../utils/currency';
+import { getMyOrders } from '../services/api';
 import Button from '../components/Button';
-// eslint-disable-next-line no-unused-vars
 
 const OrderConfirmation = () => {
   const navigate = useNavigate();
@@ -14,36 +14,46 @@ const OrderConfirmation = () => {
   const [cartCleared, setCartCleared] = useState(false);
 
   useEffect(() => {
-    // Get order data from location state or generate new order
+    const hydrateFromApi = async () => {
+      try {
+        const response = await getMyOrders();
+        const latestOrder = response.data?.[0];
+
+        if (!latestOrder) {
+          navigate('/orders');
+          return;
+        }
+
+        setOrderData({
+          orderId: `ORD${latestOrder.id}`,
+          orderDate: new Date(latestOrder.created_at).toLocaleDateString(),
+          paymentStatus: latestOrder.payment_status,
+          totalAmount: Number(latestOrder.total_amount),
+          items: (latestOrder.items || []).map((item) => ({
+            name: item.product_name,
+            image: item.product_image,
+            price: Number(item.unit_price),
+            quantity: Number(item.quantity),
+            category: 'Organic Product',
+          })),
+        });
+      } catch (error) {
+        navigate('/orders');
+      }
+    };
+
     if (location.state?.orderData) {
       setOrderData(location.state.orderData);
-      // Store order data in localStorage for Orders page
-      localStorage.setItem('order', JSON.stringify(location.state.orderData));
-    } else {
-      // Generate order data if not passed from checkout
-      const orderId = `ORD${Date.now()}`;
-      const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
-      const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      
-      const newOrderData = {
-        orderId,
-        items: cartItems,
-        totalAmount,
-        paymentStatus: 'Successful',
-        orderDate: new Date().toLocaleDateString()
-      };
-      
-      setOrderData(newOrderData);
-      // Store order data in localStorage for Orders page
-      localStorage.setItem('order', JSON.stringify(newOrderData));
+      return;
     }
-  }, [location.state]);
+
+    hydrateFromApi();
+  }, [location.state, navigate]);
 
   // Clear cart after successful order - separate useEffect to prevent re-renders
   useEffect(() => {
     if (orderData && !cartCleared) {
       cartContext.clearCart();
-      localStorage.removeItem('cart');
       setCartCleared(true); // Set flag to prevent repeated calls
     }
   }, [orderData, cartCleared, cartContext]);

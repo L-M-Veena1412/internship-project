@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { formatPriceINR } from '../utils/currency';
+import { getMyOrders } from '../services/api';
 import Button from '../components/Button';
 
 const Orders = () => {
@@ -14,18 +15,37 @@ const Orders = () => {
   };
 
   useEffect(() => {
-    // Load order data from localStorage
-    const savedOrder = localStorage.getItem('order');
-    
-    if (savedOrder) {
+    const fetchOrders = async () => {
       try {
-        const orderData = JSON.parse(savedOrder);
-        setOrder(orderData);
+        const response = await getMyOrders();
+        const latestOrder = response.data?.[0];
+
+        if (latestOrder) {
+          setOrder({
+            orderId: `ORD${latestOrder.id}`,
+            orderDate: new Date(latestOrder.created_at).toLocaleDateString(),
+            paymentStatus: latestOrder.payment_status,
+            totalAmount: Number(latestOrder.total_amount),
+            items: (latestOrder.items || []).map((item) => ({
+              name: item.product_name,
+              image: item.product_image,
+              price: Number(item.unit_price),
+              quantity: Number(item.quantity),
+              category: 'Organic Product',
+            })),
+          });
+        } else {
+          setOrder(null);
+        }
       } catch (error) {
-        console.error('Error parsing order data:', error);
+        console.error('Error loading orders:', error);
+        setOrder(null);
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+
+    fetchOrders();
   }, []);
 
   const containerVariants = {
