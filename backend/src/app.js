@@ -12,12 +12,19 @@ const orderRoutes    = require('./routes/orders');
 
 const app = express();
 
-const allowedOrigins = (
-  process.env.CLIENT_URLS || process.env.CLIENT_URL || 'http://localhost:3000'
-)
-  .split(',')
+const defaultOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://internship-project-weld-two.vercel.app',
+];
+
+const configuredOrigins = [process.env.CLIENT_URLS, process.env.CLIENT_URL]
+  .filter(Boolean)
+  .flatMap((value) => value.split(','))
   .map((origin) => origin.trim())
   .filter(Boolean);
+
+const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
 
 // ── Middleware ──────────────────────────────────────────────
 app.use(cors({
