@@ -1,8 +1,11 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider, useToast } from './context/ToastContext';
+// 1. ADD THIS IMPORT
+import { AuthProvider } from './context/AuthContext'; 
+
 import Navbar from './components/Navbar';
 import MobileBottomNav from './components/MobileBottomNav';
 import Footer from './components/Footer';
@@ -18,8 +21,21 @@ import Contact from './pages/Contact';
 import Profile from './pages/Profile';
 import TestProfile from './pages/TestProfile';
 import Orders from './pages/Orders';
-import Admin from './pages/Admin';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import AdminLogin from './pages/Admin/AdminLogin';
 import NotFound from './pages/NotFound';
+
+// Page transition wrapper
+const PageTransition = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.4 }}
+  >
+    {children}
+  </motion.div>
+);
 
 // Scroll to top component
 const ScrollToTop = () => {
@@ -66,68 +82,65 @@ const ScrollToTop = () => {
   );
 };
 
-// Page transition wrapper
-const PageTransition = ({ children }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    transition={{ duration: 0.4 }}
-  >
-    {children}
-  </motion.div>
-);
-
+// Main App Wrapper
 function App() {
   return (
-    <ToastProvider>
-      <AppContent />
-    </ToastProvider>
+    // 2. WRAP EVERYTHING IN AUTHPROVIDER
+    <AuthProvider>
+      <ToastProvider>
+        <CartProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </CartProvider>
+      </ToastProvider>
+    </AuthProvider>
   );
 }
 
 function AppContent() {
   const { toast, hideToast } = useToast();
-  const isAdminRoute = window.location.pathname.startsWith('/admin');
+  const location = useLocation(); 
+  const isAdminRoute = location.pathname.startsWith('/admin');
   
   return (
-    <CartProvider>
-      <Router>
-        <div className="min-h-screen bg-cream">
-          {!isAdminRoute && <Navbar />}
-          
-          <main className={isAdminRoute ? '' : 'pt-16'}>
-            <AnimatePresence mode="wait">
-              <Routes>
-                <Route path="/" element={<PageTransition><Home /></PageTransition>} />
-                <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
-                <Route path="/products/:subcategory" element={<PageTransition><Products /></PageTransition>} />
-                <Route path="/product/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
-                <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
-                <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-                <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
-                <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
-                <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
-                <Route path="/orders" element={<PageTransition><Orders /></PageTransition>} />
-                <Route path="/admin/*" element={<Admin />} />
-                <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
-              </Routes>
-            </AnimatePresence>
-          </main>
-          
-          {!isAdminRoute && <Footer />}
-          {!isAdminRoute && <MobileBottomNav />}
-          {!isAdminRoute && <ScrollToTop />}
-          
-          {/* Global Toast Notification */}
-          <Toast 
-            message={toast.message} 
-            isVisible={toast.isVisible} 
-            onClose={hideToast} 
-          />
-        </div>
-      </Router>
-    </CartProvider>
+    <div className="min-h-screen bg-cream">
+      {!isAdminRoute && <Navbar />}
+      
+      <main className={isAdminRoute ? '' : 'pt-16'}>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<PageTransition><Home /></PageTransition>} />
+            <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
+            <Route path="/products/:subcategory" element={<PageTransition><Products /></PageTransition>} />
+            <Route path="/product/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
+            <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+            <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+            <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+            <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+            <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+            <Route path="/orders" element={<PageTransition><Orders /></PageTransition>} />
+            
+            <Route path="/admin/test" element={<div>Admin Test Route Working</div>} />
+            <Route path="/admin/login" element={<PageTransition><AdminLogin /></PageTransition>} />
+            <Route path="/admin/*" element={<AdminDashboard />} />
+            
+            <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+          </Routes>
+        </AnimatePresence>
+      </main>
+      
+      {!isAdminRoute && <Footer />}
+   
+      {!isAdminRoute && <ScrollToTop />}
+      
+      
+      <Toast 
+        message={toast.message} 
+        isVisible={toast.isVisible} 
+        onClose={hideToast} 
+      />
+    </div>
   );
 }
 

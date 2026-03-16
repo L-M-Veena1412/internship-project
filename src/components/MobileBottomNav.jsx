@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const MobileBottomNav = () => {
-  const { cartItems } = useCart();
+  const { cartItems = [] } = useCart();
   const location = useLocation();
   
   const navItems = [

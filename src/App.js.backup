@@ -21,6 +21,7 @@ import Orders from './pages/Orders';
 import NotFound from './pages/NotFound';
 import Profile from './pages/Profile';
 
+
 // Scroll to top component
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = React.useState(false);
