@@ -1,25 +1,77 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { formatPriceINR } from '../utils/currency';
+import { getBaseVariantWeight, getVariantScaledPrice } from '../utils/variantPricing';
 
 const ProductCard = ({ product }) => {
   const { cart, addToCart, removeFromCart, updateQuantity } = useCart();
-  
-  const cartItem = cart.find(item => item.id === product.id);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [showVariantDropdown, setShowVariantDropdown] = useState(false);
+
+  const cartItem = cart.find(item => {
+    if (selectedVariant) {
+      return item.product_qty_id === selectedVariant;
+    }
+    return item.id === product.id && !item.product_qty_id;
+  });
   const currentQty = cartItem ? cartItem.quantity : 0;
 
-  const handleAddToCart = (e) => {
+  // Check if product has variants
+  const hasVariants = product.variants && product.variants.length > 0;
+  
+  // Get selected variant stock if applicable
+  const selectedVariantData = selectedVariant 
+    ? product.variants.find(v => v.id === selectedVariant)
+    : null;
+  const availableStock = selectedVariantData ? selectedVariantData.qty : 0;
+
+  const baseVariantWeight = getBaseVariantWeight(product.variants || []);
+  const currentDisplayPrice = selectedVariantData
+    ? getVariantScaledPrice(product.price, selectedVariantData.weight, baseVariantWeight)
+    : Number(product.price || 0);
+  const currentDisplayMrp = Number(product.mrp || 0) > Number(product.price || 0)
+    ? selectedVariantData
+      ? getVariantScaledPrice(product.mrp, selectedVariantData.weight, baseVariantWeight)
+      : Number(product.mrp || 0)
+    : null;
+
+  const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product, 1);
+    
+    if (hasVariants && !selectedVariant) {
+      alert('Please select a weight/variant');
+      return;
+    }
+    
+    try {
+      await addToCart(product, 1, selectedVariant);
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Failed to add item to cart');
+    }
   };
 
-  const handleIncreaseQty = (e) => {
+  const handleIncreaseQty = async (e) => {
     e.preventDefault(); 
     e.stopPropagation();
-    updateQuantity(product.id, currentQty + 1);
+    
+    if (hasVariants && !selectedVariant) {
+      alert('Please select a weight/variant');
+      return;
+    }
+    
+    if (hasVariants && availableStock <= currentQty) {
+      alert('Not enough stock available');
+      return;
+    }
+    
+    try {
+      await updateQuantity(product.id, currentQty + 1);
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Failed to update quantity');
+    }
   };
 
   const handleDecreaseQty = (e) => {
@@ -92,16 +144,63 @@ const ProductCard = ({ product }) => {
           </div>
           <span className="text-[9px] font-bold text-gray-400">({product.reviews || '48'})</span>
         </div>
+
+        {/* Variant Selector */}
+        {hasVariants && product.variants.length > 0 && (
+          <div className="mb-3 relative">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowVariantDropdown(!showVariantDropdown);
+              }}
+              className="w-full text-left px-2 py-1.5 text-xs bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <span className="font-semibold text-gray-700">
+                {selectedVariant 
+                  ? `${product.variants.find(v => v.id === selectedVariant)?.weight} - ${formatPriceINR(currentDisplayPrice)}` 
+                  : 'Select Weight'}
+              </span>
+            </button>
+            
+            {showVariantDropdown && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                {product.variants.map((variant) => (
+                  (() => {
+                    const variantPrice = getVariantScaledPrice(product.price, variant.weight, baseVariantWeight);
+                    return (
+                  <button
+                    key={variant.id}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedVariant(variant.id);
+                      setShowVariantDropdown(false);
+                    }}
+                    className={`w-full text-left px-2 py-1.5 text-xs border-b last:border-b-0 hover:bg-gray-100 transition-colors ${
+                      selectedVariant === variant.id ? 'bg-olive-green/10' : ''
+                    }`}
+                  >
+                    <span className="font-medium">{variant.weight} - {formatPriceINR(variantPrice)}</span>
+                    <span className="text-gray-500 text-[10px]"> ({variant.qty} in stock)</span>
+                  </button>
+                    );
+                  })()
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Price & Action Row */}
         <div className="mt-auto flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-sm md:text-base font-black text-gray-900">
-              {formatPriceINR(product.price)}
+              {formatPriceINR(currentDisplayPrice)}
             </span>
-            {product.mrp > product.price && (
+            {currentDisplayMrp && currentDisplayMrp > currentDisplayPrice && (
               <span className="text-[10px] text-gray-400 line-through">
-                {formatPriceINR(product.mrp)}
+                {formatPriceINR(currentDisplayMrp)}
               </span>
             )}
           </div>

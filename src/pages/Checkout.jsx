@@ -380,6 +380,9 @@ const Checkout = () => {
                     />
                     <div className="flex-1">
                       <h3 className="text-sm font-medium text-gray-900">{item.name}</h3>
+                      {item.weight && (
+                        <p className="text-xs text-gray-500">Weight: {item.weight}</p>
+                      )}
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                     <div className="text-sm font-medium text-gray-900">

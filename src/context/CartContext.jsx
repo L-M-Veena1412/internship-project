@@ -96,14 +96,21 @@ export const CartProvider = ({ children }) => {
   }, [state.items, isLoggedIn]);
 
   const addToCart = useCallback(
-    async (product, quantity = 1) => {
+    async (product, quantity = 1, variantId = null) => {
       if (isLoggedIn) {
-        await addCartItem({ product_id: product.id, quantity });
+        // For product variants, use product_qty_id
+        if (variantId) {
+          await addCartItem({ product_id: product.id, quantity, product_qty_id: variantId });
+        } else {
+          await addCartItem({ product_id: product.id, quantity });
+        }
         await loadServerCart();
         return;
       }
 
-      dispatch({ type: 'ADD_TO_CART', payload: { ...product, quantity } });
+      // Local storage fallback: combine product id and variant id for unique key
+      const itemKey = variantId ? `${product.id}-variant-${variantId}` : product.id;
+      dispatch({ type: 'ADD_TO_CART', payload: { ...product, quantity, product_qty_id: variantId, id: itemKey } });
     },
     [isLoggedIn, loadServerCart]
   );

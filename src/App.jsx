@@ -17,6 +17,7 @@ import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import About from './pages/About';
 import Contact from './pages/Contact';
 import Profile from './pages/Profile';
 import TestProfile from './pages/TestProfile';
@@ -117,6 +118,7 @@ function AppContent() {
             <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
             <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
             <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+            <Route path="/about" element={<PageTransition><About /></PageTransition>} />
             <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
             <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
             <Route path="/orders" element={<PageTransition><Orders /></PageTransition>} />

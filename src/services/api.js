@@ -43,6 +43,17 @@ const mapProduct = (product) => ({
   name: product.name,
   slug: product.slug,
   price: Number(product.price),
+  mrp: Number(
+    product.mrp ??
+      product.original_price ??
+      product.originalPrice ??
+      product.price
+  ),
+  discount: Number(
+    product.discount ??
+      product.discount_percentage ??
+      0
+  ),
   description: product.description || '',
   overview: product.overview || '',
   image: product.image || '',
@@ -53,6 +64,16 @@ const mapProduct = (product) => ({
   category: product.category_slug || product.category || '',
   subcategory: product.subcategory_slug || product.subcategory || '',
   details: Array.isArray(product.details) ? product.details : [],
+  variants: Array.isArray(product.variants) ? product.variants.map(v => ({
+    id: v.id,
+    weight: v.weight,
+    qty: Number(v.qty || 0),
+  })) : [],
+  manufacturer: product.manufacturer ? {
+    id: product.manufacturer.id || product.product_manufacturer,
+    name: product.manufacturer.manufacturer_name || product.manufacturer.name || '',
+    code: product.manufacturer.manufacturer_code || product.manufacturer.code || '',
+  } : null,
 });
 
 const mapCartItem = (item) => ({
@@ -63,6 +84,8 @@ const mapCartItem = (item) => ({
   price: Number(item.price),
   quantity: Number(item.quantity),
   inStock: Number(item.stock || 0) > 0,
+  product_qty_id: item.product_qty_id || null,
+  weight: item.product_weight || item.weight || null,
 });
 
 export const setSessionFromAuthResponse = (data) => {
@@ -144,8 +167,12 @@ export const getCart = async () => {
   return { data: (res.data.data || []).map(mapCartItem) };
 };
 
-export const addCartItem = async ({ product_id, quantity = 1 }) => {
-  const res = await api.post('/cart/items', { product_id, quantity });
+export const addCartItem = async ({ product_id, quantity = 1, product_qty_id = null }) => {
+  const payload = { product_id, quantity };
+  if (product_qty_id) {
+    payload.product_qty_id = product_qty_id;
+  }
+  const res = await api.post('/cart/items', payload);
   return res.data;
 };
 

@@ -34,15 +34,27 @@ const getProducts = async (req, res) => {
 
     const sql = `
       SELECT
-        p.id, p.name, p.slug, p.description, p.price, p.stock,
+        p.id, p.name, p.slug, p.description, p.price,
+        COALESCE(pq.total_qty, p.stock) AS stock,
+        p.stock AS legacy_stock,
         p.image, p.rating, p.reviews_count, p.is_featured,
+        p.product_manufacturer AS manufacturer_id,
+        m.manufacturer_name,
+        m.code AS manufacturer_code,
         cat.name  AS category,
         cat.slug  AS category_slug,
         sub.name  AS subcategory,
         sub.slug  AS subcategory_slug
       FROM products p
+      LEFT JOIN manufacturer m ON m.id = p.product_manufacturer
       LEFT JOIN categories cat ON cat.id = p.category_id
       LEFT JOIN categories sub ON sub.id = p.subcategory_id
+      LEFT JOIN (
+        SELECT prod_id, SUM(qty) AS total_qty
+        FROM product_qty
+        WHERE status = 1
+        GROUP BY prod_id
+      ) pq ON pq.prod_id = p.id
       ${where}
       ORDER BY p.id
       LIMIT ? OFFSET ?
@@ -84,13 +96,25 @@ const getProductById = async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT
-         p.id, p.name, p.slug, p.description, p.overview, p.price, p.stock,
+         p.id, p.name, p.slug, p.description, p.overview, p.price,
+         COALESCE(pq.total_qty, p.stock) AS stock,
+         p.stock AS legacy_stock,
          p.image, p.rating, p.reviews_count, p.is_featured,
+         p.product_manufacturer AS manufacturer_id,
+         m.manufacturer_name,
+         m.code AS manufacturer_code,
          cat.name AS category, cat.slug AS category_slug,
          sub.name AS subcategory, sub.slug AS subcategory_slug
        FROM products p
+       LEFT JOIN manufacturer m ON m.id = p.product_manufacturer
        LEFT JOIN categories cat ON cat.id = p.category_id
        LEFT JOIN categories sub ON sub.id = p.subcategory_id
+       LEFT JOIN (
+         SELECT prod_id, SUM(qty) AS total_qty
+         FROM product_qty
+         WHERE status = 1
+         GROUP BY prod_id
+       ) pq ON pq.prod_id = p.id
        WHERE p.id = ? AND p.is_active = 1`,
       [id]
     );
@@ -106,8 +130,21 @@ const getProductById = async (req, res) => {
       [id]
     );
 
+    const [variants] = await db.query(
+      'SELECT id, weight, qty FROM product_qty WHERE prod_id = ? AND status = 1 ORDER BY id',
+      [id]
+    );
+
     product.details = details;
-    product.inStock = product.stock > 0;
+    product.variants = variants;
+    product.manufacturer = product.manufacturer_id
+      ? {
+          id: product.manufacturer_id,
+          name: product.manufacturer_name,
+          code: product.manufacturer_code,
+        }
+      : null;
+    product.inStock = Number(product.stock || 0) > 0;
 
     return res.json({ data: product });
   } catch (err) {

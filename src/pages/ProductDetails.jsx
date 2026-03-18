@@ -5,6 +5,7 @@ import { getProductById, getProducts } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { formatPriceINR } from '../utils/currency';
+import { getBaseVariantWeight, getVariantScaledPrice, getWeightNumericValue } from '../utils/variantPricing';
 import Button from '../components/Button';
 import Loader from '../components/Loader';
 import ProductCard from '../components/ProductCard';
@@ -21,6 +22,7 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isDetailsOpen, setIsDetailsOpen] = useState(true);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   
   useEffect(() => {
     const fetchProduct = async () => {
@@ -51,12 +53,31 @@ const ProductDetails = () => {
     fetchProduct();
   }, [id]);
   
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (product) {
-      console.log('ProductDetails Add to Cart clicked for product:', product.name);
-      addToCart(product, quantity);
-      console.log('ProductDetails calling showToast with message');
-      showToast('Item added to cart successfully');
+      // Check if product has variants and one is selected
+      const hasVariants = product.variants && product.variants.length > 0;
+      if (hasVariants && !selectedVariant) {
+        showToast('Please select a weight/variant', 'error');
+        return;
+      }
+
+      // Get the selected variant data to check stock
+      if (hasVariants && selectedVariant) {
+        const variantData = product.variants.find(v => v.id === selectedVariant);
+        if (!variantData || variantData.qty < quantity) {
+          showToast('Not enough stock for selected variant', 'error');
+          return;
+        }
+      }
+
+      try {
+        await addToCart(product, quantity, selectedVariant);
+        showToast('Item added to cart successfully');
+      } catch (err) {
+        const message = err?.response?.data?.message || 'Failed to add item to cart';
+        showToast(message, 'error');
+      }
     }
   };
   
@@ -87,6 +108,48 @@ const ProductDetails = () => {
       </div>
     );
   }
+
+  const sellingPrice = Number(product.price || 0);
+  const rawOriginalPrice = Number(
+    product.mrp ?? product.originalPrice ?? product.original_price ?? sellingPrice
+  );
+  const rawDiscount = Number(product.discount ?? product.discount_percentage ?? 0);
+
+  const computedOriginalPrice =
+    rawOriginalPrice > sellingPrice
+      ? rawOriginalPrice
+      : rawDiscount > 0 && sellingPrice > 0
+        ? sellingPrice / (1 - rawDiscount / 100)
+        : sellingPrice;
+
+  const discountPercent =
+    rawDiscount > 0
+      ? Math.round(rawDiscount)
+      : computedOriginalPrice > sellingPrice && computedOriginalPrice > 0
+        ? Math.round(((computedOriginalPrice - sellingPrice) / computedOriginalPrice) * 100)
+        : 0;
+
+  const hasDiscount = computedOriginalPrice > sellingPrice && discountPercent > 0;
+
+  const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
+  const baseVariantWeight = getBaseVariantWeight(product.variants || []);
+  const selectedVariantData = hasVariants
+    ? product.variants.find((variant) => variant.id === selectedVariant)
+    : null;
+  const fallbackVariantData = hasVariants
+    ? [...product.variants]
+        .sort((a, b) => (getWeightNumericValue(a.weight) || Number.MAX_SAFE_INTEGER) - (getWeightNumericValue(b.weight) || Number.MAX_SAFE_INTEGER))[0]
+    : null;
+  const activeVariantData = selectedVariantData || fallbackVariantData;
+  const activeVariantWeight = activeVariantData?.weight || null;
+
+  const displaySellingPrice = hasVariants && activeVariantWeight
+    ? getVariantScaledPrice(sellingPrice, activeVariantWeight, baseVariantWeight)
+    : sellingPrice;
+
+  const displayOriginalPrice = hasDiscount && hasVariants && activeVariantWeight
+    ? getVariantScaledPrice(computedOriginalPrice, activeVariantWeight, baseVariantWeight)
+    : computedOriginalPrice;
   
   // Mock additional images for gallery
   const productImages = [
@@ -190,12 +253,38 @@ const ProductDetails = () => {
               </div>
               
               {/* Price */}
-              <div className="flex items-baseline space-x-2 mb-6">
-                <span className="text-4xl font-bold text-olive-green">
-                  {formatPriceINR(product.price)}
-                </span>
-                <span className="text-gray-600">per unit</span>
+              <div className="mb-6">
+                <div className="flex items-center gap-3">
+                  <span className="text-4xl font-bold text-olive-green">
+                    {formatPriceINR(displaySellingPrice)}
+                  </span>
+                  {hasDiscount && (
+                    <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
+                      {discountPercent}% OFF
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  {hasDiscount && (
+                    <span className="text-base text-gray-500 line-through">
+                      {formatPriceINR(displayOriginalPrice)}
+                    </span>
+                  )}
+                  {activeVariantWeight && (
+                    <span className="text-sm text-gray-500">for {activeVariantWeight}</span>
+                  )}
+                  <span className="text-gray-600">per unit</span>
+                </div>
               </div>
+
+              {/* Manufacturer Info */}
+              {product.manufacturer && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-semibold">Manufacturer:</span> {product.manufacturer.name}
+                  </p>
+                </div>
+              )}
               
               {/* Description */}
               <div className="prose prose-gray max-w-none">
@@ -205,11 +294,50 @@ const ProductDetails = () => {
               </div>
             </div>
             
-            {/* Quantity and Add to Cart */}
+            {/* Variant and Quantity Selection */}
             <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <span className="font-medium text-dark-text">Quantity:</span>
-                <div className="flex items-center border border-gray-300 rounded-lg">
+              {/* Variant Selector */}
+              {product.variants && product.variants.length > 0 && (
+                <div>
+                  <label className="block text-sm font-semibold text-dark-text mb-2">
+                    Select Weight:
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {product.variants.map((variant) => (
+                      (() => {
+                        const variantSellingPrice = getVariantScaledPrice(sellingPrice, variant.weight, baseVariantWeight);
+                        return (
+                      <button
+                        key={variant.id}
+                        onClick={() => setSelectedVariant(variant.id)}
+                        className={`p-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                          selectedVariant === variant.id
+                            ? 'border-olive-green bg-olive-green/10 text-olive-green'
+                            : 'border-gray-300 hover:border-gray-400'
+                        } ${variant.qty === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={variant.qty === 0}
+                      >
+                        <div>{variant.weight}</div>
+                        <div className="text-xs font-semibold text-olive-green">
+                          {formatPriceINR(variantSellingPrice)}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {variant.qty > 0 ? `${variant.qty} in stock` : 'Out of stock'}
+                        </div>
+                      </button>
+                        );
+                      })()
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Quantity Selection */}
+              <div>
+                <label className="block text-sm font-semibold text-dark-text mb-2">
+                  Quantity:
+                </label>
+                <div className="flex items-center border border-gray-300 rounded-lg w-fit">
                   <button
                     onClick={() => handleQuantityChange(-1)}
                     className="px-3 py-2 text-gray-600 hover:text-dark-text hover:bg-gray-100 transition-colors"
@@ -229,7 +357,7 @@ const ProductDetails = () => {
                   </button>
                 </div>
               </div>
-              
+
               <Button
                 variant="primary"
                 size="large"
@@ -239,90 +367,35 @@ const ProductDetails = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                Add to Cart - {formatPriceINR(product.price * quantity)}
+                Add to Cart - {formatPriceINR(displaySellingPrice * quantity)}
               </Button>
+            </div>
               
-              {/* Product Features */}
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm text-gray-600">100% Organic</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm text-gray-600">Farm Fresh</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm text-gray-600">No Pesticides</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-sm text-gray-600">Sustainably Sourced</span>
-                </div>
+            {/* Product Features */}
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-sm text-gray-600">100% Organic</span>
               </div>
-            </div>
-
-            {/* Short Description */}
-            <div className="w-full">
-              <h3 className="text-lg font-semibold text-dark-text mb-3">Product Overview</h3>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                {product.overview || 'Experience the finest quality organic produce, carefully selected and delivered fresh from local farms. This product embodies our commitment to sustainable agriculture and natural farming practices.'}
-              </p>
-            </div>
-
-            {/* Product Details Accordion */}
-            <div className="w-full">
-              <div className="border border-gray-200 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setIsDetailsOpen(!isDetailsOpen)}
-                  className="w-full px-6 py-4 bg-white flex items-center justify-between hover:bg-gray-50 transition-colors"
-                >
-                  <h3 className="text-lg font-semibold text-dark-text">Product Details</h3>
-                  <svg
-                    className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
-                      isDetailsOpen ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                {isDetailsOpen && (
-                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                    <div className="space-y-4">
-                      {(product.details || [
-                        { label: '100% Pure & Natural:', description: 'Free from artificial additives, preservatives, and synthetic chemicals.' },
-                        { label: 'Farm to Table:', description: 'Sourced directly from certified organic farms within 24 hours of harvest.' },
-                        { label: 'Nutrient Rich:', description: 'Higher vitamin and mineral content compared to conventional produce.' },
-                        { label: 'Eco-Friendly:', description: 'Packaged in sustainable materials with minimal environmental impact.' },
-                        { label: 'Quality Assured:', description: 'Rigorous quality checks at every stage from farm to delivery.' },
-                        { label: 'Storage Instructions:', description: 'Store in a cool, dry place. Refrigerate after opening for maximum freshness.' }
-                      ]).map((detail, index) => (
-                        <div key={index} className="space-y-1">
-                          <div className="flex items-start gap-2">
-                            <span className="text-gray-400 text-xs mt-1">•</span>
-                            <span className="font-bold text-gray-900 text-sm">{detail.label}</span>
-                          </div>
-                          <p className="text-gray-600 text-sm ml-4 leading-relaxed">
-                            {detail.description}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-sm text-gray-600">Farm Fresh</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-sm text-gray-600">No Pesticides</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-sm text-gray-600">Sustainably Sourced</span>
               </div>
             </div>
           </div>
