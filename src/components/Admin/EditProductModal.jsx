@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const AddProductModal = ({ isOpen, onClose, onAddProduct }) => {
+const EditProductModal = ({ isOpen, onClose, onEditProduct, productToEdit }) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -23,6 +23,20 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }) => {
     'Coastal & Non-Veg Specialties'
   ];
 
+  // Populate form when productToEdit changes
+  useEffect(() => {
+    if (productToEdit) {
+      setFormData({
+        name: productToEdit.name || '',
+        price: productToEdit.price?.toString() || '',
+        category: productToEdit.category || 'Snacks & Traditional Sweets',
+        stock: productToEdit.stock?.toString() || '',
+        description: productToEdit.description || '',
+        image: productToEdit.image || ''
+      });
+    }
+  }, [productToEdit]);
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -40,24 +54,16 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }) => {
     e.preventDefault();
     
     if (validateForm()) {
-      onAddProduct({
+      onEditProduct({
         ...formData,
+        id: productToEdit.id,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         status: parseInt(formData.stock) === 0 ? 'out-of-stock' : 
                 parseInt(formData.stock) < 10 ? 'low-stock' : 'in-stock'
       });
       
-      // Reset form
-      setFormData({
-        name: '',
-        price: '',
-        category: 'Snacks & Traditional Sweets',
-        stock: '',
-        description: '',
-        image: ''
-      });
-      setErrors({});
+      onClose();
     }
   };
 
@@ -71,7 +77,7 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }) => {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !productToEdit) return null;
 
   return (
     <AnimatePresence>
@@ -92,7 +98,7 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }) => {
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900">Add New Product</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Edit Product</h2>
             <button
               onClick={onClose}
               className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
@@ -184,6 +190,9 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }) => {
                 {errors.stock && (
                   <p className="mt-1 text-sm text-red-600">{errors.stock}</p>
                 )}
+                {parseInt(formData.stock) === 0 && (
+                  <p className="mt-1 text-sm text-amber-600">⚠️ Product will be marked as "Out of Stock"</p>
+                )}
               </div>
             </div>
 
@@ -247,19 +256,19 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }) => {
             )}
 
             {/* Form Actions */}
-            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+            <div className="flex gap-3 pt-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+                className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
               >
-                Add Product
+                Update Product
               </button>
             </div>
           </form>
@@ -269,4 +278,4 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }) => {
   );
 };
 
-export default AddProductModal;
+export default EditProductModal;

@@ -7,7 +7,8 @@ import ProductGrid from '../components/ProductGrid';
 import TestimonialSection from '../components/TestimonialSection';
 import NewsletterSection from '../components/NewsletterSection';
 import Button from '../components/Button';
-import { getProducts, getCategories, getFeaturedProducts } from '../services/api';
+import SafeImage from '../components/SafeImage';
+import { mockProducts, mockCategories } from '../data/mockData';
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
@@ -15,35 +16,15 @@ const Home = () => {
   const [bestSellers, setBestSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [categoriesRes, featuredRes, productsRes] = await Promise.all([
-          getCategories(),
-          getFeaturedProducts(),
-          getProducts()
-        ]);
-        
-        setCategories(categoriesRes.data);
-        setFeaturedProducts(featuredRes.data);
-        
-        const sortedByRating = [...productsRes.data].sort((a, b) => b.rating - a.rating);
-        setBestSellers(sortedByRating.slice(0, 8));
-        
-        setError(null);
-      } catch (err) {
-        setError('Failed to load data.');
-        console.error('Error fetching home data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
+    // Use mock data directly - no API calls
+    setCategories(mockCategories);
+    setFeaturedProducts(mockProducts.slice(0, 8));
+    setBestSellers(mockProducts.slice(0, 8));
+    setLoading(false);
   }, []);
-  
+
   return (
     <div className="min-h-screen bg-white">
       <HeroSection />
@@ -140,8 +121,8 @@ const Home = () => {
               className="relative"
             >
               <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&h=600&fit=crop"
+                <SafeImage
+                  src="/images/home/organic-farm.jpg"
                   alt="Organic farm"
                   className="w-full h-full object-cover"
                 />

@@ -1,10 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import ProductGrid from '../components/ProductGrid';
+import { mockCategories } from '../data/mockData';
 
-const CategoryGrid = ({ categories, title = "Shop by Category", showViewAll = true }) => {
+const CategoryGrid = ({ categories = mockCategories, title = "Shop by Category", showViewAll = true }) => {
   const categoryIcons = {
-    'Fruits': '🍎', 'Vegetables': '🥬', 'Dairy': '🥛', 'Grains': '🌾',
+    'Snacks & Traditional Sweets': '🍯', 'Health, Wellness & Organic': '🌿', 'Pickle & Thokku': '🥒', 
+    'Pooja Bhandara': '🙏', 'Papads & Sandige': '🍘', 'Pantry & Grocery Essentials': '🌾', 
+    'Coastal & Non-Veg Specialties': '🐟', 'Fruits': '🍎', 'Vegetables': '🥬', 'Dairy': '🥛', 'Grains': '🌾',
     'Herbs': '🌿', 'Organic': '🌱', 'Fresh Produce': '🥕', 'Dairy Products': '🥛',
     'Bakery': '🍞', 'Beverages': '🥤', 'Snacks': '🍿', 'Pantry': '🥫', 'default': '🛒'
   };
@@ -39,8 +43,8 @@ const CategoryGrid = ({ categories, title = "Shop by Category", showViewAll = tr
           )}
         </div>
 
-        {/* Compact Grid: Using 4 columns on small mobile to match the "Quick Pick" feel */}
-        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
+        {/* Horizontal Scrollable Categories */}
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((category, index) => (
             <motion.div
               key={category.id}
@@ -48,6 +52,7 @@ const CategoryGrid = ({ categories, title = "Shop by Category", showViewAll = tr
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               whileTap={{ scale: 0.9 }}
+              className="flex-shrink-0 w-20 sm:w-24"
             >
               <Link to={getCategoryUrl(category)} className="block text-center group">
                 {/* Smaller, cleaner circular icons */}
@@ -57,7 +62,7 @@ const CategoryGrid = ({ categories, title = "Shop by Category", showViewAll = tr
                   </span>
                 </div>
                 
-                <h3 className="text-[10px] sm:text-sm font-bold text-gray-700 line-clamp-1 group-hover:text-green-700 transition-colors">
+                <h3 className="text-[10px] sm:text-sm font-bold text-gray-700 line-clamp-2 group-hover:text-green-700 transition-colors">
                   {category.name}
                 </h3>
               </Link>

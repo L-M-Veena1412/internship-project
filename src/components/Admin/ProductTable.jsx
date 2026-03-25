@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { mockProducts } from '../../data/mockData';
 import AddProductModal from './AddProductModal';
+import EditProductModal from './EditProductModal';
 import { useToast } from '../../context/ToastContext'; // Import Toast hook
 
 const ProductTable = () => {
@@ -13,6 +14,8 @@ const ProductTable = () => {
   
   // States for UI Control
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState(null);
   const { showToast } = useToast(); // Hook to trigger notifications
 
   const categories = ['All', ...new Set(products.map(p => p.category))];
@@ -36,8 +39,18 @@ const ProductTable = () => {
     }
   };
 
-  const handleEdit = (productName) => {
-    showToast(`Edit mode for ${productName} coming soon!`, 'info');
+  const handleEdit = (product) => {
+    setProductToEdit(product);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditProduct = (updatedProduct) => {
+    setProducts(products.map(p => 
+      p.id === updatedProduct.id ? { ...p, ...updatedProduct } : p
+    ));
+    setIsEditModalOpen(false);
+    setProductToEdit(null);
+    showToast(`${updatedProduct.name} updated successfully!`, 'success');
   };
 
   const handleToggleFeatured = (productId, productName, isFeatured) => {
@@ -69,6 +82,7 @@ const ProductTable = () => {
   };
 
   const getStockStatus = (stock) => {
+    if (stock === 0) return { text: 'Out of Stock', color: 'text-red-600 bg-red-100' };
     if (stock > 50) return { text: 'In Stock', color: 'text-green-600 bg-green-100' };
     if (stock > 10) return { text: 'Low Stock', color: 'text-yellow-600 bg-yellow-100' };
     return { text: 'Critical', color: 'text-red-600 bg-red-100' };
@@ -187,7 +201,7 @@ const ProductTable = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex space-x-3">
-                      <button onClick={() => handleEdit(product.name)} className="text-blue-600 hover:text-blue-800 font-medium text-sm">Edit</button>
+                      <button onClick={() => handleEdit(product)} className="text-blue-600 hover:text-blue-800 font-medium text-sm">Edit</button>
                       <button onClick={() => handleDelete(product.id, product.name)} className="text-red-500 hover:text-red-700 font-medium text-sm">Delete</button>
                     </div>
                   </td>
@@ -220,7 +234,7 @@ const ProductTable = () => {
                   <div className="mt-3 flex items-end justify-between">
                     <span className="text-xl font-black text-olive-green">${product.price.toFixed(2)}</span>
                     <div className="flex gap-2">
-                      <button onClick={() => handleEdit(product.name)} className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                      <button onClick={() => handleEdit(product)} className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                         ✏️
                       </button>
                       <button onClick={() => handleDelete(product.id, product.name)} className="p-2 bg-red-50 text-red-600 rounded-lg">
@@ -285,6 +299,17 @@ const ProductTable = () => {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onAddProduct={handleAddProduct}
+      />
+
+      {/* The Edit Product Modal */}
+      <EditProductModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setProductToEdit(null);
+        }} 
+        onEditProduct={handleEditProduct}
+        productToEdit={productToEdit}
       />
     </>
   );

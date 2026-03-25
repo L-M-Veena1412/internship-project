@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import SafeImage from './SafeImage';
 
 const FilterSidebar = ({ 
   categories = [], 
-  activeCategory, 
+  activeCategory,
+  activeSubcategory,
   onCategoryChange,
+  onSubcategoryChange,
   priceRange,
   onPriceChange,
   sortBy,
@@ -12,9 +15,50 @@ const FilterSidebar = ({
   setIsFilterOpen 
 }) => {
   const [activeTab, setActiveTab] = useState('category');
+  const [expandedCategories, setExpandedCategories] = useState(new Set());
+  const [selectedSubcategory, setSelectedSubcategory] = useState(activeSubcategory);
 
-  const renderCategoryIcon = (name) => {
+  // Debug: Log categories to see if they're being passed
+  console.log('FilterSidebar categories:', categories);
+  console.log('Categories length:', categories?.length);
+  console.log('Categories array:', JSON.stringify(categories, null, 2));
+
+  const renderCategoryIcon = (category, className = "w-5 h-5") => {
+    // If category is an object with image property, use SafeImage
+    if (typeof category === 'object' && category?.image) {
+      return (
+        <SafeImage
+          src={category.image}
+          alt={category.name}
+          className={`${className} object-cover rounded`}
+        />
+      );
+    }
+    
+    // If category is a string, find matching category object
+    if (typeof category === 'string') {
+      const matchedCategory = categories.find(c => c.name === category);
+      if (matchedCategory?.image) {
+        return (
+          <SafeImage
+            src={matchedCategory.image}
+            alt={matchedCategory.name}
+            className={`${className} object-cover rounded`}
+          />
+        );
+      }
+    }
+    
+    // Fallback to emoji if no image found
+    const name = typeof category === 'string' ? category : category?.name;
     const n = name?.toLowerCase();
+    if (n?.includes('snack') || n?.includes('sweet')) return '🍯';
+    if (n?.includes('health') || n?.includes('wellness') || n?.includes('organic')) return '🌿';
+    if (n?.includes('pickle') || n?.includes('thokku')) return '🥒';
+    if (n?.includes('pooja') || n?.includes('bhandara')) return '🙏';
+    if (n?.includes('papad') || n?.includes('sandige')) return '🍘';
+    if (n?.includes('pantry') || n?.includes('grocery')) return '🌾';
+    if (n?.includes('coastal') || n?.includes('non-veg')) return '🐟';
     if (n?.includes('veg')) return '🥬';
     if (n?.includes('fruit')) return '🍎';
     if (n?.includes('dairy')) return '🥛';
@@ -25,54 +69,102 @@ const FilterSidebar = ({
   // Helper to handle category clicks safely
   const handleCategoryClick = (cat) => {
     if (typeof cat === 'object') {
-      // If it's an object, use the slug for filtering
-      onCategoryChange(cat.slug);
+      // If it's an object, use name for filtering (not slug)
+      onCategoryChange(cat.name);
     } else {
-      // If it's a string, check if it matches any category slug
-      const matchedCategory = categories.find(c => c.slug === cat || c.name === cat);
-      onCategoryChange(matchedCategory ? matchedCategory.slug : cat);
+      // If it's a string, check if it matches any category name
+      const matchedCategory = categories.find(c => c.name === cat);
+      onCategoryChange(matchedCategory ? matchedCategory.name : cat);
+    }
+  };
+
+  // Toggle category expansion
+  const toggleCategoryExpansion = (categoryId) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(categoryId)) {
+      newExpanded.delete(categoryId);
+    } else {
+      newExpanded.add(categoryId);
+    }
+    setExpandedCategories(newExpanded);
+  };
+
+  // Handle subcategory click with radio button logic
+  const handleSubcategoryClick = (categoryName, subcategoryName) => {
+    // If clicking the same subcategory, unselect it (toggle behavior)
+    if (activeSubcategory === subcategoryName && activeCategory === categoryName) {
+      onCategoryChange(categoryName); // Clear subcategory by setting only category
+    } else {
+      // Select the new subcategory (exclusive selection)
+      onCategoryChange(categoryName);
+      onSubcategoryChange && onSubcategoryChange(subcategoryName);
     }
   };
 
   return (
     <>
       {/* --- MOBILE VIEW: Filter Button & Quick Scroll --- */}
-      <div className="md:hidden w-full space-y-4 mb-6">
+      <div className="w-full space-y-4 mb-6 lg:hidden">
         <button 
           onClick={() => setIsFilterOpen(true)}
           className="w-full py-3.5 bg-olive-green text-white font-black rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-olive-green/20"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
           Filter & Sort
         </button>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar scroll-smooth">
+        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar scroll-smooth lg:hidden">
           <button
             onClick={() => onCategoryChange('all')}
-            className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-bold transition-all ${
+            className={`whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${
               activeCategory === 'all' ? 'bg-olive-green text-white shadow-md' : 'bg-white border border-gray-100 text-gray-600'
             }`}
           >
+            <span>🛒</span>
             All
           </button>
-          {categories.map((cat) => {
-            const name = typeof cat === 'object' ? cat.name : cat;
-            const slug = typeof cat === 'object' ? cat.slug : cat;
-            return (
+          {categories && categories.length > 0 ? (
+            categories.map((cat) => {
+              const name = typeof cat === 'object' ? cat.name : cat;
+              const slug = typeof cat === 'object' ? cat.slug : cat;
+              return (
+                <button
+                  key={slug}
+                  onClick={() => handleCategoryClick(cat)}
+                  className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all ${
+                    activeCategory === slug ? 'bg-olive-green text-white shadow-md' : 'bg-white border border-gray-100 text-gray-600'
+                  }`}
+                >
+                  <span>{renderCategoryIcon(cat)}</span>
+                  {name.replace(/-/g, ' ')}
+                </button>
+              );
+            })
+          ) : (
+            // Fallback: Show hardcoded categories if data is not available
+            [
+              { name: 'Snacks & Traditional Sweets', slug: 'snacks-and-traditional-sweets' },
+              { name: 'Health, Wellness & Organic', slug: 'health-wellness-and-organic' },
+              { name: 'Pickle & Thokku', slug: 'pickle-and-thokku' },
+              { name: 'Pooja Bhandara', slug: 'pooja-bhandara' },
+              { name: 'Papads & Sandige', slug: 'papads-and-sandige' },
+              { name: 'Pantry & Grocery Essentials', slug: 'pantry-and-grocery-essentials' },
+              { name: 'Coastal & Non-Veg Specialties', slug: 'coastal-and-non-veg-specialties' }
+            ].map((cat) => (
               <button
-                key={slug}
-                onClick={() => handleCategoryClick(cat)}
+                key={cat.slug}
+                onClick={() => handleCategoryClick(cat.slug)}
                 className={`whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 transition-all ${
-                  activeCategory === slug ? 'bg-olive-green text-white shadow-md' : 'bg-white border border-gray-100 text-gray-600'
+                  activeCategory === cat.slug ? 'bg-olive-green text-white shadow-md' : 'bg-white border border-gray-100 text-gray-600'
                 }`}
               >
-                <span>{renderCategoryIcon(name)}</span>
-                {name.replace(/-/g, ' ')}
+                <span>{renderCategoryIcon(cat.name)}</span>
+                {cat.name}
               </button>
-            );
-          })}
+            ))
+          )}
         </div>
       </div>
 
@@ -221,18 +313,68 @@ const FilterSidebar = ({
               {categories.map((cat) => {
                 const name = typeof cat === 'object' ? cat.name : cat;
                 const slug = typeof cat === 'object' ? cat.slug : cat;
+                const hasSubcategories = cat.subcategories && cat.subcategories.length > 0;
+                const isExpanded = expandedCategories.has(cat.id);
+                
                 return (
-                  <label key={slug} className="flex items-center gap-3 cursor-pointer group">
-                    <input 
-                      type="radio" 
-                      checked={activeCategory === slug}
-                      onChange={() => handleCategoryClick(cat)}
-                      className="w-4 h-4 accent-olive-green" 
-                    />
-                    <span className={`text-sm font-bold capitalize ${activeCategory === slug ? 'text-olive-green' : 'text-gray-500'} group-hover:text-olive-green transition-colors`}>
-                      {renderCategoryIcon(name)} {name.replace(/-/g, ' ')}
-                    </span>
-                  </label>
+                  <div key={slug} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-3 cursor-pointer group flex-1">
+                        <input 
+                          type="radio" 
+                          checked={activeCategory === slug}
+                          onChange={() => handleCategoryClick(cat)}
+                          className="w-4 h-4 accent-olive-green" 
+                        />
+                        <span className={`text-sm font-bold capitalize ${activeCategory === slug ? 'text-olive-green' : 'text-gray-500'} group-hover:text-olive-green transition-colors`}>
+                          {renderCategoryIcon(cat)} {name.replace(/-/g, ' ')}
+                        </span>
+                      </label>
+                      {hasSubcategories && (
+                        <button
+                          onClick={() => toggleCategoryExpansion(cat.id)}
+                          className="p-1 text-gray-400 hover:text-olive-green transition-colors"
+                        >
+                          <svg 
+                            className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* Subcategories */}
+                    {hasSubcategories && isExpanded && (
+                      <div className="ml-8 space-y-2 border-l-2 border-gray-100 pl-4">
+                        {cat.subcategories.map((sub) => {
+                          const currentParams = new URLSearchParams(window.location.search);
+                          const currentCategory = currentParams.get('category');
+                          const currentSubcategory = currentParams.get('subcategory');
+                          const isSelected = currentSubcategory === sub.name && currentCategory === name;
+                          
+                          return (
+                            <label key={sub.id} className="flex items-center gap-2 cursor-pointer group">
+                              <input 
+                                type="radio" 
+                                name="subcategory"
+                                checked={isSelected}
+                                className="w-3 h-3 accent-olive-green" 
+                                onChange={() => handleSubcategoryClick(name, sub.name)}
+                              />
+                              <span className={`text-xs ${isSelected ? 'text-olive-green font-bold' : 'text-gray-600'} group-hover:text-olive-green transition-colors`}>
+                                {sub.name}
+                              </span>
+                              <span className="text-xs text-gray-400">({sub.count})</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>

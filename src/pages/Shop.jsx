@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import ProductGrid from '../components/ProductGrid';
 import FilterSidebar from '../components/FilterSidebar';
-import { getProducts, getCategories } from '../services/api';
+import { mockProducts, mockCategories } from '../data/mockData';
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,23 +17,28 @@ const Shop = () => {
 
   // 1. Sync state with URL params
   const activeCategory = searchParams.get('category') || 'all';
+  const activeSubcategory = searchParams.get('subcategory') || '';
   const activeSort = searchParams.get('sort') || 'name-asc';
   const activePrice = searchParams.get('price') || 'all';
   const activeSearch = searchParams.get('search') || ''; // Added search support
 
   useEffect(() => {
-    const fetchShopData = async () => {
+    const fetchShopData = () => {
       try {
         setLoading(true);
-        const [prodRes, catRes] = await Promise.all([
-          getProducts(),
-          getCategories()
-        ]);
-        setProducts(prodRes.data || []);
-        setCategories(catRes.data || []);
+        // Use mock data directly - no API calls
+        setProducts(mockProducts);
+        // Transform mockCategories to include slug property for FilterSidebar compatibility
+        const transformedCategories = mockCategories.map(cat => ({
+          ...cat,
+          slug: cat.name.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and')
+        }));
+        console.log('Shop transformedCategories:', transformedCategories);
+        setCategories(transformedCategories);
+        setLoading(false); // Set loading to false immediately since we have mock data
       } catch (err) {
+        console.error('Error setting up shop data:', err);
         setError('Could not load products. Please try again.');
-      } finally {
         setLoading(false);
       }
     };
@@ -48,18 +53,26 @@ const Shop = () => {
     if (activeSearch) {
       const term = activeSearch.toLowerCase();
       result = result.filter(p => 
-        p.name.toLowerCase().includes(term) || 
-        p.category.toLowerCase().includes(term) ||
-        p.subcategory.toLowerCase().includes(term)
+        p.name.toLowerCase().includes(term) ||
+        p.category.toLowerCase().includes(term)
       );
     }
 
-    // Category Filter - Handle both category and subcategory with case-insensitive comparison
-    if (activeCategory !== 'all') {
+    // Category & Subcategory Filter
+    // If subcategory is selected, filter ONLY by subcategory (ignore main category)
+    if (activeSubcategory) {
       result = result.filter(p => {
-        const categoryMatch = p.category.toLowerCase() === activeCategory.toLowerCase();
-        const subcategoryMatch = p.subcategory.toLowerCase() === activeCategory.toLowerCase();
-        return categoryMatch || subcategoryMatch;
+        const productSubcategory = p.subcategory ? p.subcategory.toLowerCase().trim() : '';
+        const targetSubcategory = activeSubcategory.toLowerCase().trim();
+        return productSubcategory === targetSubcategory;
+      });
+    }
+    // If only category is selected (and no subcategory), filter by category
+    else if (activeCategory !== 'all') {
+      result = result.filter(p => {
+        const productCategory = p.category.toLowerCase().trim();
+        const targetCategory = activeCategory.toLowerCase().trim();
+        return productCategory === targetCategory;
       });
     }
 
@@ -86,15 +99,24 @@ const Shop = () => {
     }
 
     return result;
-  }, [products, activeCategory, activeSort, activePrice, activeSearch]);
+  }, [products, activeCategory, activeSubcategory, activeSort, activePrice, activeSearch]);
 
   const updateParams = (newParams) => {
     const current = Object.fromEntries(searchParams.entries());
+    // If category is changing, clear subcategories
+    if (newParams.category && newParams.category !== current.category) {
+      delete current.subcategory;
+    }
     setSearchParams({ ...current, ...newParams });
   };
 
+  // Clear all filters function
+  const clearAllFilters = () => {
+    setSearchParams({});
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 lg:pt-32 pb-12">
+    <div className="min-h-screen bg-[#fdfbf4] pt-20 lg:pt-32 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* MOBILE HEADER */}
@@ -112,7 +134,9 @@ const Shop = () => {
             <FilterSidebar 
               categories={categories}
               activeCategory={activeCategory}
+              activeSubcategory={activeSubcategory}
               onCategoryChange={(cat) => updateParams({ category: cat })}
+              onSubcategoryChange={(sub) => updateParams({ subcategory: sub })}
               priceRange={activePrice}
               onPriceChange={(price) => updateParams({ price })}
               sortBy={activeSort}
@@ -127,7 +151,9 @@ const Shop = () => {
             <div className="hidden md:flex items-center justify-between mb-8">
               <div>
                 <h1 className="text-3xl font-black text-gray-800 tracking-tight">
-                  {activeSearch ? `Search: ${activeSearch}` : 'Organic Collection'}
+                  {activeSearch ? `Search: ${activeSearch}` : 
+                   activeSubcategory ? `${activeSubcategory} Collection` :
+                   activeCategory === 'all' ? 'Organic Collection' : activeCategory}
                 </h1>
                 <div className="h-1 w-12 bg-olive-green rounded-full mt-1"></div>
               </div>
@@ -158,7 +184,7 @@ const Shop = () => {
               <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
                 <p className="text-gray-400 font-bold">No products found in this range.</p>
                 <button 
-                  onClick={() => setSearchParams({})}
+                  onClick={clearAllFilters}
                   className="mt-4 text-olive-green font-black text-sm underline"
                 >
                   Clear all filters & search

@@ -4,11 +4,21 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { formatPriceINR } from '../utils/currency';
 import { getBaseVariantWeight, getVariantScaledPrice } from '../utils/variantPricing';
+import SafeImage from './SafeImage';
 
 const ProductCard = ({ product }) => {
   const { cart, addToCart, removeFromCart, updateQuantity } = useCart();
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [showVariantDropdown, setShowVariantDropdown] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  // --- MENTOR'S UPDATED LOGIC START ---
+  // Using the product.image string directly as the src.
+  // We handle potential broken links with a fallback image.
+  const handleImageError = (e) => {
+    e.target.src = '/logo192.png'; // Using existing logo as fallback
+  };
+  // --- MENTOR'S UPDATED LOGIC END ---
 
   const cartItem = cart.find(item => {
     if (selectedVariant) {
@@ -18,24 +28,25 @@ const ProductCard = ({ product }) => {
   });
   const currentQty = cartItem ? cartItem.quantity : 0;
 
-  // Check if product has variants
   const hasVariants = product.variants && product.variants.length > 0;
   
-  // Get selected variant stock if applicable
   const selectedVariantData = selectedVariant 
     ? product.variants.find(v => v.id === selectedVariant)
     : null;
-  const availableStock = selectedVariantData ? selectedVariantData.qty : 0;
+  const availableStock = selectedVariantData ? selectedVariantData.qty : product.stock || 0;
 
   const baseVariantWeight = getBaseVariantWeight(product.variants || []);
   const currentDisplayPrice = selectedVariantData
     ? getVariantScaledPrice(product.price, selectedVariantData.weight, baseVariantWeight)
     : Number(product.price || 0);
-  const currentDisplayMrp = Number(product.mrp || 0) > Number(product.price || 0)
+  const currentDisplayMrp = product.originalPrice && product.originalPrice > product.price
     ? selectedVariantData
-      ? getVariantScaledPrice(product.mrp, selectedVariantData.weight, baseVariantWeight)
-      : Number(product.mrp || 0)
+      ? getVariantScaledPrice(product.originalPrice, selectedVariantData.weight, baseVariantWeight)
+      : Number(product.originalPrice || 0)
     : null;
+
+  const isOnSale = product.originalPrice && product.originalPrice > product.price;
+  const isOutOfStock = availableStock === 0;
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -62,7 +73,7 @@ const ProductCard = ({ product }) => {
       return;
     }
     
-    if (hasVariants && availableStock <= currentQty) {
+    if (availableStock <= currentQty) {
       alert('Not enough stock available');
       return;
     }
@@ -86,144 +97,99 @@ const ProductCard = ({ product }) => {
 
   return (
     <motion.div 
-      whileHover={{ y: -4 }}
-      className="bg-white rounded-3xl border border-gray-100 flex flex-col h-full relative p-3 shadow-sm hover:shadow-md transition-all duration-300"
+      whileHover={{ y: -2 }}
+      className="bg-white flex flex-col h-full"
     >
-      {/* Image Link */}
-      <Link to={`/product/${product.id}`} className="block">
-        <div className="relative aspect-square w-full bg-[#F8F9F7] rounded-2xl overflow-hidden mb-3">
-          <img
+      <div className="relative aspect-square w-full bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+        <Link to={`/product/${product.id}`} className="block w-full h-full">
+          <SafeImage
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-contain p-4 mix-blend-multiply"
+            className="w-full h-full object-cover"
           />
-          
-          {/* 1. Container now allows image to be visible outside its 'bounds' if needed */}
-<div className="relative bg-gray-50 rounded-3xl p-4 flex items-center justify-center"> 
-  {/* 2. 'Organic' tag removed entirely */}
-  
-  {/* 3. Image is now the hero without the clipping wrapper */}
-  <img 
-    src={product.image} 
-    alt={product.name} 
-    className="w-full h-32 object-contain transform hover:scale-110 transition-transform duration-300" 
-  />
-</div>
-
-          {product.discount && (
-            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-0.5 text-[9px] font-black rounded-lg">
-              -{product.discount}%
+        </Link>
+        
+        <div className="absolute bottom-2 right-2 z-10">
+          {currentQty > 0 ? (
+            <div className="flex items-center bg-white rounded-full shadow-lg border border-gray-200">
+              <button 
+                onClick={handleDecreaseQty} 
+                className="w-6 h-6 flex items-center justify-center text-pink-500 hover:text-pink-600 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                </svg>
+              </button>
+              <span className="w-6 text-center text-xs font-semibold text-green-600">{currentQty}</span>
+              <button 
+                onClick={handleIncreaseQty} 
+                className="w-6 h-6 flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
             </div>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className="w-8 h-8 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+            >
+              <svg className="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
           )}
         </div>
-      </Link>
+      </div>
 
-      {/* Details Container */}
-      <div className="flex flex-col flex-1 px-1">
-        {/* Clickable Category Badge */}
-        <Link 
-          to={`/shop?category=${product.category}`}
-          className="text-gray-400 text-[9px] font-bold uppercase tracking-[0.1em] mb-1 hover:text-olive-green transition-colors w-fit"
-        >
-          {product.category?.replace(/-/g, ' ')}
-        </Link>
+      <div className="flex flex-col pt-4 pb-3 px-3">
+        <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center">
+            {[...Array(5)].map((_, i) => (
+              <span key={i} className={`text-xs ${i < Math.floor(product.rating || 4) ? 'text-yellow-400' : 'text-gray-200'}`}>★</span>
+            ))}
+          </div>
+          <span className="text-xs text-gray-600 font-medium">
+            {product.rating || 4.5}
+          </span>
+        </div>
 
-        {/* Product Name Link */}
-        <Link to={`/product/${product.id}`}>
-          <h3 className="font-bold text-gray-800 text-xs md:text-sm line-clamp-2 leading-tight min-h-[32px] mb-2 hover:text-olive-green transition-colors">
+        <Link to={`/product/${product.id}`} className="block">
+          <h3 className="font-medium text-gray-800 text-sm line-clamp-2 leading-tight mb-2 hover:text-green-600 transition-colors">
             {product.name}
           </h3>
         </Link>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1.5 mb-3">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className={`text-[10px] ${i < Math.floor(product.rating || 4) ? 'text-yellow-400' : 'text-gray-200'}`}>★</span>
-            ))}
-          </div>
-          <span className="text-[9px] font-bold text-gray-400">({product.reviews || '48'})</span>
+        <div className="text-gray-400 text-xs mb-2">
+          {hasVariants && selectedVariant
+            ? product.variants.find(v => v.id === selectedVariant)?.weight || '1 pack (88 g)'
+            : '1 pack (88 g)'}
         </div>
 
-        {/* Variant Selector */}
-        {hasVariants && product.variants.length > 0 && (
-          <div className="mb-3 relative">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setShowVariantDropdown(!showVariantDropdown);
-              }}
-              className="w-full text-left px-2 py-1.5 text-xs bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <span className="font-semibold text-gray-700">
-                {selectedVariant 
-                  ? `${product.variants.find(v => v.id === selectedVariant)?.weight} - ${formatPriceINR(currentDisplayPrice)}` 
-                  : 'Select Weight'}
-              </span>
-            </button>
-            
-            {showVariantDropdown && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
-                {product.variants.map((variant) => (
-                  (() => {
-                    const variantPrice = getVariantScaledPrice(product.price, variant.weight, baseVariantWeight);
-                    return (
-                  <button
-                    key={variant.id}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setSelectedVariant(variant.id);
-                      setShowVariantDropdown(false);
-                    }}
-                    className={`w-full text-left px-2 py-1.5 text-xs border-b last:border-b-0 hover:bg-gray-100 transition-colors ${
-                      selectedVariant === variant.id ? 'bg-olive-green/10' : ''
-                    }`}
-                  >
-                    <span className="font-medium">{variant.weight} - {formatPriceINR(variantPrice)}</span>
-                    <span className="text-gray-500 text-[10px]"> ({variant.qty} in stock)</span>
-                  </button>
-                    );
-                  })()
-                ))}
-              </div>
-            )}
+        <div className="flex items-center gap-2 mb-1">
+          <span className="bg-green-700 text-white px-2 py-1 rounded text-xs font-semibold whitespace-nowrap">
+            {formatPriceINR(currentDisplayPrice)}
+          </span>
+          
+          {currentDisplayMrp && (
+            <span className="text-gray-400 text-xs line-through whitespace-nowrap">
+              {formatPriceINR(currentDisplayMrp)}
+            </span>
+          )}
+        </div>
+
+        {currentDisplayMrp && (
+          <div className="text-green-600 text-xs font-medium">
+            ₹{Math.round(currentDisplayMrp - currentDisplayPrice)} OFF
           </div>
         )}
-        
-        {/* Price & Action Row */}
-        <div className="mt-auto flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-sm md:text-base font-black text-gray-900">
-              {formatPriceINR(currentDisplayPrice)}
-            </span>
-            {currentDisplayMrp && currentDisplayMrp > currentDisplayPrice && (
-              <span className="text-[10px] text-gray-400 line-through">
-                {formatPriceINR(currentDisplayMrp)}
-              </span>
-            )}
-          </div>
 
-          <div className="flex items-center">
-            {currentQty === 0 ? (
-              <button
-                onClick={handleAddToCart}
-                className="w-8 h-8 md:w-9 md:h-9 bg-olive-green text-white rounded-full flex items-center justify-center shadow-lg shadow-olive-green/20 hover:scale-110 active:scale-95 transition-transform"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </button>
-            ) : (
-              <div className="flex items-center gap-2 bg-olive-green/10 border border-olive-green/20 rounded-full px-1.5 py-1">
-                <button onClick={handleDecreaseQty} className="w-5 h-5 flex items-center justify-center text-olive-green font-bold text-xs">-</button>
-                <span className="text-xs font-black text-gray-900 min-w-[12px] text-center">{currentQty}</span>
-                <button onClick={handleIncreaseQty} className="w-5 h-5 flex items-center justify-center text-olive-green font-bold text-xs">+</button>
-              </div>
-            )}
+        {isOutOfStock && (
+          <div className="mt-2">
+            <span className="text-red-500 text-xs font-semibold">Out of Stock</span>
           </div>
-        </div>
+        )}
       </div>
     </motion.div>
   );

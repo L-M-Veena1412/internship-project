@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { mockProducts } from '../data/mockData';
 import Button from './Button';
+import SafeImage from './SafeImage';
 
 const HeroSection = () => {
   return (
@@ -9,8 +11,8 @@ const HeroSection = () => {
       
       {/* Background Image Layer */}
       <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=1920&h=1080&fit=crop"
+        <SafeImage
+          src="/images/home/main-hero.jpg"
           alt="Fresh organic produce"
           className="w-full h-full object-cover object-center"
         />
