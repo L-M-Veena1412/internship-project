@@ -12,7 +12,7 @@ const HeroSection = () => {
       {/* Background Image Layer */}
       <div className="absolute inset-0 z-0">
         <SafeImage
-          src="/images/home/main-hero.jpg"
+          src="/images/home/home.jpg"
           alt="Fresh organic produce"
           className="w-full h-full object-cover object-center"
         />

@@ -7,187 +7,114 @@ import { getBaseVariantWeight, getVariantScaledPrice } from '../utils/variantPri
 import SafeImage from './SafeImage';
 
 const ProductCard = ({ product }) => {
-  const { cart, addToCart, removeFromCart, updateQuantity } = useCart();
-  const [selectedVariant, setSelectedVariant] = useState(null);
-  const [showVariantDropdown, setShowVariantDropdown] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { cart, addToCart, updateQuantity } = useCart();
+  const [selectedVariant] = useState(null);
 
-  // --- MENTOR'S UPDATED LOGIC START ---
-  // Using the product.image string directly as the src.
-  // We handle potential broken links with a fallback image.
-  const handleImageError = (e) => {
-    e.target.src = '/logo192.png'; // Using existing logo as fallback
-  };
-  // --- MENTOR'S UPDATED LOGIC END ---
-
-  const cartItem = cart.find(item => {
-    if (selectedVariant) {
-      return item.product_qty_id === selectedVariant;
-    }
-    return item.id === product.id && !item.product_qty_id;
-  });
+  const cartItem = cart.find(item => item.id === product.id);
   const currentQty = cartItem ? cartItem.quantity : 0;
 
   const hasVariants = product.variants && product.variants.length > 0;
-  
-  const selectedVariantData = selectedVariant 
-    ? product.variants.find(v => v.id === selectedVariant)
-    : null;
-  const availableStock = selectedVariantData ? selectedVariantData.qty : product.stock || 0;
-
-  const baseVariantWeight = getBaseVariantWeight(product.variants || []);
-  const currentDisplayPrice = selectedVariantData
-    ? getVariantScaledPrice(product.price, selectedVariantData.weight, baseVariantWeight)
-    : Number(product.price || 0);
-  const currentDisplayMrp = product.originalPrice && product.originalPrice > product.price
-    ? selectedVariantData
-      ? getVariantScaledPrice(product.originalPrice, selectedVariantData.weight, baseVariantWeight)
-      : Number(product.originalPrice || 0)
-    : null;
-
-  const isOnSale = product.originalPrice && product.originalPrice > product.price;
+  const availableStock = product.stock || 0;
   const isOutOfStock = availableStock === 0;
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (hasVariants && !selectedVariant) {
-      alert('Please select a weight/variant');
-      return;
-    }
-    
     try {
       await addToCart(product, 1, selectedVariant);
     } catch (err) {
-      alert(err?.response?.data?.message || 'Failed to add item to cart');
-    }
-  };
-
-  const handleIncreaseQty = async (e) => {
-    e.preventDefault(); 
-    e.stopPropagation();
-    
-    if (hasVariants && !selectedVariant) {
-      alert('Please select a weight/variant');
-      return;
-    }
-    
-    if (availableStock <= currentQty) {
-      alert('Not enough stock available');
-      return;
-    }
-    
-    try {
-      await updateQuantity(product.id, currentQty + 1);
-    } catch (err) {
-      alert(err?.response?.data?.message || 'Failed to update quantity');
-    }
-  };
-
-  const handleDecreaseQty = (e) => {
-    e.preventDefault(); 
-    e.stopPropagation();
-    if (currentQty > 1) {
-      updateQuantity(product.id, currentQty - 1);
-    } else {
-      removeFromCart(product.id);
+      console.error(err);
     }
   };
 
   return (
     <motion.div 
-      whileHover={{ y: -2 }}
-      className="bg-white flex flex-col h-full"
+      whileHover={{ y: -3 }}
+      className="bg-white flex flex-col h-full group"
     >
-      <div className="relative aspect-square w-full bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+      {/* IMAGE SECTION - Set to Cover */}
+      <div className="relative aspect-square w-full bg-gray-100 rounded-2xl overflow-hidden border border-gray-50">
         <Link to={`/product/${product.id}`} className="block w-full h-full">
           <SafeImage
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover"
+            /* CHANGED: object-cover makes image fill the entire top box */
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         </Link>
         
+        {/* ADD BUTTON - Compact overlay */}
         <div className="absolute bottom-2 right-2 z-10">
           {currentQty > 0 ? (
-            <div className="flex items-center bg-white rounded-full shadow-lg border border-gray-200">
+            <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg p-0.5 border border-purple-100">
               <button 
-                onClick={handleDecreaseQty} 
-                className="w-6 h-6 flex items-center justify-center text-pink-500 hover:text-pink-600 transition-colors"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); updateQuantity(product.id, currentQty - 1); }} 
+                className="w-6 h-6 flex items-center justify-center text-purple-600 font-bold"
               >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                </svg>
+                -
               </button>
-              <span className="w-6 text-center text-xs font-semibold text-green-600">{currentQty}</span>
+              <span className="w-5 text-center text-[11px] font-black text-gray-800">{currentQty}</span>
               <button 
-                onClick={handleIncreaseQty} 
-                className="w-6 h-6 flex items-center justify-center text-green-600 hover:text-green-700 transition-colors"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); updateQuantity(product.id, currentQty + 1); }} 
+                className="w-6 h-6 flex items-center justify-center text-purple-600 font-bold"
               >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+                +
               </button>
             </div>
           ) : (
             <button
               onClick={handleAddToCart}
-              className="w-8 h-8 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+              disabled={isOutOfStock}
+              className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center text-purple-600 hover:bg-purple-600 hover:text-white transition-all"
             >
-              <svg className="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
+              <span className="text-xl leading-none">+</span>
             </button>
           )}
         </div>
       </div>
 
-      <div className="flex flex-col pt-4 pb-3 px-3">
-        <div className="flex items-center gap-1 mb-2">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <span key={i} className={`text-xs ${i < Math.floor(product.rating || 4) ? 'text-yellow-400' : 'text-gray-200'}`}>★</span>
-            ))}
-          </div>
-          <span className="text-xs text-gray-600 font-medium">
-            {product.rating || 4.5}
-          </span>
+      {/* INFO SECTION - More Compact */}
+      <div className="flex flex-col pt-2 px-1">
+        {/* RATING */}
+        <div className="flex items-center gap-1 mb-0.5">
+          <span className="text-yellow-400 text-[10px]">★★★★★</span>
+          <span className="text-[9px] text-gray-400 font-bold uppercase">{product.rating || 4.5}</span>
         </div>
 
-        <Link to={`/product/${product.id}`} className="block">
-          <h3 className="font-medium text-gray-800 text-sm line-clamp-2 leading-tight mb-2 hover:text-green-600 transition-colors">
+        {/* NAME - Reduced font and height */}
+        <Link to={`/product/${product.id}`} className="block mb-0.5">
+          <h3 className="font-bold text-gray-800 text-[12px] line-clamp-2 leading-tight h-[30px] group-hover:text-purple-600">
             {product.name}
           </h3>
         </Link>
 
-        <div className="text-gray-400 text-xs mb-2">
-          {hasVariants && selectedVariant
-            ? product.variants.find(v => v.id === selectedVariant)?.weight || '1 pack (88 g)'
-            : '1 pack (88 g)'}
+        {/* WEIGHT */}
+        <div className="text-gray-400 text-[10px] font-medium mb-1">
+          {product.weight || '500g'}
         </div>
 
-        <div className="flex items-center gap-2 mb-1">
-          <span className="bg-green-700 text-white px-2 py-1 rounded text-xs font-semibold whitespace-nowrap">
-            {formatPriceINR(currentDisplayPrice)}
+        {/* PRICE BAR */}
+        <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+          <span className="bg-[#108910] text-white px-1.5 py-0.5 rounded text-[12px] font-black">
+            {formatPriceINR(product.price)}
           </span>
-          
-          {currentDisplayMrp && (
-            <span className="text-gray-400 text-xs line-through whitespace-nowrap">
-              {formatPriceINR(currentDisplayMrp)}
+          {product.originalPrice > product.price && (
+            <span className="text-gray-400 text-[11px] line-through font-medium">
+              {formatPriceINR(product.originalPrice)}
             </span>
           )}
         </div>
 
-        {currentDisplayMrp && (
-          <div className="text-green-600 text-xs font-medium">
-            ₹{Math.round(currentDisplayMrp - currentDisplayPrice)} OFF
+        {/* OFF LABEL */}
+        {product.originalPrice > product.price && (
+          <div className="text-[#108910] text-[10px] font-black uppercase">
+            ₹{Math.round(product.originalPrice - product.price)} OFF
           </div>
         )}
 
         {isOutOfStock && (
-          <div className="mt-2">
-            <span className="text-red-500 text-xs font-semibold">Out of Stock</span>
+          <div className="mt-1">
+            <span className="text-red-500 text-[9px] font-black uppercase tracking-tighter">Out of Stock</span>
           </div>
         )}
       </div>

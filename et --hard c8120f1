@@ -1,0 +1,43 @@
+[33mc8120f1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull origin main: Fast-forward
+[33meb4a5e2[m HEAD@{1}: reset: moving to eb4a5e2
+[33mc8120f1[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{2}: commit: added new products
+[33m0adc747[m[33m ([m[1;31morigin/NEW_CHANGES[m[33m)[m HEAD@{3}: pull origin main: Fast-forward
+[33meb4a5e2[m HEAD@{4}: reset: moving to eb4a5e2
+[33m0adc747[m[33m ([m[1;31morigin/NEW_CHANGES[m[33m)[m HEAD@{5}: pull: Fast-forward
+[33meb4a5e2[m HEAD@{6}: reset: moving to eb4a5e2
+[33m8139d4b[m HEAD@{7}: pull origin main: Merge made by the 'ort' strategy.
+[33meb4a5e2[m HEAD@{8}: commit: Add admin routing with component isolation
+[33m6da3b40[m HEAD@{9}: reset: moving to HEAD
+[33m6da3b40[m HEAD@{10}: reset: moving to HEAD
+[33m6da3b40[m HEAD@{11}: commit: Add admin routing with component isolation
+[33mcd83531[m HEAD@{12}: commit: Add professional Admin Dashboard with responsive design
+[33m7bc874d[m HEAD@{13}: commit: update on search button
+[33m5cbcb5d[m HEAD@{14}: commit: update on homepage
+[33m00165f3[m HEAD@{15}: commit: added product description
+[33m1b67264[m HEAD@{16}: commit: updates for cartpage
+[33me0b8701[m HEAD@{17}: commit: updates for checkoutpage
+[33m85cdfe8[m HEAD@{18}: commit: updates for mobile view
+[33m71f49c4[m HEAD@{19}: commit: feat(ui): implement native-style mobile search and smooth profile transitions
+[33m25467ee[m HEAD@{20}: commit: feat: updated related products to horizontal scroll and restored navbar auth UI
+[33m34a586f[m HEAD@{21}: commit: removed some feauted
+[33m3e1a2f7[m HEAD@{22}: commit: Update layout: Logo left, Links centered, and Hero height adjusted for mobile
+[33ma7f22fd[m HEAD@{23}: commit: Update hero section
+[33m4b79074[m HEAD@{24}: commit: Updates on homepage
+[33m02036a0[m HEAD@{25}: commit: Updates on homepage
+[33me2d3bc4[m HEAD@{26}: commit: Update package.json
+[33m6a335db[m HEAD@{27}: commit: Update package.json
+[33m38b84ab[m HEAD@{28}: commit: Fixed unused variable ESLint errors
+[33m192342d[m HEAD@{29}: commit: Fixed ESLint unused variable errors
+[33md5404bd[m HEAD@{30}: commit: Updated mobile navigation, subcategory filtering, and UI improvements
+[33mb28b96e[m HEAD@{31}: commit: final version for deployment
+[33m0de445a[m HEAD@{32}: commit: made responsive changes
+[33m11b6c96[m HEAD@{33}: commit: features updated
+[33mddacc3a[m HEAD@{34}: commit: features updated
+[33madac76b[m HEAD@{35}: commit: Fixed infinite re-render issue in OrderConfirmation and improved frontend stability
+[33m5a37e54[m HEAD@{36}: commit: Add missing products and subcategory page, update api.jsx
+[33maa824bb[m HEAD@{37}: commit: features updated
+[33m5ad6f0f[m HEAD@{38}: commit: features updated
+[33mb610eaf[m HEAD@{39}: commit: Updated frontend design
+[33m2b0e227[m HEAD@{40}: Branch: renamed refs/heads/master to refs/heads/main
+[33m2b0e227[m HEAD@{42}: commit: Initial project commit
+[33mb417f7a[m HEAD@{43}: commit (initial): Initialize project using Create React App

@@ -15,8 +15,8 @@ const CategoryCard = ({ category }) => {
       whileHover={{ scale: 1.02 }}
       className="relative overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group cursor-pointer border border-gray-100"
     >
-      <Link to={`/category/${category.slug}`} className="block">
-        {/* Height reduced for mobile to keep "Products" visible below it */}
+      {/* UPDATED: Navigate to /shop with encoded category name */}
+      <Link to={`/shop?category=${encodeURIComponent(category.name)}`} className="block">
         <div className="relative h-32 sm:h-64">
           <img
             src={category.image}

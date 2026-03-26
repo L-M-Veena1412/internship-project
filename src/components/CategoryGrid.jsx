@@ -22,12 +22,12 @@ const CategoryGrid = ({ categories = mockCategories, title = "Shop by Category",
     return categoryIcons.default;
   };
 
-  const getCategoryUrl = (category) => `/shop?category=${category.slug || category.id}`;
+  // UPDATED: Use encodeURIComponent(category.name) to match Shop page filters
+  const getCategoryUrl = (category) => `/shop?category=${encodeURIComponent(category.name)}`;
 
   return (
     <section className="py-6 sm:py-12 px-2">
       <div className="max-w-7xl mx-auto">
-        {/* Tighter Section Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-lg sm:text-3xl font-black text-dark-text leading-tight">
@@ -43,7 +43,6 @@ const CategoryGrid = ({ categories = mockCategories, title = "Shop by Category",
           )}
         </div>
 
-        {/* Horizontal Scrollable Categories */}
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((category, index) => (
             <motion.div
@@ -55,7 +54,6 @@ const CategoryGrid = ({ categories = mockCategories, title = "Shop by Category",
               className="flex-shrink-0 w-20 sm:w-24"
             >
               <Link to={getCategoryUrl(category)} className="block text-center group">
-                {/* Smaller, cleaner circular icons */}
                 <div className="bg-white border border-gray-100 rounded-full w-full aspect-square flex items-center justify-center shadow-sm group-hover:bg-green-50 transition-colors mb-2">
                   <span className="text-xl sm:text-3xl">
                     {getCategoryIcon(category.name)}

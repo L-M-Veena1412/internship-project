@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getProductById, getProducts } from '../services/api';
+import { mockProducts } from '../data/mockData';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { formatPriceINR } from '../utils/currency';
-import { getBaseVariantWeight, getVariantScaledPrice, getWeightNumericValue } from '../utils/variantPricing';
-import Button from '../components/Button';
-import Loader from '../components/Loader';
 import ProductCard from '../components/ProductCard';
 
 const ProductDetails = () => {
@@ -15,418 +12,187 @@ const ProductDetails = () => {
   const { addToCart } = useCart();
   const { showToast } = useToast();
   
-  const [product, setProduct] = useState(null);
-  const [relatedProducts, setRelatedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('details');
   const [quantity, setQuantity] = useState(1);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(true);
-  const [selectedVariant, setSelectedVariant] = useState(null);
-  
+
+  const product = useMemo(() => mockProducts.find(p => p.id === parseInt(id)), [id]);
+
+  const relatedProducts = useMemo(() => {
+    if (!product) return [];
+    return mockProducts
+      .filter(p => p.category === product.category && p.id !== product.id)
+      .slice(0, 12);
+  }, [product]);
+
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        
-        const productRes = await getProductById(id);
-        const productData = productRes.data;
-        
-        setProduct(productData);
-        
-        // Fetch related products (same category, excluding current product)
-        const allProductsRes = await getProducts();
-        const related = allProductsRes.data
-          .filter(p => p.category === productData.category && p.id !== productData.id)
-          .slice(0, 4);
-        
-        setRelatedProducts(related);
-        setError(null);
-      } catch (err) {
-        setError('Product not found or failed to load.');
-        console.error('Error fetching product:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchProduct();
+    window.scrollTo(0, 0);
+    setQuantity(1);
   }, [id]);
-  
-  const handleAddToCart = async () => {
-    if (product) {
-      // Check if product has variants and one is selected
-      const hasVariants = product.variants && product.variants.length > 0;
-      if (hasVariants && !selectedVariant) {
-        showToast('Please select a weight/variant', 'error');
-        return;
-      }
 
-      // Get the selected variant data to check stock
-      if (hasVariants && selectedVariant) {
-        const variantData = product.variants.find(v => v.id === selectedVariant);
-        if (!variantData || variantData.qty < quantity) {
-          showToast('Not enough stock for selected variant', 'error');
-          return;
-        }
-      }
+  if (!product) return <div className="py-20 text-center uppercase font-black">Product Not Found</div>;
 
-      try {
-        await addToCart(product, quantity, selectedVariant);
-        showToast('Item added to cart successfully');
-      } catch (err) {
-        const message = err?.response?.data?.message || 'Failed to add item to cart';
-        showToast(message, 'error');
-      }
-    }
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+    showToast(`${product.name} added to cart!`);
   };
-  
-  const handleQuantityChange = (value) => {
-    const newQuantity = quantity + value;
-    if (newQuantity >= 1 && newQuantity <= 10) {
-      setQuantity(newQuantity);
-    }
-  };
-  
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader size="large" text="Loading product details..." />
-      </div>
-    );
-  }
-  
-  if (error || !product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-dark-text mb-4">{error}</h2>
-          <Link to="/shop">
-            <Button variant="primary">Back to Shop</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
-  const sellingPrice = Number(product.price || 0);
-  const rawOriginalPrice = Number(
-    product.mrp ?? product.originalPrice ?? product.original_price ?? sellingPrice
-  );
-  const rawDiscount = Number(product.discount ?? product.discount_percentage ?? 0);
-
-  const computedOriginalPrice =
-    rawOriginalPrice > sellingPrice
-      ? rawOriginalPrice
-      : rawDiscount > 0 && sellingPrice > 0
-        ? sellingPrice / (1 - rawDiscount / 100)
-        : sellingPrice;
-
-  const discountPercent =
-    rawDiscount > 0
-      ? Math.round(rawDiscount)
-      : computedOriginalPrice > sellingPrice && computedOriginalPrice > 0
-        ? Math.round(((computedOriginalPrice - sellingPrice) / computedOriginalPrice) * 100)
-        : 0;
-
-  const hasDiscount = computedOriginalPrice > sellingPrice && discountPercent > 0;
-
-  const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
-  const baseVariantWeight = getBaseVariantWeight(product.variants || []);
-  const selectedVariantData = hasVariants
-    ? product.variants.find((variant) => variant.id === selectedVariant)
-    : null;
-  const fallbackVariantData = hasVariants
-    ? [...product.variants]
-        .sort((a, b) => (getWeightNumericValue(a.weight) || Number.MAX_SAFE_INTEGER) - (getWeightNumericValue(b.weight) || Number.MAX_SAFE_INTEGER))[0]
-    : null;
-  const activeVariantData = selectedVariantData || fallbackVariantData;
-  const activeVariantWeight = activeVariantData?.weight || null;
-
-  const displaySellingPrice = hasVariants && activeVariantWeight
-    ? getVariantScaledPrice(sellingPrice, activeVariantWeight, baseVariantWeight)
-    : sellingPrice;
-
-  const displayOriginalPrice = hasDiscount && hasVariants && activeVariantWeight
-    ? getVariantScaledPrice(computedOriginalPrice, activeVariantWeight, baseVariantWeight)
-    : computedOriginalPrice;
-  
-  // Mock additional images for gallery
-  const productImages = [
-    product.image,
-    'https://images.unsplash.com/photo-1546470427-e92b2c9c09d6?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1445282768811-6a790c3c3529?w=600&h=600&fit=crop'
-  ];
-
-  const handleImageError = (e) => {
-    // Fallback to a placeholder image if the original fails to load
-    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=600&fit=crop'; // Fresh produce fallback
-  };
-  
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="min-h-screen bg-[#fdfbf4] pb-10">
+      <div className="max-w-7xl mx-auto px-4 pt-4">
+        
         {/* Breadcrumb */}
-        <motion.nav
-          className="mb-6 sm:mb-8 text-sm text-gray-600"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Link to="/" className="hover:text-olive-green transition-colors">Home</Link>
-          <span className="mx-2">/</span>
-          <Link to="/shop" className="hover:text-olive-green transition-colors">Shop</Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-900">{product?.name || 'Product'}</span>
-        </motion.nav>
-        
-        {/* Product Details */}
-        <motion.div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12 sm:mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          {/* Image Gallery */}
-          <div className="space-y-4">
-            <div className="aspect-square overflow-hidden rounded-custom bg-white shadow-soft">
-              <img
-                src={productImages[selectedImage]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                onError={handleImageError}
-              />
+        <nav className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">
+          <Link to="/" className="hover:text-purple-600 transition-colors">Home</Link>
+          <span>/</span>
+          <Link to="/shop" className="hover:text-purple-600 transition-colors">Shop</Link>
+          <span>/</span>
+          <span className="text-gray-800 truncate">{product.name}</span>
+        </nav>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* LEFT: Image Box */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center justify-center aspect-square overflow-hidden self-start">
+            <motion.img
+              key={id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              src={product.image || "/logo192.png"}
+              alt={product.name}
+              className="max-h-full w-auto object-contain transition-transform duration-500 hover:scale-105"
+            />
+          </div>
+
+          {/* RIGHT: Product Sidebar + Tabs */}
+          <div className="flex flex-col">
+            <div className="mb-1">
+                <span className="text-purple-600 font-black text-[10px] uppercase tracking-[0.2em]">{product.category}</span>
             </div>
+            <h1 className="text-2xl lg:text-3xl font-black text-gray-800 leading-tight mb-2 tracking-tighter uppercase">
+              {product.name}
+            </h1>
             
-            {/* Thumbnail Gallery */}
-            <div className="grid grid-cols-4 gap-2">
-              {productImages.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`aspect-square overflow-hidden rounded-custom border-2 transition-all ${
-                    selectedImage === index
-                      ? 'border-olive-green shadow-medium'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
+            <p className="text-gray-500 text-sm font-medium mb-4 leading-relaxed border-l-4 border-purple-100 pl-4">
+              {product.description}
+            </p>
+
+            <div className="flex items-end gap-3 mb-6">
+              <span className="text-3xl font-black text-gray-900">{formatPriceINR(product.price)}</span>
+              {product.originalPrice > product.price && (
+                <>
+                  <span className="text-lg text-gray-400 line-through font-bold mb-0.5">{formatPriceINR(product.originalPrice)}</span>
+                  <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[9px] font-black uppercase mb-1">
+                    {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* Trust Badges */}
+            <div className="grid grid-cols-3 gap-2 mb-6 py-3 border-y border-gray-100">
+               <div className="text-center">
+                  <p className="text-[8px] font-black text-gray-300 uppercase">Authenticity</p>
+                  <p className="text-[10px] font-bold text-gray-700 leading-tight">Taste Guaranteed</p>
+               </div>
+               <div className="text-center border-x border-gray-100">
+                  <p className="text-[8px] font-black text-gray-300 uppercase">Logistics</p>
+                  <p className="text-[10px] font-bold text-gray-700 leading-tight">Damage Covered</p>
+               </div>
+               <div className="text-center">
+                  <p className="text-[8px] font-black text-gray-300 uppercase">Support</p>
+                  <p className="text-[10px] font-bold text-gray-700 leading-tight">24/7 Support</p>
+               </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex items-center border-2 border-gray-200 rounded-xl bg-white overflow-hidden">
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 py-2 text-gray-400 font-bold hover:text-purple-600 transition-colors">-</button>
+                <span className="w-8 text-center font-black text-gray-800 text-sm">{quantity}</span>
+                <button onClick={() => setQuantity(quantity + 1)} className="px-4 py-2 text-gray-400 font-bold hover:text-purple-600 transition-colors">+</button>
+              </div>
+              <button onClick={handleAddToCart} className="flex-1 bg-purple-600 text-white font-black py-3 rounded-xl shadow-md hover:bg-purple-700 active:scale-95 transition-all uppercase tracking-widest text-[10px]">
+                Add to Cart
+              </button>
+            </div>
+
+            {/* --- MOVED TABS SECTION: NOW INSIDE THE RIGHT COLUMN --- */}
+            <div className="border-t border-gray-100 pt-6">
+              <div className="flex gap-6 border-b border-gray-100 mb-4">
+                <button 
+                  onClick={() => setActiveTab('details')}
+                  className={`pb-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'details' ? 'text-purple-600 border-b-2 border-purple-600' : 'text-gray-400 border-b-2 border-transparent'}`}
                 >
-                  <img
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={handleImageError}
-                  />
+                  Product Details
                 </button>
-              ))}
-            </div>
-          </div>
-          
-          {/* Product Info */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-dark-text mb-2">
-                {product.name}
-              </h1>
-              
-              {/* Rating */}
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.floor(product.rating)
-                          ? 'text-yellow-400'
-                          : 'text-gray-300'
-                      }`}
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600">
-                  {product.rating} ({product.reviews} reviews)
-                </span>
-              </div>
-              
-              {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl font-bold text-olive-green">
-                    {formatPriceINR(displaySellingPrice)}
-                  </span>
-                  {hasDiscount && (
-                    <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
-                      {discountPercent}% OFF
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  {hasDiscount && (
-                    <span className="text-base text-gray-500 line-through">
-                      {formatPriceINR(displayOriginalPrice)}
-                    </span>
-                  )}
-                  {activeVariantWeight && (
-                    <span className="text-sm text-gray-500">for {activeVariantWeight}</span>
-                  )}
-                  <span className="text-gray-600">per unit</span>
-                </div>
+                <button 
+                  onClick={() => setActiveTab('overview')}
+                  className={`pb-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === 'overview' ? 'text-purple-600 border-b-2 border-purple-600' : 'text-gray-400 border-b-2 border-transparent'}`}
+                >
+                  Overview
+                </button>
               </div>
 
-              {/* Manufacturer Info */}
-              {product.manufacturer && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-semibold">Manufacturer:</span> {product.manufacturer.name}
-                  </p>
-                </div>
-              )}
-              
-              {/* Description */}
-              <div className="prose prose-gray max-w-none">
-                <p className="text-gray-700 leading-relaxed">
-                  {product.description}
-                </p>
-              </div>
-            </div>
-            
-            {/* Variant and Quantity Selection */}
-            <div className="space-y-4">
-              {/* Variant Selector */}
-              {product.variants && product.variants.length > 0 && (
-                <div>
-                  <label className="block text-sm font-semibold text-dark-text mb-2">
-                    Select Weight:
-                  </label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {product.variants.map((variant) => (
-                      (() => {
-                        const variantSellingPrice = getVariantScaledPrice(sellingPrice, variant.weight, baseVariantWeight);
-                        return (
-                      <button
-                        key={variant.id}
-                        onClick={() => setSelectedVariant(variant.id)}
-                        className={`p-3 rounded-lg border-2 transition-all text-sm font-medium ${
-                          selectedVariant === variant.id
-                            ? 'border-olive-green bg-olive-green/10 text-olive-green'
-                            : 'border-gray-300 hover:border-gray-400'
-                        } ${variant.qty === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        disabled={variant.qty === 0}
-                      >
-                        <div>{variant.weight}</div>
-                        <div className="text-xs font-semibold text-olive-green">
-                          {formatPriceINR(variantSellingPrice)}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {variant.qty > 0 ? `${variant.qty} in stock` : 'Out of stock'}
-                        </div>
-                      </button>
-                        );
-                      })()
-                    ))}
+              <div className="animate-fadeIn">
+                {activeTab === 'details' ? (
+                  <div className="space-y-3">
+                    <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                      <h4 className="text-[8px] font-black text-purple-600 uppercase mb-1">Ingredients</h4>
+                      <p className="text-[11px] text-gray-600 font-medium leading-snug">
+                        Sugar, Gram Flour, Pure Ghee, Cardamom, Edible Oil. No added preservatives.
+                      </p>
+                    </div>
+                    <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                      <h4 className="text-[8px] font-black text-purple-600 uppercase mb-1">Shelf Life</h4>
+                      <p className="text-[11px] text-gray-600 font-medium leading-snug">
+                        Best within 30 days. Store in a cool, dry place in an airtight container.
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* Quantity Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-dark-text mb-2">
-                  Quantity:
-                </label>
-                <div className="flex items-center border border-gray-300 rounded-lg w-fit">
-                  <button
-                    onClick={() => handleQuantityChange(-1)}
-                    className="px-3 py-2 text-gray-600 hover:text-dark-text hover:bg-gray-100 transition-colors"
-                    disabled={quantity <= 1}
-                  >
-                    -
-                  </button>
-                  <span className="px-4 py-2 border-x border-gray-300 min-w-[60px] text-center">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => handleQuantityChange(1)}
-                    className="px-3 py-2 text-gray-600 hover:text-dark-text hover:bg-gray-100 transition-colors"
-                    disabled={quantity >= 10}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                variant="primary"
-                size="large"
-                onClick={handleAddToCart}
-                className="w-full flex items-center justify-center gap-2 py-4 sm:py-3"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Add to Cart - {formatPriceINR(displaySellingPrice * quantity)}
-              </Button>
-            </div>
-              
-            {/* Product Features */}
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-sm text-gray-600">100% Organic</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-sm text-gray-600">Farm Fresh</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-sm text-gray-600">No Pesticides</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-olive-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-sm text-gray-600">Sustainably Sourced</span>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-gray-600 text-[11px] font-medium leading-relaxed">
+                      Authentic South Indian flavor delivered fresh. Each batch is prepared by traditional artisans to maintain nostalgic taste.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                       <p className="text-[10px] text-gray-500 font-bold">✓ 100% Veg</p>
+                       <p className="text-[10px] text-gray-500 font-bold">✓ Hand-crafted</p>
+                       <p className="text-[10px] text-gray-500 font-bold">✓ Hygienic</p>
+                       <p className="text-[10px] text-gray-500 font-bold">✓ Traditional</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </motion.div>
-        
-        {/* Related Products */}
-{relatedProducts.length > 0 && (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, delay: 0.2 }}
-    className="mt-12"
-  >
-    <div className="flex items-center justify-between mb-6">
-      <h2 className="text-xl sm:text-2xl font-bold text-dark-text">Related Products</h2>
-      <span className="text-sm text-olive-green font-medium sm:hidden">Swipe →</span>
-    </div>
-
-    {/* Horizontal Scroll Container for Mobile, Grid for Desktop */}
-    <div className="flex overflow-x-auto pb-4 gap-4 snap-x no-scrollbar lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 sm:gap-6">
-      {relatedProducts.map((relatedProduct) => (
-        <div 
-          key={relatedProduct.id} 
-          className="min-w-[70%] sm:min-w-[45%] lg:min-w-0 snap-start"
-        >
-          <ProductCard product={relatedProduct} />
         </div>
-      ))}
-    </div>
-  </motion.div>
-)}
+
+        {/* RELATED PRODUCTS SLIDER (remains at the bottom across full width) */}
+        {relatedProducts.length > 0 && (
+          <div className="pt-6 border-t border-gray-100">
+            <div className="flex justify-between items-end mb-4">
+              <div>
+                <h2 className="text-xl font-black text-gray-800 uppercase tracking-tighter leading-none">More Like This</h2>
+                <p className="text-gray-400 text-[9px] font-bold uppercase tracking-widest mt-1">You might also like</p>
+              </div>
+              <Link to="/shop" className="text-[9px] font-black text-purple-600 uppercase tracking-widest border-b-2 border-purple-200 pb-1">
+                View Shop
+              </Link>
+            </div>
+
+            <div className="relative group">
+              <div className="flex overflow-x-auto gap-3 pb-4 snap-x snap-mandatory no-scrollbar scroll-smooth">
+                {relatedProducts.map((p) => (
+                  <div key={p.id} className="min-w-[32%] sm:min-w-[24%] lg:min-w-[15.5%] snap-start snap-always">
+                    <div className="h-full bg-white rounded-2xl border border-gray-50 shadow-sm transition-transform duration-300 hover:-translate-y-1">
+                      <ProductCard product={p} />
+                    </div>
+                  </div>
+                ))}
+                <div className="min-w-[10px] h-1 shrink-0" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
