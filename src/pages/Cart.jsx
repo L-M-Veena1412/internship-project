@@ -1,21 +1,24 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { convertToINR, formatINR, formatPriceINR } from '../utils/currency';
 import Button from '../components/Button';
 
 const Cart = () => {
-  // Renamed 'items' to 'cart' to match your Context's exported value
   const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
   
-  // Safety check: Ensure cart is always an array before calling .length
+  // Safety check: Ensure cart is always an array
   const cartItems = cart || [];
-  
+
   const subtotalInr = cartItems.reduce(
     (total, item) => total + convertToINR(item.price) * item.quantity,
     0
   );
+
   const freeShippingThresholdInr = 100;
   const minimumSubtotalForFreeInr = freeShippingThresholdInr + 1;
   const shippingCostInr = 49;
@@ -28,6 +31,18 @@ const Cart = () => {
   
   const handleQuantityChange = (productId, newQuantity) => {
     updateQuantity(productId, newQuantity);
+  };
+
+  const handleCheckoutNavigation = (e) => {
+    // Check if e exists before calling preventDefault
+    if (e && e.preventDefault) e.preventDefault();
+    
+    if (!isLoggedIn) {
+      // Redirect to login but tell it to come back to checkout
+      navigate('/login', { state: { from: '/checkout' } });
+    } else {
+      navigate('/checkout');
+    }
   };
   
   if (cartItems.length === 0) {
@@ -193,11 +208,15 @@ const Cart = () => {
                   </div>
                 </div>
                 
-                <Link to="/checkout" className="block w-full">
-                  <Button variant="primary" size="large" className="w-full py-4 rounded-2xl shadow-lg shadow-green-100 font-black">
-                    Proceed to Checkout
-                  </Button>
-                </Link>
+                {/* Fixed the nested button/link issue here */}
+                <Button 
+                  onClick={handleCheckoutNavigation} 
+                  variant="primary" 
+                  size="large" 
+                  className="w-full py-4 rounded-2xl shadow-lg shadow-green-100 font-black transition-transform active:scale-95"
+                >
+                  Proceed to Checkout
+                </Button>
                 
                 <div className="mt-6 flex flex-col items-center gap-3">
                   <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">

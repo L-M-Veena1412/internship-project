@@ -10,8 +10,7 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
 
   const handleImageError = (e) => {
-    // Fallback to a placeholder image if the original fails to load
-    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop'; // Fresh produce fallback
+    e.target.src = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=400&fit=crop';
   };
 
   useEffect(() => {
@@ -23,15 +22,20 @@ const Orders = () => {
         if (latestOrder) {
           setOrder({
             orderId: `ORD${latestOrder.id}`,
-            orderDate: new Date(latestOrder.created_at).toLocaleDateString(),
+            orderDate: new Date(latestOrder.created_at).toLocaleDateString('en-IN', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            }),
             paymentStatus: latestOrder.payment_status,
             totalAmount: Number(latestOrder.total_amount),
+            status: latestOrder.status || 'Placed Successfully',
             items: (latestOrder.items || []).map((item) => ({
               name: item.product_name,
               image: item.product_image,
               price: Number(item.unit_price),
               quantity: Number(item.quantity),
-              category: 'Organic Product',
+              category: item.category || 'Organic Product',
             })),
           });
         } else {
@@ -52,28 +56,21 @@ const Orders = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        duration: 0.6,
-        staggerChildren: 0.1
-      }
+      transition: { duration: 0.6, staggerChildren: 0.1 }
     }
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.5 }
-    }
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#fdfbf4] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-olive-green border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading order details...</p>
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Fetching your orders...</p>
         </div>
       </div>
     );
@@ -81,30 +78,20 @@ const Orders = () => {
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <motion.div
-          className="text-center max-w-md"
+      <div className="min-h-screen bg-[#fdfbf4] flex items-center justify-center px-4">
+        <motion.div 
+          className="text-center max-w-md bg-white p-10 rounded-3xl shadow-sm border border-gray-100"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6 }}
         >
-          <div className="mb-8">
-            <svg className="w-24 h-24 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-          </div>
-          
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Orders Found</h2>
-          <p className="text-gray-600 mb-8">
-            You haven't placed any orders yet. Start shopping to see your orders here.
+          <div className="mb-6 text-gray-200 text-6xl">📦</div>
+          <h2 className="text-2xl font-black text-gray-900 mb-2 uppercase tracking-tighter">No Orders Found</h2>
+          <p className="text-gray-500 text-sm font-medium mb-8">
+            Looks like you haven't tasted our organic specialties yet. Start your journey today!
           </p>
-          
           <Link to="/shop">
-            <Button variant="primary" size="large">
+            <Button variant="primary" className="w-full py-4 rounded-2xl font-black uppercase tracking-widest text-[10px]">
               Start Shopping
-              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
             </Button>
           </Link>
         </motion.div>
@@ -113,190 +100,129 @@ const Orders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 sm:py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#fdfbf4] py-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="space-y-8"
+          className="space-y-6"
         >
-          {/* Page Header */}
-          <motion.div variants={itemVariants} className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Orders</h1>
-            <p className="text-gray-600">Track and manage your orders</p>
+          {/* Header */}
+          <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 pb-6">
+            <div>
+              <p className="text-purple-600 font-black text-[10px] uppercase tracking-[0.2em] mb-1">Confirmation</p>
+              <h1 className="text-3xl font-black text-gray-800 uppercase tracking-tighter">Order Details</h1>
+            </div>
+            <div className="bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
+               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">{order.status}</span>
+            </div>
           </motion.div>
 
-          {/* Order Details */}
-          <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-lg p-8">
-            {/* Order Header */}
-            <div className="border-b pb-6 mb-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Details</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Order ID:</span>
-                      <p className="font-semibold text-gray-900">{order.orderId}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Order Date:</span>
-                      <p className="font-semibold text-gray-900">{order.orderDate}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Payment Status:</span>
-                      <p className="font-semibold text-green-600">{order.paymentStatus}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Total Amount:</span>
-                      <p className="font-semibold text-gray-900">{formatPriceINR(order.totalAmount)}</p>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Order Info */}
+            <div className="lg:col-span-2 space-y-6">
+              <motion.div variants={itemVariants} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Items Ordered</h3>
+                  <p className="text-[10px] font-black text-gray-800">{order.items.length} Products</p>
                 </div>
-                
-                {/* Order Status Badge */}
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-green-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
+                <div className="divide-y divide-gray-50">
+                  {order.items.map((item, index) => (
+                    <div key={index} className="p-6 flex items-center gap-4 hover:bg-gray-50/50 transition-colors">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-20 h-20 object-cover rounded-2xl border border-gray-100 shadow-sm flex-shrink-0"
+                        onError={handleImageError}
                       />
-                    </svg>
-                  </div>
-                  <span className="ml-3 text-sm font-medium text-green-600">Placed Successfully</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[9px] font-black text-purple-600 uppercase tracking-widest mb-0.5">{item.category}</p>
+                        <h4 className="text-sm font-black text-gray-800 uppercase truncate">{item.name}</h4>
+                        <div className="flex items-center gap-4 mt-2">
+                          <p className="text-xs font-bold text-gray-400">Qty: <span className="text-gray-900">{item.quantity}</span></p>
+                          <p className="text-xs font-bold text-gray-400">Price: <span className="text-gray-900">{formatPriceINR(item.price)}</span></p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-black text-gray-900">{formatPriceINR(item.price * item.quantity)}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              </motion.div>
+
+              {/* Trust Badges */}
+              <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
+                <div className="bg-white p-4 rounded-2xl border border-gray-100 text-center">
+                   <p className="text-[8px] font-black text-gray-300 uppercase mb-1">Quality</p>
+                   <p className="text-[10px] font-bold text-gray-700 leading-tight">Taste Guaranteed</p>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-gray-100 text-center">
+                   <p className="text-[8px] font-black text-gray-300 uppercase mb-1">Safety</p>
+                   <p className="text-[10px] font-bold text-gray-700 leading-tight">Damage Covered</p>
+                </div>
+                <div className="bg-white p-4 rounded-2xl border border-gray-100 text-center">
+                   <p className="text-[8px] font-black text-gray-300 uppercase mb-1">Shipping</p>
+                   <p className="text-[10px] font-bold text-gray-700 leading-tight">Fresh Delivery</p>
+                </div>
+              </motion.div>
             </div>
 
-            {/* Customer Information */}
-            {order.customerInfo && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Customer Information</h3>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">Name:</span>
-                      <p className="font-medium text-gray-900">
-                        {order.customerInfo.firstName} {order.customerInfo.lastName}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Email:</span>
-                      <p className="font-medium text-gray-900">{order.customerInfo.email}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Address:</span>
-                      <p className="font-medium text-gray-900">
-                        {order.customerInfo.address}, {order.customerInfo.city}, {order.customerInfo.state} {order.customerInfo.zipCode}
-                      </p>
-                    </div>
+            {/* Sidebar Summary */}
+            <div className="space-y-6">
+              <motion.div variants={itemVariants} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6 border-b border-gray-50 pb-4">Order Summary</h3>
+                
+                <div className="space-y-4 mb-6">
+                  <div className="flex justify-between">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase">Order ID</span>
+                    <span className="text-[10px] font-black text-gray-800 uppercase tracking-tighter">{order.orderId}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase">Date</span>
+                    <span className="text-[10px] font-black text-gray-800 uppercase tracking-tighter">{order.orderDate}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase">Payment</span>
+                    <span className="text-[10px] font-black text-green-600 uppercase tracking-tighter">{order.paymentStatus}</span>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Ordered Products */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Ordered Products</h3>
-              <div className="border rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Product
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Price
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Quantity
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Total
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {order.items.map((item, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-12 h-12 object-cover rounded-lg mr-4"
-                                onError={handleImageError}
-                              />
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                                <div className="text-sm text-gray-500">{item.category}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {formatPriceINR(item.price)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {item.quantity}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {formatPriceINR(item.price * item.quantity)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            {/* Order Summary */}
-            <div className="mt-6">
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between text-gray-600">
+                <div className="bg-gray-50 rounded-2xl p-4 space-y-3 mb-6">
+                  <div className="flex justify-between text-xs font-bold text-gray-500">
                     <span>Subtotal</span>
                     <span>{formatPriceINR(order.totalAmount)}</span>
                   </div>
-                  <div className="flex justify-between text-gray-600">
+                  <div className="flex justify-between text-xs font-bold text-gray-500">
                     <span>Shipping</span>
-                    <span>FREE</span>
+                    <span className="text-green-600">FREE</span>
                   </div>
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between font-semibold text-gray-900 text-lg">
-                      <span>Total</span>
-                      <span>{formatPriceINR(order.totalAmount)}</span>
-                    </div>
+                  <div className="border-t border-gray-200 pt-3 flex justify-between items-center">
+                    <span className="text-[10px] font-black text-gray-900 uppercase">Total</span>
+                    <span className="text-xl font-black text-gray-900">{formatPriceINR(order.totalAmount)}</span>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-              <Link to="/shop">
-                <Button variant="primary" className="w-full sm:w-auto px-8 py-3">
-                  Continue Shopping
+                <Button
+                  variant="outline"
+                  className="w-full py-3 rounded-xl font-black uppercase tracking-widest text-[9px] border-2"
+                  onClick={() => window.print()}
+                >
+                  Print Invoice
                 </Button>
-              </Link>
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto px-8 py-3"
-                onClick={() => window.print()}
-              >
-                Print Order
-              </Button>
+              </motion.div>
+
+              <motion.div variants={itemVariants}>
+                <Link to="/shop">
+                  <Button variant="primary" className="w-full py-4 rounded-3xl shadow-lg shadow-purple-100 font-black uppercase tracking-widest text-[10px]">
+                    Continue Shopping
+                  </Button>
+                </Link>
+              </motion.div>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     </div>
