@@ -2441,5 +2441,6 @@ export const mockCustomers = [
     totalOrders: 15,
     totalSpent: 678.90,
     status: "active"
-  }
+  },
+  { id: '50100', name: 'Suresh Kumar', email: 'suresh@email.com', phone: '+91 9876543210', joinedDate: 'Jan 15, 2024', totalOrders: 5, avatar: '🌱' },
 ];

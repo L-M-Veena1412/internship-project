@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-// Correct path to match your folder structure
+import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
 import { formatPriceINR } from '../../utils/currency'; 
 
 const ProductTable = ({ products, onDelete, onUpdateStock }) => {
   const [editingStock, setEditingStock] = useState(null);
+  const navigate = useNavigate(); // 2. Initialize navigate
 
-  // 🛡️ SAFETY GUARD: If products is undefined or not an array, show a loading message
+  // SAFETY GUARD
   if (!products || !Array.isArray(products)) {
     return (
       <div className="w-full p-20 text-center">
@@ -18,7 +19,8 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
     );
   }
 
-  const handleStockUpdate = (productId, currentStock) => {
+  // This handles the small pencil icon update for stock only
+  const handleQuickStockUpdate = (productId, currentStock) => {
     const newStock = prompt('Enter new stock quantity:', currentStock);
     if (newStock !== null && !isNaN(newStock)) {
       onUpdateStock(productId, parseInt(newStock));
@@ -122,7 +124,13 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-3">
-                      <button onClick={() => handleStockUpdate(product.id, product.stock)} className="text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest transition-colors">Edit</button>
+                      {/* --- 3. MODIFIED EDIT BUTTON --- */}
+                      <button 
+                        onClick={() => navigate(`/admin/products/edit/${product.id}`)} 
+                        className="text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest transition-colors"
+                      >
+                        Edit
+                      </button>
                       <button onClick={() => onDelete(product.id)} className="text-[10px] font-black uppercase text-red-500 hover:text-red-700 tracking-widest transition-colors">Delete</button>
                     </div>
                   </td>
@@ -151,7 +159,13 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
                 {getStatusBadge(product.stock)}
               </div>
               <div className="flex gap-2">
-                <button onClick={() => handleStockUpdate(product.id, product.stock)} className="px-4 py-2 bg-gray-50 text-[9px] font-black uppercase rounded-xl hover:bg-gray-100 transition-colors">Stock</button>
+                {/* Mobile Edit Button */}
+                <button 
+                  onClick={() => navigate(`/admin/products/edit/${product.id}`)} 
+                  className="px-4 py-2 bg-blue-50 text-blue-600 text-[9px] font-black uppercase rounded-xl hover:bg-blue-100 transition-colors"
+                >
+                  Edit
+                </button>
                 <button onClick={() => onDelete(product.id)} className="px-4 py-2 bg-red-50 text-red-500 text-[9px] font-black uppercase rounded-xl hover:bg-red-100 transition-colors">Remove</button>
               </div>
             </div>
