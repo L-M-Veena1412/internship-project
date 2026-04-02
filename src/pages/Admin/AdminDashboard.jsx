@@ -17,6 +17,9 @@ import CustomerForm from './CustomerForm';
 import CustomerDetailView from './CustomerDetailView';
 import AnalyticsPage from './TempA';
 import SettingsPage from './TempS';
+import ManufacturerListPage from './ManufacturerListPage';
+import ManufacturerForm from './ManufacturerForm';
+import ManufacturerDetailView from './ManufacturerDetailView';
 
 // Data Imports
 import { mockStats, mockOrders, mockProducts, mockCustomers } from '../../data/mockData';
@@ -63,51 +66,48 @@ const AdminDashboard = () => {
       <AdminSidebar isOpen={sidebarOpen} onToggle={handleSidebarToggle} />
 
       <div className="flex-1 lg:ml-72 min-w-0 w-full h-screen overflow-y-auto transition-all duration-300">
-        {/* Mobile Header */}
-        <div className="lg:hidden bg-white shadow-sm border-b border-gray-200">
-          <div className="flex items-center justify-between px-4 py-3">
-            <button onClick={handleSidebarToggle} className="p-2 rounded-lg hover:bg-gray-100">
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        
+        {/* IMPROVED MOBILE HEADER */}
+        <div className="lg:hidden sticky top-0 z-40 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100">
+          <div className="flex items-center justify-between px-4 py-4">
+            <button onClick={handleSidebarToggle} className="p-2 bg-slate-50 rounded-xl text-emerald-700 hover:bg-emerald-50 transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-lg font-bold text-emerald-800 uppercase tracking-tighter">Organic Store</h1>
-            <div className="w-10"></div>
+            <h1 className="text-sm font-black text-emerald-800 uppercase tracking-widest">Organic Store</h1>
+            <div className="w-10"></div> 
           </div>
         </div>
 
-        <main className="p-4 sm:p-6 lg:p-8 w-full max-w-none mx-0">
+        {/* Padding adjustment for better spacing on mobile main container */}
+        <main className="p-3 sm:p-6 lg:p-8 w-full max-w-none mx-0">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
-              {/* Dashboard Home */}
               <Route path="/" element={<DashboardOverview />} />
               <Route path="/dashboard" element={<DashboardOverview />} />
-              
-              {/* Product Management Routes */}
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/products/add" element={<AddProductPage />} />
               <Route path="/products/edit/:productId" element={<AddProductPage />} />
               <Route path="/products/detail/:productId" element={<ProductDetailView />} />
               <Route path="/products/detail" element={<ProductDetailView />} />
-
-              {/* Order Management Routes */}
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/orders/:orderId" element={<OrderDetailView />} />
               <Route path="/orders/detail" element={<OrderDetailView />} />
-
-              {/* Customer Management Routes */}
               <Route path="/customers" element={<CustomersPage />} />
               <Route path="/customers/add" element={<CustomerForm />} />
               <Route path="/customers/edit" element={<CustomerForm />} />
               <Route path="/customers/edit/:customerId" element={<CustomerForm />} />
               <Route path="/customers/detail" element={<CustomerDetailView />} />
               <Route path="/customers/:customerId" element={<CustomerDetailView />} />
-
-              {/* Secondary Pages */}
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
-              
               <Route path="*" element={<DashboardOverview />} />
+              {/* Inside <Routes> block */}
+<Route path="/manufacturers" element={<ManufacturerListPage />} />
+<Route path="/manufacturers/add" element={<ManufacturerForm />} />
+<Route path="/manufacturers/edit/:id" element={<ManufacturerForm />} />
+<Route path="/manufacturers/detail/:id" element={<ManufacturerDetailView />} />
             </Routes>
           </AnimatePresence>
         </main>
@@ -116,8 +116,7 @@ const AdminDashboard = () => {
   );
 };
 
-// --- INTERNAL PAGE COMPONENTS ---
-
+// Internal Page Components Update
 const DashboardOverview = () => {
   const [recentOrders, setRecentOrders] = useState(mockOrders.slice(0, 5));
   const handleStatusChange = (orderId, newStatus) => {
@@ -125,11 +124,11 @@ const DashboardOverview = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 w-full">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 md:space-y-6 w-full">
       <StatsCards />
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden w-full">
-        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-xl font-black text-gray-800 uppercase tracking-tighter">Recent Orders</h2>
+        <div className="px-4 py-4 md:px-6 md:py-5 border-b border-gray-100 flex justify-between items-center">
+          <h2 className="text-lg md:text-xl font-black text-gray-800 uppercase tracking-tighter">Recent Orders</h2>
         </div>
         <OrderTable orders={recentOrders} onStatusChange={handleStatusChange} />
       </div>
@@ -157,10 +156,10 @@ const ProductsPage = () => {
   );
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full space-y-6">
-      <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
-        <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter">Product Inventory</h2>
-        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-1">Manage your store items and stock levels</p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full space-y-4 md:space-y-6">
+      <div className="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 shadow-sm">
+        <h2 className="text-xl md:text-2xl font-black text-gray-800 uppercase tracking-tighter">Product Inventory</h2>
+        <p className="text-[9px] md:text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-1">Manage items and stock</p>
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 px-6 rounded-2xl border border-gray-100 shadow-sm">
@@ -172,10 +171,10 @@ const ProductsPage = () => {
           </span>
           <input 
             type="text" 
-            placeholder="Search products..." 
+            placeholder="Search..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm font-medium"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-xs font-medium"
           />
         </div>
 
@@ -183,12 +182,11 @@ const ProductsPage = () => {
           onClick={() => navigate('/admin/products/add')}
           className="w-full md:w-auto px-6 py-3 bg-[#5E7D63] hover:bg-[#4a634e] text-white text-[10px] font-black uppercase rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 tracking-widest"
         >
-          <span className="text-lg leading-none">+</span>
-          Add New Product
+          Add Product
         </button>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
         <ProductTable 
           products={filteredProducts} 
           onDelete={handleDelete} 
@@ -206,10 +204,10 @@ const OrdersPage = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full space-y-6">
-      <div className="flex justify-between items-center bg-white p-6 rounded-3xl border border-gray-100">
-        <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter">Order List</h2>
-        <button className="px-6 py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase rounded-xl hover:bg-emerald-700 transition-all shadow-lg">Export CSV</button>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 md:p-6 rounded-3xl border border-gray-100">
+        <h2 className="text-xl md:text-2xl font-black text-gray-800 uppercase tracking-tighter">Order List</h2>
+        <button className="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase rounded-xl hover:bg-emerald-700 transition-all shadow-lg">Export CSV</button>
       </div>
       <OrderTable orders={orders} onStatusChange={handleStatusChange} />
     </motion.div>
@@ -221,19 +219,19 @@ const CustomersPage = () => {
   const navigate = useNavigate();
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full space-y-6">
-      <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex justify-between items-center">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full space-y-4 md:space-y-6">
+      <div className="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-black text-gray-800 uppercase tracking-tighter">Customer List</h2>
-          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-1">
+          <h2 className="text-xl md:text-2xl font-black text-gray-800 uppercase tracking-tighter">Customer List</h2>
+          <p className="text-[9px] md:text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-1">
             Managing {customers.length} registered members
           </p>
         </div>
         <button 
           onClick={() => navigate('/admin/customers/add')}
-          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase rounded-xl transition-all shadow-lg shadow-emerald-200/50"
+          className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase rounded-xl transition-all shadow-lg shadow-emerald-200/50"
         >
-          + Add New Customer
+          Add Customer
         </button>
       </div>
 
@@ -246,13 +244,13 @@ const CustomersPage = () => {
           </span>
           <input 
             type="text" 
-            placeholder="Search by name, email or phone..." 
+            placeholder="Search..." 
             className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-xs font-bold"
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+      <div className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-gray-100 shadow-xl shadow-slate-200/50 overflow-hidden">
         <CustomerTable 
             customers={customers} 
             onDelete={(id) => setCustomers(customers.filter(c => c.id !== id))} 

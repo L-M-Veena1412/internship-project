@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { formatPriceINR } from '../../utils/currency'; 
 
 const ProductTable = ({ products, onDelete, onUpdateStock }) => {
   const [editingStock, setEditingStock] = useState(null);
-  const navigate = useNavigate(); // 2. Initialize navigate
+  const navigate = useNavigate();
 
   // SAFETY GUARD
   if (!products || !Array.isArray(products)) {
@@ -18,15 +18,6 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
       </div>
     );
   }
-
-  // This handles the small pencil icon update for stock only
-  const handleQuickStockUpdate = (productId, currentStock) => {
-    const newStock = prompt('Enter new stock quantity:', currentStock);
-    if (newStock !== null && !isNaN(newStock)) {
-      onUpdateStock(productId, parseInt(newStock));
-      setEditingStock(null);
-    }
-  };
 
   const getStatusBadge = (stock) => {
     let style = "bg-green-100 text-green-700";
@@ -49,9 +40,9 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
 
   return (
     <div className="w-full">
-      {/* Desktop View Table */}
+      {/* --- DESKTOP VIEW (Visible on Large Screens) --- */}
       <div className="hidden lg:block bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead className="bg-gray-50/50 border-b border-gray-100">
               <tr>
@@ -89,7 +80,7 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{product.category}</span>
+                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{product.category || product.mainCategory}</span>
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-sm font-black text-gray-900">{formatPriceINR(product.price)}</p>
@@ -98,7 +89,7 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
                     {editingStock === product.id ? (
                       <input
                         type="number"
-                        defaultValue={product.stock}
+                        defaultValue={product.stock || product.quantity}
                         className="w-20 px-2 py-1 border-2 border-emerald-100 rounded-lg text-xs font-black focus:border-emerald-500 outline-none"
                         autoFocus
                         onBlur={(e) => {
@@ -114,17 +105,22 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
                       />
                     ) : (
                       <div className="flex items-center gap-2 group/stock cursor-pointer" onClick={() => setEditingStock(product.id)}>
-                        <span className="text-sm font-black text-gray-700">{product.stock} Units</span>
+                        <span className="text-sm font-black text-gray-700">{product.stock || product.quantity} Units</span>
                         <span className="opacity-0 group-hover/stock:opacity-100 text-blue-400 text-xs">✎</span>
                       </div>
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    {getStatusBadge(product.stock)}
+                    {getStatusBadge(product.stock || product.quantity)}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end gap-3">
-                      {/* --- 3. MODIFIED EDIT BUTTON --- */}
+                      <button 
+                        onClick={() => navigate(`/admin/products/detail/${product.id}`)} 
+                        className="text-[10px] font-black uppercase text-emerald-600 hover:text-emerald-800 tracking-widest transition-colors"
+                      >
+                        View
+                      </button>
                       <button 
                         onClick={() => navigate(`/admin/products/edit/${product.id}`)} 
                         className="text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest transition-colors"
@@ -141,35 +137,65 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
         </div>
       </div>
 
-      {/* Mobile View Cards */}
+      {/* --- MOBILE VIEW (Visible on Small Screens) --- */}
       <div className="lg:hidden space-y-4">
         {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
+          <motion.div 
+            key={product.id} 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm"
+          >
             <div className="flex gap-4 mb-4">
-              <img src={product.image} className="w-20 h-20 rounded-2xl object-cover bg-gray-50 border border-gray-100" alt="" />
-              <div className="flex-1">
-                <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">{product.category}</p>
-                <h3 className="text-sm font-black text-gray-800 uppercase leading-tight mb-1">{product.name}</h3>
+              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
+                <img 
+                  src={product.image || "/logo192.png"} 
+                  className="w-full h-full object-cover" 
+                  alt="" 
+                  onError={(e) => { e.target.src = 'https://via.placeholder.com/80?text=Org'; }}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1 truncate">
+                  {product.category || product.mainCategory}
+                </p>
+                <h3 className="text-sm font-black text-gray-800 uppercase leading-tight mb-1 truncate">
+                  {product.name}
+                </h3>
                 <p className="text-lg font-black text-gray-900">{formatPriceINR(product.price)}</p>
+                <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">ID: #{product.id}</p>
               </div>
             </div>
+            
             <div className="flex items-center justify-between pt-4 border-t border-gray-50">
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Stock: {product.stock} Units</span>
-                {getStatusBadge(product.stock)}
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
+                  Stock: {product.stock || product.quantity} Units
+                </span>
+                {getStatusBadge(product.stock || product.quantity)}
               </div>
               <div className="flex gap-2">
-                {/* Mobile Edit Button */}
+                <button 
+                   onClick={() => navigate(`/admin/products/detail/${product.id}`)}
+                   className="p-2 bg-emerald-50 text-emerald-600 rounded-xl"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                </button>
                 <button 
                   onClick={() => navigate(`/admin/products/edit/${product.id}`)} 
-                  className="px-4 py-2 bg-blue-50 text-blue-600 text-[9px] font-black uppercase rounded-xl hover:bg-blue-100 transition-colors"
+                  className="px-4 py-2 bg-blue-50 text-blue-600 text-[9px] font-black uppercase rounded-xl hover:bg-blue-100"
                 >
                   Edit
                 </button>
-                <button onClick={() => onDelete(product.id)} className="px-4 py-2 bg-red-50 text-red-500 text-[9px] font-black uppercase rounded-xl hover:bg-red-100 transition-colors">Remove</button>
+                <button 
+                  onClick={() => onDelete(product.id)} 
+                  className="px-4 py-2 bg-red-50 text-red-500 text-[9px] font-black uppercase rounded-xl hover:bg-red-100"
+                >
+                  Remove
+                </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
