@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Outlet, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Routes, Route, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Component Imports
@@ -20,6 +20,8 @@ import SettingsPage from './TempS';
 import ManufacturerListPage from './ManufacturerListPage';
 import ManufacturerForm from './ManufacturerForm';
 import ManufacturerDetailView from './ManufacturerDetailView';
+import CategoryListPage from './CategoryListPage';
+import CategoryForm from './CategoryForm';
 
 // Data Imports
 import { mockStats, mockOrders, mockProducts, mockCustomers } from '../../data/mockData';
@@ -65,7 +67,7 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-50 flex w-full overflow-hidden text-slate-900">
       <AdminSidebar isOpen={sidebarOpen} onToggle={handleSidebarToggle} />
 
-      <div className="flex-1 lg:ml-72 min-w-0 w-full h-screen overflow-y-auto transition-all duration-300">
+      <div className="flex-1 lg:ml-72 min-w-0 w-full h-screen overflow-y-auto transition-all duration-300 no-scrollbar">
         
         {/* IMPROVED MOBILE HEADER */}
         <div className="lg:hidden sticky top-0 z-40 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100">
@@ -80,34 +82,48 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Padding adjustment for better spacing on mobile main container */}
         <main className="p-3 sm:p-6 lg:p-8 w-full max-w-none mx-0">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
-              <Route path="/" element={<DashboardOverview />} />
-              <Route path="/dashboard" element={<DashboardOverview />} />
-              <Route path="/products" element={<ProductsPage />} />
+              {/* CATEGORY ROUTES (Specific routes first) */}
+              <Route path="/categories/add" element={<CategoryForm />} />
+              <Route path="/categories/edit/:id" element={<CategoryForm />} />
+              <Route path="/categories" element={<CategoryListPage />} />
+
+              {/* PRODUCT ROUTES */}
               <Route path="/products/add" element={<AddProductPage />} />
               <Route path="/products/edit/:productId" element={<AddProductPage />} />
               <Route path="/products/detail/:productId" element={<ProductDetailView />} />
               <Route path="/products/detail" element={<ProductDetailView />} />
-              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/products" element={<ProductsPage />} />
+
+              {/* MANUFACTURER ROUTES */}
+              <Route path="/manufacturers/add" element={<ManufacturerForm />} />
+              <Route path="/manufacturers/edit/:id" element={<ManufacturerForm />} />
+              <Route path="/manufacturers/detail/:id" element={<ManufacturerDetailView />} />
+              <Route path="/manufacturers" element={<ManufacturerListPage />} />
+
+              {/* ORDER ROUTES */}
               <Route path="/orders/:orderId" element={<OrderDetailView />} />
               <Route path="/orders/detail" element={<OrderDetailView />} />
-              <Route path="/customers" element={<CustomersPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+
+              {/* CUSTOMER ROUTES */}
               <Route path="/customers/add" element={<CustomerForm />} />
-              <Route path="/customers/edit" element={<CustomerForm />} />
               <Route path="/customers/edit/:customerId" element={<CustomerForm />} />
-              <Route path="/customers/detail" element={<CustomerDetailView />} />
+              <Route path="/customers/edit" element={<CustomerForm />} />
               <Route path="/customers/:customerId" element={<CustomerDetailView />} />
+              <Route path="/customers/detail" element={<CustomerDetailView />} />
+              <Route path="/customers" element={<CustomersPage />} />
+
+              {/* GENERAL ROUTES */}
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/dashboard" element={<DashboardOverview />} />
+              <Route path="/" element={<DashboardOverview />} />
+              
+              {/* WILDCARD (FALLBACK) */}
               <Route path="*" element={<DashboardOverview />} />
-              {/* Inside <Routes> block */}
-<Route path="/manufacturers" element={<ManufacturerListPage />} />
-<Route path="/manufacturers/add" element={<ManufacturerForm />} />
-<Route path="/manufacturers/edit/:id" element={<ManufacturerForm />} />
-<Route path="/manufacturers/detail/:id" element={<ManufacturerDetailView />} />
             </Routes>
           </AnimatePresence>
         </main>
@@ -116,7 +132,7 @@ const AdminDashboard = () => {
   );
 };
 
-// Internal Page Components Update
+// Internal Page Components
 const DashboardOverview = () => {
   const [recentOrders, setRecentOrders] = useState(mockOrders.slice(0, 5));
   const handleStatusChange = (orderId, newStatus) => {

@@ -69,6 +69,16 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
         { name: 'Detail', path: '/admin/products' }
       ]
     },
+    // ... inside your menuItems array
+{
+  name: 'Categories',
+  path: '/admin/categories',
+  icon: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+    </svg>
+  )
+},
     {
       name: 'Customer',
       icon: (
@@ -134,7 +144,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
       </div>
 
       <nav className="flex-1 px-4 py-6 overflow-y-auto no-scrollbar">
-        <p className="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Master Controls</p>
+        <p className="px-4 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Admin Panel</p>
         <ul className="space-y-1">
           {menuItems.map((item) => {
             const hasSubItems = item.subItems && item.subItems.length > 0;
