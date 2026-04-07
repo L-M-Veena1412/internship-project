@@ -1,338 +1,182 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const { signup, sendOTP, verifyOTP } = useAuth();
+  
+  const [step, setStep] = useState('form'); 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    name: '', email: '', password: '', mobile: ''
   });
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [activePolicy, setActivePolicy] = useState('');
 
-  const policyContent = {
-    terms: {
-      title: 'Terms of Service',
-      body: [
-        'By creating an account, you agree to provide accurate information and keep your credentials secure.',
-        'Orders can be cancelled only before dispatch. Refunds for damaged or incorrect products are processed after verification.',
-        'We may update these terms from time to time. Continued use of OrganicStore means you accept those updates.'
-      ]
-    },
-    privacy: {
-      title: 'Privacy Policy',
-      body: [
-        'We collect only the data required to process orders, deliver products, and provide support.',
-        'Your personal data is not sold to third parties. Payment information is handled through secure payment providers.',
-        'You can request profile updates or account deletion by contacting support from your registered email address.'
-      ]
-    }
-  };
-
-  const validateName = (name) => {
-    if (!name) return 'Full name is required';
-    if (!/^[a-zA-Z]/.test(name)) return 'Name must begin with a letter';
-    if (!/^[a-zA-Z][a-zA-Z\s]*$/.test(name)) return 'Name can only contain letters and spaces';
-    if (name.trim().length < 2) return 'Name must be at least 2 characters';
-    return '';
-  };
-
-  const getPasswordStrength = (password) => {
-    let score = 0;
-    if (password.length >= 8) score++;
-    if (/[A-Z]/.test(password)) score++;
-    if (/[a-z]/.test(password)) score++;
-    if (/[0-9]/.test(password)) score++;
-    if (/[^A-Za-z0-9]/.test(password)) score++;
-    if (score <= 1) return { label: 'Very Weak', color: 'bg-red-500', width: 'w-1/5' };
-    if (score === 2) return { label: 'Weak', color: 'bg-orange-400', width: 'w-2/5' };
-    if (score === 3) return { label: 'Fair', color: 'bg-yellow-400', width: 'w-3/5' };
-    if (score === 4) return { label: 'Strong', color: 'bg-lime-500', width: 'w-4/5' };
-    return { label: 'Very Strong', color: 'bg-green-600', width: 'w-full' };
-  };
-
-  const validatePassword = (password) => {
-    if (!password) return 'Password is required';
-    if (password.length < 8) return 'Password must be at least 8 characters';
-    if (!/[A-Z]/.test(password)) return 'Password must contain at least one uppercase letter';
-    if (!/[a-z]/.test(password)) return 'Password must contain at least one lowercase letter';
-    if (!/[0-9]/.test(password)) return 'Password must contain at least one number';
-    if (!/[^A-Za-z0-9]/.test(password)) return 'Password must contain at least one special character (!@#$%…)';
-    return '';
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    // Clear field error on change
-    if (fieldErrors[name]) {
-      setFieldErrors({ ...fieldErrors, [name]: '' });
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    const nameErr = validateName(formData.name);
-    const passErr = validatePassword(formData.password);
-    const confirmErr = formData.password !== formData.confirmPassword ? 'Passwords do not match' : '';
-
-    if (nameErr || passErr || confirmErr) {
-      setFieldErrors({ name: nameErr, password: passErr, confirmPassword: confirmErr });
-      return;
-    }
-
-    setLoading(true);
+  const handleOtpChange = (element, index) => {
+    if (isNaN(element.value)) return false;
+    const newOtp = [...otp];
+    newOtp[index] = element.value;
+    setOtp(newOtp);
     
-    try {
-      const result = await signup(formData.name, formData.email, formData.password);
-      
-      if (result.success) {
-        // Redirect to login after successful registration
-        navigate('/login');
-      } else {
-        setError(result.message);
-      }
-    } catch (err) {
-      setError('Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
+    if (element.value !== "" && element.nextSibling) {
+      element.nextSibling.focus();
     }
   };
-  
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const res = await sendOTP(formData.email, 'email');
+    if (res.success) setStep('email_otp');
+    else setError(res.message);
+    setLoading(false);
+  };
+
+  const handleVerifyEmail = async () => {
+    setLoading(true);
+    setError('');
+    const res = await verifyOTP(formData.email, otp.join(''));
+    if (res.success) {
+      setOtp(['', '', '', '', '', '']);
+      setStep('mobile_input');
+    } else {
+      setError(res.message);
+    }
+    setLoading(false);
+  };
+
+  const handleSendMobileOTP = async () => {
+    setLoading(true);
+    setError('');
+    const res = await sendOTP(formData.mobile, 'mobile');
+    if (res.success) setStep('mobile_otp');
+    else setError(res.message);
+    setLoading(false);
+  };
+
+  const handleFinalVerify = async () => {
+    setLoading(true);
+    setError('');
+    const res = await verifyOTP(formData.mobile, otp.join(''));
+    if (res.success) {
+      const finalRes = await signup(formData);
+      if (finalRes.success) navigate('/login');
+    } else {
+      setError(res.message);
+    }
+    setLoading(false);
+  };
+
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div
-        className="max-w-md w-full space-y-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        {/* Header */}
-        <div className="text-center">
-          <Link to="/" className="flex items-center justify-center space-x-2 mb-6">
-            <svg className="w-10 h-10 text-olive-green" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-            </svg>
-            <span className="text-2xl font-bold text-olive-green">OrganicStore</span>
-          </Link>
-          
-          <h2 className="text-3xl font-bold text-dark-text">
-            Create Account
-          </h2>
-          <p className="mt-2 text-gray-600">
-            Join us for fresh organic goodness delivered to your door
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#fdfbf4] flex items-center justify-center py-12 px-4">
+      <motion.div className="max-w-md w-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         
-        {/* Register Form */}
-        <motion.div
-          className="bg-white p-8 rounded-custom shadow-medium"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
+        {/* TOP TOGGLE - Updated to Olive Green (#708A28) */}
+        {step === 'form' && (
+          <div className="flex bg-gray-100 rounded-full p-1 mb-8 shadow-sm">
+            <button onClick={() => navigate('/login')} className="flex-1 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 transition-all">Login</button>
+            <button className="flex-1 py-2.5 text-sm font-bold bg-[#708A28] text-white rounded-full shadow-lg transition-all">Register</button>
+          </div>
+        )}
+
+        <div className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-gray-50 relative overflow-hidden">
+          <AnimatePresence mode="wait">
+            
+            {/* STEP 1: REGISTRATION FORM */}
+            {step === 'form' && (
+              <motion.form key="form" onSubmit={handleFormSubmit} initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="space-y-5">
+                <div className="text-center mb-6">
+                  <h2 className="text-2xl font-black text-gray-800">Create an account</h2>
+                  <p className="text-xs text-gray-400 mt-2">Already have an account? <Link to="/login" className="text-[#708A28] font-bold">Log in</Link></p>
+                </div>
+                
+                <InputField label="Full Name" placeholder="Alex Jovan" value={formData.name} onChange={(val) => setFormData({...formData, name: val})} />
+                <InputField label="Email Address" type="email" placeholder="myaccount@gmail.com" value={formData.email} onChange={(val) => setFormData({...formData, email: val})} />
+                <InputField label="Password" type="password" placeholder="••••••••" value={formData.password} onChange={(val) => setFormData({...formData, password: val})} />
+                
+                <Button type="submit" disabled={loading} className="w-full bg-[#708A28] hover:bg-[#5a6f20] text-white py-4 rounded-2xl mt-4 shadow-lg shadow-green-100 transition-all">
+                  {loading ? 'Sending Code...' : 'Register'}
+                </Button>
+              </motion.form>
             )}
-            
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-dark-text mb-2">
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green focus:border-transparent ${fieldErrors.name ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-                placeholder="Enter your full name"
-              />
-              {fieldErrors.name && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.name}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-400">Must start with a letter; letters and spaces only.</p>
-            </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-dark-text mb-2">
-                Email Address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green focus:border-transparent"
-                placeholder="Enter your email"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-dark-text mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green focus:border-transparent ${fieldErrors.password ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-                placeholder="Create a password"
-              />
-              {formData.password && (() => {
-                const strength = getPasswordStrength(formData.password);
-                return (
-                  <div className="mt-2">
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
-                      <div className={`h-1.5 rounded-full transition-all duration-300 ${strength.color} ${strength.width}`} />
-                    </div>
-                    <p className={`mt-1 text-xs font-medium ${
-                      strength.label === 'Very Weak' || strength.label === 'Weak' ? 'text-red-500' :
-                      strength.label === 'Fair' ? 'text-yellow-600' : 'text-green-600'
-                    }`}>{strength.label}</p>
-                  </div>
-                );
-              })()}
-              {fieldErrors.password && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.password}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-400">Min 8 chars, uppercase, lowercase, number &amp; special character.</p>
-            </div>
-            
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-dark-text mb-2">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-olive-green focus:border-transparent ${fieldErrors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-                placeholder="Confirm your password"
-              />
-              {fieldErrors.confirmPassword && (
-                <p className="mt-1 text-xs text-red-500">{fieldErrors.confirmPassword}</p>
-              )}
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                required
-                className="h-4 w-4 text-olive-green focus:ring-olive-green border-gray-300 rounded"
-              />
-              <label htmlFor="terms" className="ml-2 block text-sm text-gray-600">
-                I agree to the{' '}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActivePolicy('terms');
-                  }}
-                  className="text-olive-green hover:text-dark-green"
-                >
-                  Terms of Service
-                </button>{' '}
-                and{' '}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActivePolicy('privacy');
-                  }}
-                  className="text-olive-green hover:text-dark-green"
-                >
-                  Privacy Policy
-                </button>
-              </label>
-            </div>
-            
-            <Button
-              type="submit"
-              variant="primary"
-              size="large"
-              disabled={loading}
-              className="w-full"
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </Button>
-          </form>
-          
 
-        </motion.div>
-        
-        {/* Sign In Link */}
-        <p className="text-center text-gray-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-olive-green hover:text-dark-green">
-            Sign in here
-          </Link>
-        </p>
-      </motion.div>
+            {/* STEP 2 & 4: OTP VERIFICATION */}
+            {(step === 'email_otp' || step === 'mobile_otp') && (
+              <motion.div key="otp" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
+                <h2 className="text-xl font-black text-gray-800 mb-2">Enter Verification Code</h2>
+                <p className="text-xs text-gray-400 mb-8 leading-relaxed">Enter the 6-digit code sent to <br/><span className="font-bold text-gray-700">{step === 'email_otp' ? formData.email : formData.mobile}</span></p>
+                
+                {error && <p className="text-red-500 text-[10px] font-bold mb-4 uppercase tracking-wider">{error}</p>}
 
-      {activePolicy && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <button
-            type="button"
-            aria-label="Close popup"
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setActivePolicy('')}
-          />
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl"
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <h3 className="text-xl font-bold text-dark-text">
-                {policyContent[activePolicy].title}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setActivePolicy('')}
-                className="rounded-md px-2 py-1 text-sm text-gray-500 hover:bg-gray-100"
-              >
-                Close
-              </button>
-            </div>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-gray-700">
-              {policyContent[activePolicy].body.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
-          </motion.div>
+                <div className="flex justify-between gap-2 mb-8">
+                  {otp.map((data, index) => (
+                    <input 
+                      key={index} 
+                      type="text" 
+                      maxLength="1" 
+                      className="w-11 h-14 text-center text-xl font-bold border-2 border-gray-100 rounded-xl focus:border-[#708A28] focus:bg-green-50/30 outline-none transition-all" 
+                      value={data} 
+                      onChange={e => handleOtpChange(e.target, index)} 
+                    />
+                  ))}
+                </div>
+                
+                <p className="text-xs text-gray-400 mb-8">Didn't receive a code? <button className="text-[#708A28] font-bold ml-1">Resend</button></p>
+                
+                <Button onClick={step === 'email_otp' ? handleVerifyEmail : handleFinalVerify} className="w-full bg-[#708A28] hover:bg-[#5a6f20] text-white py-4 rounded-2xl shadow-lg shadow-green-100 transition-all">
+                  {loading ? 'Verifying...' : 'Verify'}
+                </Button>
+              </motion.div>
+            )}
+
+            {/* STEP 3: MOBILE NUMBER INPUT */}
+            {step === 'mobile_input' && (
+              <motion.div key="mobile" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="space-y-6 text-center">
+                <h2 className="text-xl font-black text-gray-800">Almost there!</h2>
+                <p className="text-xs text-gray-400">Enter your mobile number to complete your profile.</p>
+                
+                <div className="text-left">
+                  <label className="text-xs font-bold text-gray-700 ml-1">Mobile Number</label>
+                  <input 
+                    type="tel" 
+                    required 
+                    value={formData.mobile} 
+                    onChange={(e)=>setFormData({...formData, mobile: e.target.value})} 
+                    className="w-full mt-1 px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#708A28] outline-none transition-all" 
+                    placeholder="+91 00000 00000" 
+                  />
+                </div>
+
+                <Button onClick={handleSendMobileOTP} className="w-full bg-[#708A28] hover:bg-[#5a6f20] text-white py-4 rounded-2xl shadow-lg shadow-green-100 transition-all">
+                  {loading ? 'Sending OTP...' : 'Send Verification OTP'}
+                </Button>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
         </div>
-      )}
+      </motion.div>
     </div>
   );
 };
+
+const InputField = ({ label, type = "text", placeholder, value, onChange }) => (
+  <div>
+    <label className="text-xs font-bold text-gray-700 ml-1 uppercase tracking-tighter">{label}</label>
+    <input 
+      type={type} 
+      required 
+      value={value} 
+      onChange={(e) => onChange(e.target.value)} 
+      className="w-full mt-1 px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-[#708A28] transition-all text-sm outline-none" 
+      placeholder={placeholder} 
+    />
+  </div>
+);
 
 export default Register;

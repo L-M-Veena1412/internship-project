@@ -13,12 +13,15 @@ const CartContext = createContext();
 const cartReducer = (state, action) => {
   switch (action.type) {
     case 'ADD_TO_CART': {
-      const existingItem = state.items.find((item) => item.id === action.payload.id);
+      // Ensure we compare IDs as strings to prevent duplicate key errors
+      const productId = String(action.payload.id);
+      const existingItem = state.items.find((item) => String(item.id) === productId);
+      
       if (existingItem) {
         return {
           ...state,
           items: state.items.map((item) =>
-            item.id === action.payload.id
+            String(item.id) === productId
               ? { ...item, quantity: item.quantity + (action.payload.quantity || 1) }
               : item
           ),
@@ -32,13 +35,13 @@ const cartReducer = (state, action) => {
     case 'REMOVE_FROM_CART':
       return {
         ...state,
-        items: state.items.filter((item) => item.id !== action.payload),
+        items: state.items.filter((item) => String(item.id) !== String(action.payload)),
       };
     case 'UPDATE_QUANTITY':
       return {
         ...state,
         items: state.items.map((item) =>
-          item.id === action.payload.id
+          String(item.id) === String(action.payload.id)
             ? { ...item, quantity: action.payload.quantity }
             : item
         ),
@@ -57,35 +60,29 @@ export const CartProvider = ({ children }) => {
   const { isLoggedIn } = useAuth();
 
   const loadServerCart = useCallback(async () => {
-    const response = await getCart();
-    dispatch({ type: 'LOAD_CART', payload: response.data || [] });
+    try {
+      const response = await getCart();
+      dispatch({ type: 'LOAD_CART', payload: response.data || [] });
+    } catch (error) {
+      console.error('Failed to load server cart', error);
+    }
   }, []);
 
   useEffect(() => {
     const loadCart = async () => {
       if (isLoggedIn) {
-        try {
-          await loadServerCart();
-        } catch (error) {
-          console.error('Failed to load server cart', error);
-          dispatch({ type: 'LOAD_CART', payload: [] });
-        }
-        return;
-      }
-
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        try {
-          dispatch({ type: 'LOAD_CART', payload: JSON.parse(savedCart) });
-        } catch (error) {
-          console.error('Failed to parse local cart', error);
-          dispatch({ type: 'LOAD_CART', payload: [] });
-        }
+        await loadServerCart();
       } else {
-        dispatch({ type: 'LOAD_CART', payload: [] });
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) {
+          try {
+            dispatch({ type: 'LOAD_CART', payload: JSON.parse(savedCart) });
+          } catch (error) {
+            dispatch({ type: 'LOAD_CART', payload: [] });
+          }
+        }
       }
     };
-
     loadCart();
   }, [isLoggedIn, loadServerCart]);
 
@@ -97,38 +94,48 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = useCallback(
     async (product, quantity = 1, variantId = null) => {
-      if (isLoggedIn) {
-        // For product variants, use product_qty_id
-        if (variantId) {
-          await addCartItem({ product_id: product.id, quantity, product_qty_id: variantId });
-        } else {
-          await addCartItem({ product_id: product.id, quantity });
-        }
-        await loadServerCart();
-        return;
-      }
-
-      // Local storage fallback: combine product id and variant id for unique key
+      // 1. UPDATE UI IMMEDIATELY (Optimistic Update)
       const itemKey = variantId ? `${product.id}-variant-${variantId}` : product.id;
-      dispatch({ type: 'ADD_TO_CART', payload: { ...product, quantity, product_qty_id: variantId, id: itemKey } });
+      dispatch({ 
+        type: 'ADD_TO_CART', 
+        payload: { ...product, quantity, product_qty_id: variantId, id: itemKey } 
+      });
+
+      // 2. SYNC WITH SERVER IN BACKGROUND
+      if (isLoggedIn) {
+        try {
+          if (variantId) {
+            await addCartItem({ product_id: product.id, quantity, product_qty_id: variantId });
+          } else {
+            await addCartItem({ product_id: product.id, quantity });
+          }
+          // We don't call loadServerCart() here anymore to prevent flickering 
+          // because we've already updated the local state.
+        } catch (error) {
+          console.warn("Server sync failed, item remains in local cart (Mock Mode)");
+        }
+      }
     },
-    [isLoggedIn, loadServerCart]
+    [isLoggedIn]
   );
 
   const removeFromCart = useCallback(
     async (productId) => {
-      if (isLoggedIn) {
-        const item = state.items.find((cartItem) => cartItem.id === productId);
-        if (item?.cartItemId) {
-          await removeCartItem(item.cartItemId);
-          await loadServerCart();
-        }
-        return;
-      }
-
+      const originalItems = [...state.items];
       dispatch({ type: 'REMOVE_FROM_CART', payload: productId });
+
+      if (isLoggedIn) {
+        try {
+          const item = originalItems.find((cartItem) => String(cartItem.id) === String(productId));
+          if (item?.cartItemId) {
+            await removeCartItem(item.cartItemId);
+          }
+        } catch (error) {
+          console.warn("Failed to remove from server");
+        }
+      }
     },
-    [isLoggedIn, state.items, loadServerCart]
+    [isLoggedIn, state.items]
   );
 
   const updateQuantity = useCallback(
@@ -138,28 +145,31 @@ export const CartProvider = ({ children }) => {
         return;
       }
 
-      if (isLoggedIn) {
-        const item = state.items.find((cartItem) => cartItem.id === productId);
-        if (item?.cartItemId) {
-          await updateCartItem(item.cartItemId, quantity);
-          await loadServerCart();
-        }
-        return;
-      }
-
       dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
+
+      if (isLoggedIn) {
+        try {
+          const item = state.items.find((cartItem) => String(cartItem.id) === String(productId));
+          if (item?.cartItemId) {
+            await updateCartItem(item.cartItemId, quantity);
+          }
+        } catch (error) {
+          console.warn("Failed to update quantity on server");
+        }
+      }
     },
-    [isLoggedIn, state.items, removeFromCart, loadServerCart]
+    [isLoggedIn, state.items, removeFromCart]
   );
 
   const clearCart = useCallback(async () => {
-    if (isLoggedIn) {
-      await clearServerCart();
-      dispatch({ type: 'CLEAR_CART' });
-      return;
-    }
-
     dispatch({ type: 'CLEAR_CART' });
+    if (isLoggedIn) {
+      try {
+        await clearServerCart();
+      } catch (error) {
+        console.warn("Failed to clear server cart");
+      }
+    }
   }, [isLoggedIn]);
 
   const getCartTotal = useCallback(() => {
@@ -172,8 +182,8 @@ export const CartProvider = ({ children }) => {
 
   const value = {
     items: state.items,
-    cart: state.items,
-    cartItems: state.items,
+    cart: state.items,      // Keeping 'cart' for ProductCard.jsx compatibility
+    cartItems: state.items, // Keeping 'cartItems' for other components
     addToCart,
     removeFromCart,
     updateQuantity,

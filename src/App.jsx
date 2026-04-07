@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider, useToast } from './context/ToastContext';
-// 1. ADD THIS IMPORT
 import { AuthProvider } from './context/AuthContext'; 
 
 import Navbar from './components/Navbar';
@@ -25,6 +24,10 @@ import Orders from './pages/Orders';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminLogin from './pages/Admin/AdminLogin';
 import NotFound from './pages/NotFound';
+
+// --- IMPORT THESE NEW PAGES ---
+import Checkout from './pages/Checkout'; 
+import OrderConfirmation from './pages/OrderConfirmation'; 
 
 // Page transition wrapper
 const PageTransition = ({ children }) => (
@@ -86,7 +89,6 @@ const ScrollToTop = () => {
 // Main App Wrapper
 function App() {
   return (
-    // 2. WRAP EVERYTHING IN AUTHPROVIDER
     <AuthProvider>
       <ToastProvider>
         <CartProvider>
@@ -116,6 +118,11 @@ function AppContent() {
             <Route path="/products/:subcategory" element={<PageTransition><Products /></PageTransition>} />
             <Route path="/product/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
             <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+            
+            {/* --- ADDED CHECKOUT ROUTES HERE --- */}
+            <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
+            <Route path="/order-confirmation" element={<PageTransition><OrderConfirmation /></PageTransition>} />
+            
             <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
             <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
             <Route path="/about" element={<PageTransition><About /></PageTransition>} />
@@ -133,9 +140,7 @@ function AppContent() {
       </main>
       
       {!isAdminRoute && <Footer />}
-   
       {!isAdminRoute && <ScrollToTop />}
-      
       
       <Toast 
         message={toast.message} 
