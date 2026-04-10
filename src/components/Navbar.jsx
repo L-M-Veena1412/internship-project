@@ -4,14 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import MobileNavigation from './MobileNavigation';
-// IMPORT your mock products
 import { mockProducts } from '../data/mockData';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -21,15 +19,12 @@ const Navbar = () => {
   const location = useLocation();
   const cartItemsCount = getCartItemsCount();
 
-  // --- SEARCH LOGIC UPDATED ---
-  // This filters your real products as you type
   const searchResults = useMemo(() => {
     if (searchQuery.trim().length < 2) return [];
-    
     return mockProducts.filter(product =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase())
-    ).slice(0, 6); // Show top 6 matches
+    ).slice(0, 6);
   }, [searchQuery]);
 
   const handleSelectSearch = (productId) => {
@@ -41,13 +36,11 @@ const Navbar = () => {
   const handleSearchSubmit = (e) => {
     e?.preventDefault();
     if (searchQuery.trim()) {
-      // Navigate to shop page with search filter
       navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
       setSearchQuery('');
     }
   };
-  // --- END SEARCH LOGIC ---
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -70,7 +63,6 @@ const Navbar = () => {
     { name: 'Contact', path: '/contact' }
   ];
 
-  // Helper for search UI
   const SearchContent = () => (
     <div className="flex-1 overflow-y-auto bg-white">
       <div className="p-4 max-w-2xl mx-auto space-y-6">
@@ -84,18 +76,12 @@ const Navbar = () => {
                   onClick={() => handleSelectSearch(item.id)} 
                   className="flex items-center gap-4 cursor-pointer p-2 hover:bg-gray-50 rounded-xl transition-colors"
                 >
-                  <img 
-                    src={item.image} 
-                    className="w-14 h-14 rounded-lg object-cover bg-gray-50 border border-gray-100" 
-                    alt="" 
-                  />
+                  <img src={item.image} className="w-14 h-14 rounded-lg object-cover bg-gray-50 border border-gray-100" alt="" />
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-gray-800 text-sm truncate uppercase tracking-tight">{item.name}</p>
                     <p className="text-xs text-gray-400 lowercase">{item.category}</p>
                   </div>
-                  <div className="text-sm font-black text-gray-900 pr-1">
-                    ₹{item.price}
-                  </div>
+                  <div className="text-sm font-black text-gray-900 pr-1">₹{item.price}</div>
                 </div>
               ))}
             </>
@@ -124,14 +110,10 @@ const Navbar = () => {
         animate={{ y: 0 }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          
-          {/* SEARCH OVERLAY (Universal for Mobile & Desktop) */}
           <AnimatePresence>
             {isSearchOpen && (
               <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="fixed inset-0 bg-white z-[999] flex flex-col h-screen overflow-hidden"
               >
                 <div className="flex items-center p-4 border-b border-gray-100 gap-3">
@@ -140,7 +122,6 @@ const Navbar = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-                  
                   <div className="flex-1 relative max-w-2xl mx-auto">
                     <form onSubmit={handleSearchSubmit}>
                       <input 
@@ -149,32 +130,37 @@ const Navbar = () => {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search our organic store..."
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-10 py-2.5 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-purple-600"
+                        // UPDATED: focus:ring-olive-green
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-10 py-2.5 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-olive-green"
                       />
                     </form>
                   </div>
                 </div>
-
                 <SearchContent />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* MAIN NAVBAR CONTENT */}
           <div className="flex md:grid md:grid-cols-3 items-center justify-between pointer-events-auto">
             <div className="flex items-center justify-start">
               <button className="p-2 rounded-lg text-dark-text md:hidden" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
               </button>
               <Link to="/" className="hidden md:flex items-center space-x-2 text-2xl font-bold text-dark-text tracking-tighter uppercase">
-                <span className="text-purple-600">Organic</span>Store
+                {/* UPDATED: text-olive-green */}
+                <span className="text-olive-green">Organic</span>Store
               </Link>
             </div>
 
             <div className="hidden md:flex justify-center">
               <div className="flex items-center space-x-8">
                 {navLinks.map((link) => (
-                  <Link key={link.name} to={link.path} className={`text-[11px] uppercase tracking-widest font-black transition-colors hover:text-purple-600 ${location.pathname === link.path ? 'text-purple-600' : 'text-gray-500'}`}>
+                  // UPDATED: hover:text-olive-green and conditional color
+                  <Link 
+                    key={link.name} 
+                    to={link.path} 
+                    className={`text-[11px] uppercase tracking-widest font-black transition-colors hover:text-olive-green ${location.pathname === link.path ? 'text-olive-green' : 'text-gray-500'}`}
+                  >
                     {link.name}
                   </Link>
                 ))}
@@ -182,18 +168,14 @@ const Navbar = () => {
             </div>
             
             <div className="flex items-center justify-end space-x-2 sm:space-x-4">
-              <button 
-                className="p-2 rounded-lg text-dark-text hover:bg-gray-100 transition-colors" 
-                onClick={() => setIsSearchOpen(true)}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+              <button className="p-2 rounded-lg text-dark-text hover:bg-gray-100 transition-colors" onClick={() => setIsSearchOpen(true)}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </button>
               
               <Link to="/cart" className="relative p-2 text-dark-text hover:bg-gray-100 rounded-lg">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                {cartItemsCount > 0 && <span className="absolute top-0 right-0 bg-purple-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">{cartItemsCount}</span>}
+                {/* UPDATED: bg-olive-green */}
+                {cartItemsCount > 0 && <span className="absolute top-0 right-0 bg-olive-green text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">{cartItemsCount}</span>}
               </Link>
 
               {isLoggedIn ? (
@@ -204,9 +186,7 @@ const Navbar = () => {
                   <AnimatePresence>
                     {isProfileDropdownOpen && (
                       <motion.div 
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }} 
-                        animate={{ opacity: 1, y: 0, scale: 1 }} 
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50"
                       >
                         <Link to="/profile" onClick={() => setIsProfileDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Profile</Link>
@@ -219,7 +199,8 @@ const Navbar = () => {
                 </div>
               ) : (
                 <Link to="/login" className="hidden md:block">
-                  <button className="px-5 py-2 rounded-full border border-purple-600 text-purple-600 text-sm font-black uppercase tracking-widest hover:bg-purple-600 hover:text-white transition-all">
+                  {/* UPDATED: border-olive-green, text-olive-green, hover:bg-olive-green */}
+                  <button className="px-5 py-2 rounded-full border border-olive-green text-olive-green text-sm font-black uppercase tracking-widest hover:bg-olive-green hover:text-white transition-all">
                     Login
                   </button>
                 </Link>
