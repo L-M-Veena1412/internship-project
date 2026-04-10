@@ -1,23 +1,31 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
   theme: {
     extend: {
       colors: {
-        cream: '#F8F5F0',
+        // The "Source of Truth" variables
         'olive-green': '#708A28', 
         'olive-green-dark': '#5a6f20', 
         
-        // GLOBAL OVERRIDE: 
-        // This ensures that even if you miss a file, 
-        // 'purple' classes will now show your brand green.
+        // Brand Identity
+        'primary-brand': '#708A28',
+        'primary-brand-dark': '#5a6f20',
+
+        // Global Override: Forces all purple classes to be Green
+        // This solves the mobile and filter sidebar issues globally.
         purple: {
-          50: '#f1f5e9',   // Very light green tint
+          50: '#f1f5e9',   // Very light green tint for backgrounds
           100: '#e1ebd3',
-          600: '#708A28',  // Your main brand color
-          700: '#5a6f20',  // Darker hover state
+          500: '#708A28', 
+          600: '#708A28',  // Main Brand Color
+          700: '#5a6f20',  // Hover state
         },
 
+        // Existing Site Colors
+        cream: '#F8F5F0',
         'dark-green': '#3A5A40',
         'light-brown': '#D4A373',
         'dark-text': '#2E2E2E',

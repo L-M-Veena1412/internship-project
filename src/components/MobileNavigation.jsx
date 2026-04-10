@@ -45,10 +45,8 @@ const MobileNavigation = ({ isOpen, onClose }) => {
         <div className="fixed inset-0 bg-black/40 z-[1000]" onClick={onClose} />
       )}
 
-      {/* Width reduced to 80% for sleeker look */}
       <div className={`fixed top-0 left-0 h-full w-[80%] bg-white z-[1001] shadow-2xl transition-transform duration-300 overflow-y-auto no-scrollbar ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
-        {/* Compact Header */}
         <div className="p-4 border-b border-gray-50 flex justify-end">
           <button onClick={onClose} className="p-1">
             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -59,9 +57,10 @@ const MobileNavigation = ({ isOpen, onClose }) => {
           <AnimatePresence mode="wait">
             {currentView === 'main' && (
               <motion.div key="main" variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.2 }} className="px-4 py-2">
-                <Link to="/" onClick={onClose} className="block text-[#6B46C1] text-[14px] font-medium py-2 border-b border-gray-50">Home</Link>
+                {/* UPDATED: text-olive-green (#708A28) */}
+                <Link to="/" onClick={onClose} className="block text-[#708A28] text-[14px] font-bold py-2 border-b border-gray-50">Home</Link>
                 <p className="text-[9px] font-bold text-gray-300 uppercase tracking-widest pt-3 pb-1">Categories</p>
-                {/* Fixed Crash with Optional Chaining */}
+                
                 {mockCategories?.map(cat => (
                   <button 
                     key={cat.id} 
@@ -76,7 +75,8 @@ const MobileNavigation = ({ isOpen, onClose }) => {
                     }} 
                     className="w-full text-left py-2 flex justify-between items-center border-b border-gray-50 group"
                   >
-                    <span className="text-[13px] text-gray-600 font-medium group-active:text-[#6B46C1]">{cat.name}</span>
+                    {/* UPDATED: group-active:text-olive-green */}
+                    <span className="text-[13px] text-gray-600 font-medium group-active:text-[#708A28]">{cat.name}</span>
                     <span className="text-gray-300 text-xs">→</span>
                   </button>
                 ))}
@@ -87,11 +87,12 @@ const MobileNavigation = ({ isOpen, onClose }) => {
               <motion.div key="sub" variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.2 }} className="px-4 py-2">
                 <button onClick={() => setCurrentView('main')} className="text-gray-400 mb-3 text-[10px] font-bold flex items-center gap-1 uppercase tracking-tighter">← BACK</button>
                 <h2 className="text-[13px] font-bold text-gray-800 mb-2 px-1">{selectedCat?.name}</h2>
-                {/* Fixed Crash with Optional Chaining */}
+                
                 {selectedCat?.subcategories?.map(sub => (
                   <button key={sub.id} onClick={() => handleSubClick(sub)} className="w-full text-left py-2 border-b border-gray-50 flex justify-between items-center group">
-                    <span className="text-[#6B46C1] font-medium text-[13px]">{sub.name}</span>
-                    <span className="text-purple-200 text-xs">→</span>
+                    {/* UPDATED: text-olive-green */}
+                    <span className="text-[#708A28] font-medium text-[13px]">{sub.name}</span>
+                    <span className="text-olive-green/30 text-xs">→</span>
                   </button>
                 ))}
               </motion.div>
@@ -100,10 +101,11 @@ const MobileNavigation = ({ isOpen, onClose }) => {
             {currentView === 'leaf' && (
               <motion.div key="leaf" variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.2 }} className="px-4 py-2">
                 <button onClick={() => setCurrentView('sub')} className="text-gray-400 mb-3 text-[10px] font-bold flex items-center gap-1 uppercase tracking-tighter">← BACK</button>
-                <h2 className="text-[12px] font-bold text-[#6B46C1] mb-2 px-1 border-l-2 border-[#6B46C1] pl-2">{selectedSub?.name}</h2>
-                {/* Fixed Crash with Optional Chaining */}
+                {/* UPDATED: text-olive-green and border-olive-green */}
+                <h2 className="text-[12px] font-bold text-[#708A28] mb-2 px-1 border-l-2 border-[#708A28] pl-2">{selectedSub?.name}</h2>
+                
                 {selectedSub?.items?.map((item, idx) => (
-                  <button key={idx} onClick={() => handleLeafClick(item)} className="w-full text-left py-2 border-b border-gray-50 text-[12px] text-gray-500">
+                  <button key={idx} onClick={() => handleLeafClick(item)} className="w-full text-left py-2 border-b border-gray-50 text-[12px] text-gray-500 hover:text-[#708A28]">
                     {item}
                   </button>
                 ))}
@@ -111,7 +113,6 @@ const MobileNavigation = ({ isOpen, onClose }) => {
             )}
           </AnimatePresence>
 
-          {/* Professional Compact Footer */}
           <div className="px-5 py-4 space-y-4 border-t border-gray-50 mt-4 bg-white">
             <div className="space-y-2">
               <a href="mailto:support@mangalorecart.zohodesk.in" className="flex items-center gap-2.5 text-[11px] text-gray-500">
@@ -124,7 +125,6 @@ const MobileNavigation = ({ isOpen, onClose }) => {
               </a>
             </div>
 
-            {/* Social Media Row - Compact Sizes */}
             <div className="flex flex-wrap items-center gap-2.5">
               {[
                 "M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm4.462 8.876c-.181 1.905-.959 6.492-1.35 8.571-.166.883-.492 1.179-.806 1.207-.691.064-1.215-.456-1.885-.894-1.048-.686-1.64-1.113-2.658-1.783-1.177-.775-.415-1.2.257-1.899.176-.183 3.232-2.963 3.291-3.213.007-.033.014-.154-.059-.219s-.181-.042-.259-.025c-.11.023-1.865 1.183-5.26 3.473-.497.341-.948.508-1.353.499-.446-.01-1.303-.252-1.94-.459-.781-.253-1.402-.389-1.348-.82.028-.225.338-.456.93-.694 3.633-1.583 6.055-2.628 7.265-3.133 3.456-1.445 4.174-1.696 4.642-1.705.103-.002.333.023.483.145s.202.316.222.443z",
@@ -135,7 +135,8 @@ const MobileNavigation = ({ isOpen, onClose }) => {
                 "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z",
                 "M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.942-.001-3.841-.487-5.538-1.409l-6.459 1.717zm11.833-20.091c-4.517 0-8.196 3.68-8.198 8.197 0 1.548.438 3.058 1.267 4.368l.1 1.159-4.665 1.274 1.296-4.735-.114-.183c-.853-1.362-1.303-2.937-1.302-4.557.002-4.516 3.682-8.196 8.2-8.196 2.19 0 4.248.853 5.795 2.403 1.547 1.55 2.4 3.607 2.4 5.797-.002 4.517-3.682 8.197-8.2 8.197-1.402 0-2.774-.356-3.97-1.03l-.284-.16-3.753.985.998-3.655-.175-.279c-.742-1.182-1.134-2.547-1.133-3.948.002-4.14 3.366-7.505 7.505-7.505 2.012 0 3.894.782 5.31 2.198 1.417 1.416 2.198 3.3 2.197 5.31-.003 4.142-3.369 7.506-7.507 7.506z"
               ].map((path, i) => (
-                <div key={i} className="w-6 h-6 bg-black rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-[#6B46C1] transition-colors shrink-0">
+                /* UPDATED: hover:bg-olive-green (#708A28) */
+                <div key={i} className="w-6 h-6 bg-black rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-[#708A28] transition-colors shrink-0">
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d={path} /></svg>
                 </div>
               ))}
