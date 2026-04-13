@@ -11,7 +11,7 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
   if (!products || !Array.isArray(products)) {
     return (
       <div className="w-full p-20 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#007863] mx-auto mb-4"></div>
         <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
           Syncing Inventory...
         </p>
@@ -40,18 +40,18 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
 
   return (
     <div className="w-full">
-      {/* --- DESKTOP VIEW (Visible on Large Screens) --- */}
-      <div className="hidden lg:block bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      {/* --- DESKTOP VIEW --- */}
+      <div className="hidden lg:block bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden font-sans">
         <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead className="bg-gray-50/50 border-b border-gray-100">
-              <tr>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Product Info</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Category</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Pricing</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Inventory</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
+              <tr className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                <th className="px-6 py-5">Product Info</th>
+                <th className="px-6 py-5">Category</th>
+                <th className="px-6 py-5">Pricing</th>
+                <th className="px-6 py-5">Inventory</th>
+                <th className="px-6 py-5">Status</th>
+                <th className="px-6 py-5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -75,22 +75,24 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
                       </div>
                       <div>
                         <p className="text-sm font-black text-gray-800 uppercase tracking-tight">{product.name}</p>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase">ID: #{product.id}</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">ID: #{product.id}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{product.category || product.mainCategory}</span>
+                    <span className="text-[10px] font-black text-[#007863] uppercase tracking-widest">
+                      {product.category || product.mainCategory}
+                    </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <p className="text-sm font-black text-gray-900">{formatPriceINR(product.price)}</p>
+                  <td className="px-6 py-4 font-black text-gray-900 text-sm">
+                    {formatPriceINR(product.price)}
                   </td>
                   <td className="px-6 py-4">
                     {editingStock === product.id ? (
                       <input
                         type="number"
                         defaultValue={product.stock || product.quantity}
-                        className="w-20 px-2 py-1 border-2 border-emerald-100 rounded-lg text-xs font-black focus:border-emerald-500 outline-none"
+                        className="w-20 px-2 py-1 border-2 border-[#007863]/20 rounded-lg text-xs font-black focus:border-[#007863] outline-none"
                         autoFocus
                         onBlur={(e) => {
                           onUpdateStock(product.id, parseInt(e.target.value));
@@ -106,28 +108,33 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
                     ) : (
                       <div className="flex items-center gap-2 group/stock cursor-pointer" onClick={() => setEditingStock(product.id)}>
                         <span className="text-sm font-black text-gray-700">{product.stock || product.quantity} Units</span>
-                        <span className="opacity-0 group-hover/stock:opacity-100 text-blue-400 text-xs">✎</span>
+                        <span className="opacity-0 group-hover/stock:opacity-100 text-[#007863] text-xs">✎</span>
                       </div>
                     )}
                   </td>
                   <td className="px-6 py-4">
                     {getStatusBadge(product.stock || product.quantity)}
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex justify-end gap-3">
+                  <td className="px-6 py-4">
+                    <div className="flex justify-end gap-5 text-[10px] font-black uppercase tracking-tighter">
                       <button 
                         onClick={() => navigate(`/admin/products/detail/${product.id}`)} 
-                        className="text-[10px] font-black uppercase text-emerald-600 hover:text-emerald-800 tracking-widest transition-colors"
+                        className="text-gray-400 hover:text-[#007863] transition-colors"
                       >
-                        View
+                        VIEW
                       </button>
                       <button 
                         onClick={() => navigate(`/admin/products/edit/${product.id}`)} 
-                        className="text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest transition-colors"
+                        className="text-gray-400 hover:text-blue-600 transition-colors"
                       >
-                        Edit
+                        EDIT
                       </button>
-                      <button onClick={() => onDelete(product.id)} className="text-[10px] font-black uppercase text-red-500 hover:text-red-700 tracking-widest transition-colors">Delete</button>
+                      <button 
+                        onClick={() => onDelete(product.id)} 
+                        className="text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        DELETE
+                      </button>
                     </div>
                   </td>
                 </motion.tr>
@@ -137,7 +144,7 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
         </div>
       </div>
 
-      {/* --- MOBILE VIEW (Visible on Small Screens) --- */}
+      {/* --- MOBILE VIEW --- */}
       <div className="lg:hidden space-y-4">
         {products.map((product) => (
           <motion.div 
@@ -156,14 +163,14 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1 truncate">
+                <p className="text-[9px] font-black text-[#007863] uppercase tracking-widest mb-1 truncate">
                   {product.category || product.mainCategory}
                 </p>
                 <h3 className="text-sm font-black text-gray-800 uppercase leading-tight mb-1 truncate">
                   {product.name}
                 </h3>
                 <p className="text-lg font-black text-gray-900">{formatPriceINR(product.price)}</p>
-                <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">ID: #{product.id}</p>
+                <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase tracking-widest">ID: #{product.id}</p>
               </div>
             </div>
             
@@ -174,24 +181,24 @@ const ProductTable = ({ products, onDelete, onUpdateStock }) => {
                 </span>
                 {getStatusBadge(product.stock || product.quantity)}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-3 text-[10px] font-black uppercase tracking-tighter">
                 <button 
                    onClick={() => navigate(`/admin/products/detail/${product.id}`)}
-                   className="p-2 bg-emerald-50 text-emerald-600 rounded-xl"
+                   className="px-3 py-2 bg-gray-50 text-gray-500 rounded-xl"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  VIEW
                 </button>
                 <button 
                   onClick={() => navigate(`/admin/products/edit/${product.id}`)} 
-                  className="px-4 py-2 bg-blue-50 text-blue-600 text-[9px] font-black uppercase rounded-xl hover:bg-blue-100"
+                  className="px-3 py-2 bg-[#007863]/10 text-[#007863] rounded-xl"
                 >
-                  Edit
+                  EDIT
                 </button>
                 <button 
                   onClick={() => onDelete(product.id)} 
-                  className="px-4 py-2 bg-red-50 text-red-500 text-[9px] font-black uppercase rounded-xl hover:bg-red-100"
+                  className="px-3 py-2 bg-red-50 text-red-500 rounded-xl"
                 >
-                  Remove
+                  DELETE
                 </button>
               </div>
             </div>

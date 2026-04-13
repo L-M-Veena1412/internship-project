@@ -10,7 +10,8 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
     Orders: false,
     Customer: false,
     Manufacturers: false,
-    Products: false
+    Products: false,
+    Variants: false
   });
 
   useEffect(() => {
@@ -20,10 +21,11 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Auto-expand menus based on current URL
+  // AUTO-EXPAND Logic: Keeps the menu open if any sub-page is active
   useEffect(() => {
     const path = location.pathname;
     if (path.includes('/admin/products')) setOpenMenus(prev => ({ ...prev, Products: true }));
+    if (path.includes('/admin/variants')) setOpenMenus(prev => ({ ...prev, Variants: true }));
     if (path.includes('/admin/customers')) setOpenMenus(prev => ({ ...prev, Customer: true }));
     if (path.includes('/admin/orders')) setOpenMenus(prev => ({ ...prev, Orders: true }));
     if (path.includes('/admin/manufacturers')) setOpenMenus(prev => ({ ...prev, Manufacturers: true }));
@@ -52,7 +54,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
       ),
       subItems: [
         { name: 'List', path: '/admin/orders' }, 
-        { name: 'Detail', path: '/admin/orders' }
+        { name: 'Detail', path: '/admin/orders/detail' }
       ]
     },
     {
@@ -65,20 +67,33 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
       subItems: [
         { name: 'List', path: '/admin/products' },
         { name: 'Add', path: '/admin/products/add' },
-        { name: 'Edit', path: '/admin/products' },
-        { name: 'Detail', path: '/admin/products' }
+        { name: 'Edit', path: '/admin/products/edit' },
+        { name: 'Detail', path: '/admin/products/detail' }
       ]
     },
-    // ... inside your menuItems array
-{
-  name: 'Categories',
-  path: '/admin/categories',
-  icon: (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-    </svg>
-  )
-},
+    {
+      name: 'Variants',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      ),
+      subItems: [
+        { name: 'List', path: '/admin/variants' },
+        { name: 'Add New', path: '/admin/variants/add' },
+        { name: 'Edit', path: '/admin/variants/edit' },
+        { name: 'Detail', path: '/admin/variants/detail' }
+      ]
+    },
+    {
+      name: 'Categories',
+      path: '/admin/categories',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+      )
+    },
     {
       name: 'Customer',
       icon: (
@@ -89,8 +104,8 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
       subItems: [
         { name: 'List', path: '/admin/customers' }, 
         { name: 'Add', path: '/admin/customers/add' },
-        { name: 'Edit', path: '/admin/customers' },
-        { name: 'Detail', path: '/admin/customers' }
+        { name: 'Edit', path: '/admin/customers/edit' },
+        { name: 'Detail', path: '/admin/customers/detail' }
       ]
     },
     {
@@ -103,8 +118,8 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
       subItems: [
         { name: 'List', path: '/admin/manufacturers' }, 
         { name: 'Add', path: '/admin/manufacturers/add' },
-        { name: 'Edit', path: '/admin/manufacturers' },
-        { name: 'Detail', path: '/admin/manufacturers' }
+        { name: 'Edit', path: '/admin/manufacturers/edit' },
+        { name: 'Detail', path: '/admin/manufacturers/detail' }
       ]
     },
     {
@@ -134,12 +149,12 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-white text-slate-900">
+    <div className="flex flex-col h-full bg-white text-slate-900 font-sans">
       <div className="p-6 border-b border-gray-100 flex items-center space-x-3">
-        <div className="w-10 h-10 bg-emerald-700 rounded-lg flex items-center justify-center text-white text-xl shadow-lg">🌱</div>
+        <div className="w-10 h-10 bg-[#708A28] rounded-lg flex items-center justify-center text-white text-xl shadow-lg">🌱</div>
         <div className="flex flex-col leading-tight">
-          <h1 className="text-xl font-black text-emerald-800 tracking-tighter uppercase">Organic</h1>
-          <span className="text-emerald-600 font-black tracking-tighter text-xl uppercase">Store</span>
+          <h1 className="text-xl font-black text-[#708A28] tracking-tighter uppercase">Organic</h1>
+          <span className="text-[#708A28] font-black tracking-tighter text-xl uppercase">Store</span>
         </div>
       </div>
 
@@ -155,7 +170,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 {hasSubItems ? (
                   <>
                     <button onClick={() => toggleMenu(item.name)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isExpanded ? 'text-emerald-700 bg-emerald-50' : 'text-gray-500 hover:bg-gray-50'}`}>
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${isExpanded ? 'text-[#708A28] bg-[#708A28]/10' : 'text-gray-500 hover:bg-gray-50'}`}>
                       <div className="flex items-center">
                         <span className="flex-shrink-0">{item.icon}</span>
                         <span className="ml-3 text-sm font-bold">{item.name}</span>
@@ -164,27 +179,33 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                     </button>
                     <AnimatePresence>
                       {isExpanded && (
-                        <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="ml-9 space-y-1 mt-1 overflow-hidden border-l-2 border-emerald-100">
+                        <motion.ul initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="ml-9 space-y-1 mt-1 overflow-hidden border-l-2 border-[#708A28]/20">
                           {item.subItems.map((sub) => {
                             const path = location.pathname;
                             let isSubActive = false;
 
-                            // Dynamic Active Logic for IDs
-                            if (sub.name === 'List') {
-                              isSubActive = path === sub.path;
-                            } else if (sub.name === 'Add') {
-                              isSubActive = path.includes('/add') && path.includes(item.name.toLowerCase().substring(0, 5));
-                            } else if (sub.name === 'Edit') {
-                              isSubActive = path.includes('/edit/') && path.includes(item.name.toLowerCase().substring(0, 5));
-                            } else if (sub.name === 'Detail') {
-                              isSubActive = (path.includes('/detail/') || (path.split('/').length > 3 && !path.includes('/edit') && !path.includes('/add'))) && path.includes(item.name.toLowerCase().substring(0, 5));
+                            // 1. Logic for ORDER DETAIL (Dynamic IDs like /admin/orders/ORD-001)
+                            if (item.name === 'Orders' && sub.name === 'Detail') {
+                                isSubActive = path.startsWith('/admin/orders/') && path !== '/admin/orders';
+                            } 
+                            // 2. Logic for LIST (Exact match to prevent double highlight)
+                            else if (sub.name === 'List') {
+                                isSubActive = path === sub.path;
                             }
-
+                            // 3. Logic for DETAIL/EDIT in other sections (Products, Customers, etc.)
+                            else if (sub.name === 'Detail' || sub.name === 'Edit') {
+                                isSubActive = path.includes(sub.path) || (path.includes(sub.name.toLowerCase()) && path.includes(item.name.toLowerCase().substring(0, 5)));
+                            }
+                            // 4. Default for 'Add'
+                            else {
+                                isSubActive = path === sub.path;
+                            }
+                            
                             return (
                               <li key={sub.name}>
                                 <Link 
                                   to={sub.path} 
-                                  className={`block px-4 py-2 text-[11px] font-black uppercase tracking-widest transition-all ${isSubActive ? 'text-emerald-800 bg-emerald-100/80 translate-x-1' : 'text-gray-400 hover:text-emerald-600'}`}
+                                  className={`block px-4 py-2 text-[11px] font-black uppercase tracking-widest transition-all ${isSubActive ? 'text-[#708A28] bg-[#708A28]/10 translate-x-1' : 'text-gray-400 hover:text-[#708A28]'}`}
                                 >
                                   {isSubActive ? '● ' : '- '} {sub.name}
                                 </Link>
@@ -196,7 +217,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                     </AnimatePresence>
                   </>
                 ) : (
-                  <Link to={item.path} className={`flex items-center px-4 py-3 rounded-xl transition-all ${location.pathname === item.path ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-100' : 'text-gray-500 hover:bg-gray-50'}`}>
+                  <Link to={item.path} className={`flex items-center px-4 py-3 rounded-xl transition-all ${location.pathname === item.path ? 'bg-[#708A28] text-white shadow-xl shadow-[#708A28]/20' : 'text-gray-500 hover:bg-gray-50'}`}>
                     <span className="flex-shrink-0">{item.icon}</span>
                     <span className="ml-3 text-sm font-bold">{item.name}</span>
                   </Link>

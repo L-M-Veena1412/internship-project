@@ -175,10 +175,10 @@ export const CartProvider = ({ children }) => {
   const getCartTotal = useCallback(() => {
     return state.items.reduce((total, item) => total + item.price * item.quantity, 0);
   }, [state.items]);
-
-  const getCartItemsCount = useCallback(() => {
-    return state.items.reduce((count, item) => count + item.quantity, 0);
-  }, [state.items]);
+const getCartItemsCount = useCallback(() => {
+  return state.items.length; // This counts unique products only
+}, [state.items]);
+  
 
   const value = {
     items: state.items,
