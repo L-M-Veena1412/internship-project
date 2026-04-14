@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext'; 
+import { WishlistProvider } from './context/WishlistContext'; // IMPORTED
 
 import Navbar from './components/Navbar';
 import MobileBottomNav from './components/MobileBottomNav';
@@ -24,10 +25,9 @@ import Orders from './pages/Orders';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminLogin from './pages/Admin/AdminLogin';
 import NotFound from './pages/NotFound';
-
-// --- IMPORT THESE NEW PAGES ---
 import Checkout from './pages/Checkout'; 
 import OrderConfirmation from './pages/OrderConfirmation'; 
+import WishlistPage from './pages/WishlistPage'; // IMPORTED
 
 // Page transition wrapper
 const PageTransition = ({ children }) => (
@@ -91,10 +91,13 @@ function App() {
   return (
     <AuthProvider>
       <ToastProvider>
+        {/* ADDED WISHLIST PROVIDER HERE */}
         <CartProvider>
-          <Router>
-            <AppContent />
-          </Router>
+          <WishlistProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </WishlistProvider>
         </CartProvider>
       </ToastProvider>
     </AuthProvider>
@@ -119,7 +122,9 @@ function AppContent() {
             <Route path="/product/:id" element={<PageTransition><ProductDetails /></PageTransition>} />
             <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
             
-            {/* --- ADDED CHECKOUT ROUTES HERE --- */}
+            {/* WISHLIST ROUTE ADDED HERE */}
+            <Route path="/wishlist" element={<PageTransition><WishlistPage /></PageTransition>} />
+            
             <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
             <Route path="/order-confirmation" element={<PageTransition><OrderConfirmation /></PageTransition>} />
             
