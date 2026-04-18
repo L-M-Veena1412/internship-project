@@ -5,6 +5,17 @@ import { useNavigate } from 'react-router-dom';
 const ManufacturerDetailView = () => {
   const navigate = useNavigate();
 
+  // Mock data representing the updated schema
+  const manufacturerData = {
+    fullName: 'Alexander Blake',
+    email: 'alexander@gmail.com',
+    phone: '+91 3216546540',
+    country: 'India',
+    location: 'Bengaluru, Karnataka, India',
+    zipCode: '560001',
+    joinedDate: '15/08/2023',
+  };
+
   const stats = [
     { label: 'Total Sales', value: '150', icon: '%', color: 'bg-cyan-400' },
     { label: 'Listed Products', value: '30', icon: '🛒', color: 'bg-emerald-400' },
@@ -34,19 +45,20 @@ const ManufacturerDetailView = () => {
             <div className="flex items-center gap-4 mb-8">
               <img src="https://i.pravatar.cc/150?u=a" className="w-16 h-16 rounded-full border-2 border-slate-50 shadow-sm" alt="" />
               <div>
-                <h3 className="font-bold text-slate-800">Alexander Blake</h3>
-                <p className="text-[10px] text-slate-400 font-medium">alexander@gmail.com</p>
+                {/* UPDATED to use the new fullName */}
+                <h3 className="font-bold text-slate-800">{manufacturerData.fullName}</h3>
+                <p className="text-[10px] text-slate-400 font-medium">{manufacturerData.email}</p>
               </div>
             </div>
 
             <div className="space-y-6">
+              {/* UPDATED: Replaced irrelevant fields (Gender, Birthday) with Location, Country, Zip Code */}
               {[
-                { l: 'Number', v: '+880 321654654' },
-                { l: 'Gender', v: 'Male' },
-                { l: 'Birthday', v: 'xx/xx/xxx' },
-                { l: 'Registered Since', v: 'xx/xx/xxx' },
-                { l: 'Favourite Branch', v: 'Branch A' },
-                { l: 'Favourite Item', v: 'Pizza' },
+                { l: 'Phone Number', v: manufacturerData.phone },
+                { l: 'Location', v: manufacturerData.location },
+                { l: 'Country', v: manufacturerData.country },
+                { l: 'Zip Code', v: manufacturerData.zipCode },
+                { l: 'Registered Since', v: manufacturerData.joinedDate },
               ].map((item, i) => (
                 <div key={i}>
                   <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">{item.l}</p>

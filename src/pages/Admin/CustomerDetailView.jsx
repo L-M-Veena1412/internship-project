@@ -13,9 +13,9 @@ const CustomerDetailView = () => {
   const customer = mockCustomers.find(c => c.id.toString() === customerId?.toString()) || mockCustomers[0];
 
   // 2. FILTER ORDERS FOR THIS SPECIFIC CUSTOMER
-  // Only show orders where the 'customer' name matches the current profile name
+  // Only show orders where the 'customer' name matches the current profile name (updated for fullName)
   const customerOrders = Array.isArray(mockOrders) 
-    ? mockOrders.filter(o => o.customer === customer.name)
+    ? mockOrders.filter(o => o.customer === (customer.fullName || customer.name))
     : [];
 
   // 3. DYNAMIC STATS calculation
@@ -37,7 +37,7 @@ const CustomerDetailView = () => {
         <div>
           <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">Customer Profile</h2>
           <p className="text-sm font-medium text-slate-500 mt-1">
-            Detailed database record for {customer.name}
+            Detailed database record for {customer.fullName || customer.name}
           </p>
         </div>
         <button 
@@ -60,7 +60,7 @@ const CustomerDetailView = () => {
             </div>
             <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Status: Active</p>
             <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight leading-none mb-1">
-              {customer.name}
+              {customer.fullName || customer.name}
             </h1>
             <p className="text-xs font-bold text-slate-400 mb-6">ID: #{customer.id}</p>
             
@@ -87,13 +87,15 @@ const CustomerDetailView = () => {
              <StatMiniCard title="Cancelled" value={stats.cancelled} color="red" />
           </div>
 
-          {/* 3. Personal Information Card */}
+          {/* 3. Personal Information Card - UPDATED WITH LOCATION */}
           <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
              <h3 className="text-xs font-black uppercase text-slate-400 tracking-[0.2em]">Personal Information</h3>
              <InfoRow label="Phone" value={customer.phone || "Not Provided"} />
              <InfoRow label="Email" value={customer.email || "Not Provided"} />
+             <InfoRow label="Location" value={customer.location || "Not Provided"} />
+             <InfoRow label="Country" value={customer.country || "Not Provided"} />
+             <InfoRow label="Zip Code" value={customer.zipCode || "Not Provided"} />
              <InfoRow label="Joined" value={customer.joinedDate || customer.joined || "N/A"} />
-             <InfoRow label="Gender" value={customer.gender || "Not Specified"} />
           </div>
         </div>
 
@@ -169,11 +171,11 @@ const StatMiniCard = ({ title, value, color }) => {
   );
 };
 
-// Sub-component for an information row
+// Sub-component for an information row - UPDATED to handle long text gracefully
 const InfoRow = ({ label, value }) => (
   <div className="flex justify-between items-center text-xs">
     <span className="font-bold text-slate-400 uppercase tracking-widest text-[10px]">{label}</span>
-    <span className="font-bold text-slate-700">{value}</span>
+    <span className="font-bold text-slate-700 text-right max-w-[60%] truncate" title={value}>{value}</span>
   </div>
 );
 

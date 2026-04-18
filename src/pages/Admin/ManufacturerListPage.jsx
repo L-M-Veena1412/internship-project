@@ -5,9 +5,11 @@ import ManufacturerTable from './ManufacturerTable';
 
 const ManufacturerListPage = () => {
   const navigate = useNavigate();
+  
+  // UPDATED MOCK DATA: Now uses fullName and location to match your new form!
   const [data] = useState([
-    { id: 1, name: 'Coop Friberg', email: 'cfribergj@bloomberg.com', phone: '+91 2273927096', orders: 31, revenue: '2,087.64', joinedDate: '08/07/2023', status: 'Block', avatar: 'https://i.pravatar.cc/150?u=1' },
-    { id: 2, name: 'Kerk Biaggi', email: 'kbiaggik@springer.com', phone: '+91 2631748654', orders: 32, revenue: '5,888.58', joinedDate: '01/10/2023', status: 'Active', avatar: 'https://i.pravatar.cc/150?u=2' },
+    { id: 1, fullName: 'Coop Friberg', email: 'cfribergj@bloomberg.com', phone: '+91 2273927096', location: 'Bengaluru, Karnataka, India', orders: 31, revenue: '2,087.64', joinedDate: '08/07/2023', status: 'Block', avatar: 'https://i.pravatar.cc/150?u=1' },
+    { id: 2, fullName: 'Kerk Biaggi', email: 'kbiaggik@springer.com', phone: '+91 2631748654', location: 'Mangaluru, Karnataka, India', orders: 32, revenue: '5,888.58', joinedDate: '01/10/2023', status: 'Active', avatar: 'https://i.pravatar.cc/150?u=2' },
   ]);
 
   return (

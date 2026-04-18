@@ -27,8 +27,9 @@ const ManufacturerTable = ({ manufacturers, onDelete }) => {
                   <div className="flex items-center gap-3">
                     <img src={m.avatar} className="w-10 h-10 rounded-full object-cover border border-slate-100" alt="" />
                     <div>
-                      <p className="text-xs font-black text-slate-800 uppercase">{m.name}</p>
-                      <p className="text-[9px] font-bold text-slate-400">Since {m.joinedDate}</p>
+                      {/* UPDATED: Now uses m.fullName and displays m.location */}
+                      <p className="text-xs font-black text-slate-800 uppercase">{m.fullName}</p>
+                      <p className="text-[9px] font-bold text-slate-400 truncate w-32">{m.location}</p>
                     </div>
                   </div>
                 </td>
@@ -45,7 +46,6 @@ const ManufacturerTable = ({ manufacturers, onDelete }) => {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">
-                    {/* EDIT ACTION */}
                     <button 
                       onClick={() => navigate(`/admin/manufacturers/edit/${m.id}`)}
                       className="p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all"
@@ -54,7 +54,6 @@ const ManufacturerTable = ({ manufacturers, onDelete }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                       </svg>
                     </button>
-                    {/* VIEW ACTION */}
                     <button 
                       onClick={() => navigate(`/admin/manufacturers/detail/${m.id}`)}
                       className="p-2 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 rounded-lg transition-all"

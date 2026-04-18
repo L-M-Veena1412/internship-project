@@ -44,10 +44,14 @@ const CustomerTable = ({ customers, onDelete }) => {
                     {user.avatar || "👤"}
                   </div>
                   <div>
+                    {/* UPDATED: Uses fullName and added location */}
                     <p className="text-sm font-black text-slate-800 uppercase tracking-tight leading-none mb-1">
-                      {user.name}
+                      {user.fullName || user.name}
                     </p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">ID: #{user.id || '50100'}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-0.5">ID: #{user.id || '50100'}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter w-40 truncate">
+                      {user.location || 'Location not set'}
+                    </p>
                   </div>
                 </div>
               </td>
@@ -96,7 +100,7 @@ const CustomerTable = ({ customers, onDelete }) => {
                   {/* DELETE CUSTOMER */}
                   <button 
                     onClick={() => {
-                      if (window.confirm(`Are you sure you want to delete ${user.name}? This action cannot be undone.`)) {
+                      if (window.confirm(`Are you sure you want to delete ${user.fullName || user.name}? This action cannot be undone.`)) {
                         onDelete(user.id);
                       }
                     }}

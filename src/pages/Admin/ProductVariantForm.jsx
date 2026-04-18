@@ -9,10 +9,10 @@ const ProductVariantForm = () => {
   const [formData, setFormData] = useState({
     manufacturer_id: '',
     product_id: '',
-    sku: '', // NEW: Stock Keeping Unit
-    weight_value: '', // NEW: The number part (500)
-    measurement_type: 'GRAM', // The unit part (GRAM)
-    packaging_type: 'Box', // NEW
+    sku: '', 
+    weight_value: '', 
+    measurement_type: 'GRAM', 
+    packaging_type: 'Box', 
     price: '',
     wholesale_price: '',
     discount: '',
@@ -31,6 +31,13 @@ const ProductVariantForm = () => {
     setImages(prev => [...prev, ...newImages].slice(0, 10));
   };
 
+  // Helper function to prevent typing negative signs or 'e' in number fields
+  const preventNegativeInput = (e) => {
+    if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+      e.preventDefault();
+    }
+  };
+
   const inputClass = "w-full px-5 py-4 rounded-2xl border-2 border-slate-100 bg-slate-50/50 focus:bg-white focus:border-[#708A28] outline-none transition-all text-slate-700 font-bold text-sm";
   const labelClass = "block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest";
   const darkInput = "w-full px-5 py-4 rounded-2xl bg-slate-800/50 border-2 border-slate-700/50 focus:border-[#708A28] outline-none transition-all font-black text-xl text-white";
@@ -43,24 +50,27 @@ const ProductVariantForm = () => {
       </div>
 
       <form className="space-y-8">
-        {/* LINKING SECTION */}
+        {/* LINKING SECTION - Manufacturer Dropdown is here */}
         <section className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label className={labelClass}>Manufacturer</label>
+              <label className={labelClass}>Manufacturer Details</label>
               <select name="manufacturer_id" className={inputClass} onChange={handleInputChange}>
-                <option value="">Choose...</option>
+                <option value="">Select Manufacturer...</option>
+                {/* Add your dynamic manufacturers here later */}
                 <option value="1">Shree Krishna Sweets</option>
+                <option value="2">Ankola Bakers</option>
+                <option value="3">Mangaluru Spices</option>
               </select>
             </div>
             <div>
               <label className={labelClass}>Product Identity</label>
               <select name="product_id" className={inputClass} onChange={handleInputChange}>
-                <option value="">Choose...</option>
+                <option value="">Select Base Product...</option>
                 <option value="101">Ghee Mysore Pak</option>
+                <option value="102">Banana Halwa</option>
               </select>
             </div>
-            
           </div>
         </section>
 
@@ -72,7 +82,14 @@ const ProductVariantForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className={labelClass}>Weight/Volume Value</label>
-              <input name="weight_value" type="number" className={inputClass} placeholder="e.g. 500" />
+              <input 
+                name="weight_value" 
+                type="number" 
+                min="0"
+                onKeyDown={preventNegativeInput}
+                className={inputClass} 
+                placeholder="e.g. 500" 
+              />
             </div>
             <div>
               <label className={labelClass}>Measurement Unit</label>
@@ -92,20 +109,42 @@ const ProductVariantForm = () => {
           </div>
         </section>
 
-        {/* PRICE SECTION (DARK) */}
+        {/* PRICE SECTION (DARK) - Added Validation here */}
         <section className="bg-[#0B0E14] p-8 md:p-12 rounded-[2.5rem] shadow-2xl text-white">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-10">
             <div className="space-y-2">
               <label className="text-[9px] font-black uppercase text-slate-500 ml-1 tracking-widest">Sale Price (₹)</label>
-              <input name="price" type="number" className={`${darkInput} text-emerald-400`} placeholder="0.00" />
+              <input 
+                name="price" 
+                type="number" 
+                min="0"
+                onKeyDown={preventNegativeInput}
+                className={`${darkInput} text-emerald-400`} 
+                placeholder="0.00" 
+              />
             </div>
             <div className="space-y-2">
               <label className="text-[9px] font-black uppercase text-slate-500 ml-1 tracking-widest">Disc (%)</label>
-              <input name="discount" type="number" className={`${darkInput} text-orange-400`} placeholder="0" />
+              <input 
+                name="discount" 
+                type="number" 
+                min="0"
+                max="100"
+                onKeyDown={preventNegativeInput}
+                className={`${darkInput} text-orange-400`} 
+                placeholder="0" 
+              />
             </div>
             <div className="space-y-2">
               <label className="text-[9px] font-black uppercase text-slate-500 ml-1 tracking-widest">Stock Units</label>
-              <input name="stock_units" type="number" className={`${darkInput} text-blue-400`} placeholder="0" />
+              <input 
+                name="stock_units" 
+                type="number" 
+                min="0"
+                onKeyDown={preventNegativeInput}
+                className={`${darkInput} text-blue-400`} 
+                placeholder="0" 
+              />
             </div>
           </div>
         </section>
@@ -121,7 +160,7 @@ const ProductVariantForm = () => {
                 <img src={img.preview} alt="" className="w-full h-full object-cover" />
               </div>
             ))}
-            <label className="aspect-square flex items-center justify-center border-2 border-dashed rounded-2xl cursor-pointer hover:bg-olive-green/5 transition-all">
+            <label className="aspect-square flex items-center justify-center border-2 border-dashed rounded-2xl cursor-pointer hover:bg-[#708A28]/5 transition-all">
               <span className="text-3xl text-slate-300">+</span>
               <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
             </label>
